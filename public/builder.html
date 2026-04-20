@@ -117,6 +117,7 @@ label.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba
   <div class="header-nav">
     <a href="/index.html" class="nav-link">← Home</a>
     <a href="/play.html" class="nav-link">▶ Play</a>
+    <a href="/library.html" class="nav-link">📚 Library</a>
     <span class="badge" id="sw-badge">● Offline Ready</span>
   </div>
 </header>
@@ -803,6 +804,23 @@ function validate() {
 // ─── Escape HTML ──────────────────────────────────────────────────────────────
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
 
+// ─── Library ──────────────────────────────────────────────────────────────────
+const LIB_KEY = 'arc4-jeopardy-library';
+function saveToLibrary(title, cats, html) {
+  try {
+    const lib = JSON.parse(localStorage.getItem(LIB_KEY)||'[]');
+    lib.unshift({
+      id: Date.now().toString(36)+Math.random().toString(36).slice(2,5),
+      title, createdAt: new Date().toISOString(),
+      numCats, numRows, difficulty,
+      categories: cats.map(c=>c.name),
+      html
+    });
+    if(lib.length>60) lib.length=60;
+    localStorage.setItem(LIB_KEY, JSON.stringify(lib));
+  } catch(e) {}
+}
+
 // ─── Download ─────────────────────────────────────────────────────────────────
 function generateGame() {
   if(!validate()) return;
@@ -812,13 +830,16 @@ function generateGame() {
     cats.push({name:document.getElementById(`cat-${c}`).value.trim(),clues:POINTS.map((_,r)=>({pts:POINTS[r],clue:document.getElementById(`clue-${c}-${r}`).value.trim(),ans:document.getElementById(`ans-${c}-${r}`).value.trim()}))});
   }
   const html=buildGameHTML(title,cats,numCats);
+  // Save to library
+  saveToLibrary(title, cats, html);
+  // Download
   const fn=title.replace(/[^a-z0-9]/gi,'-').toLowerCase()+'.html';
   const blob=new Blob([html],{type:'text/html;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=fn;
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showToast('🎮 Game file downloaded!','ok');
+  showToast('🎮 Saved to library &amp; downloaded!','ok');
 }
 
 // ─── BUILD GAME HTML ──────────────────────────────────────────────────────────

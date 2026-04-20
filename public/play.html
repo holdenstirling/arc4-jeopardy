@@ -204,8 +204,10 @@ body{font-family:Verdana,Arial,sans-serif;background:var(--bd);color:#fff;min-he
     <h1>⚡ Arc4 Trivia Challenge</h1>
     <div class="topbar-right">
       <button class="hdr-btn" id="mute-btn" onclick="toggleMute()" title="Toggle sound">🔊</button>
+      <button class="hdr-btn" onclick="triggerFinalJeopardy()" title="Final Jeopardy">🏁 Final</button>
       <button class="hdr-btn" onclick="resetBoard()">↺ Reset</button>
       <button class="hdr-btn" onclick="goSetup()">⚙ Teams</button>
+      <button class="hdr-btn" id="install-btn" style="display:none" onclick="installPWA()">⊕ Install</button>
       <button class="hdr-btn" onclick="location.href='/index.html'">⌂ Home</button>
     </div>
   </div>
@@ -282,6 +284,60 @@ body{font-family:Verdana,Arial,sans-serif;background:var(--bd);color:#fff;min-he
     <p class="sub" id="winner-sub"></p>
     <div class="podium" id="podium"></div>
     <button class="btn-play-again" onclick="resetBoard()">↺ Play Again</button>
+  </div>
+</div>
+
+<!-- ── DAILY DOUBLE OVERLAY ── -->
+<div id="dd-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:500;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="text-align:center;animation:winnerIn .4s cubic-bezier(.34,1.56,.64,1);">
+    <div style="font-size:5rem;margin-bottom:16px;">🎰</div>
+    <div style="font-size:clamp(2rem,8vw,4rem);font-weight:900;color:#f5c518;letter-spacing:3px;text-shadow:0 0 40px rgba(245,197,24,.6);">DAILY DOUBLE!</div>
+    <div style="color:rgba(255,255,255,.5);font-size:1rem;margin-top:12px;">Place your wagers…</div>
+  </div>
+</div>
+
+<!-- ── FINAL JEOPARDY MODAL ── -->
+<div id="fj-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:400;align-items:center;justify-content:center;padding:20px;">
+  <div id="fj-card" style="background:linear-gradient(135deg,#1a237e,#0d47a1);border:4px solid #f5c518;border-radius:16px;max-width:640px;width:100%;padding:32px;text-align:center;animation:modalIn .25s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto;">
+    <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:#f5c518;margin-bottom:6px;">Final Jeopardy</div>
+    <div id="fj-step1">
+      <div style="font-size:1.1rem;font-weight:700;margin-bottom:20px;">Enter the Final Jeopardy category &amp; clue</div>
+      <div style="margin-bottom:12px;text-align:left;">
+        <label style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.38);display:block;margin-bottom:5px;">Category</label>
+        <input id="fj-cat-inp" type="text" placeholder="e.g. Famous Scientists" style="width:100%;padding:9px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.95rem;outline:none;font-family:inherit;">
+      </div>
+      <div style="margin-bottom:20px;text-align:left;">
+        <label style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.38);display:block;margin-bottom:5px;">Clue</label>
+        <textarea id="fj-clue-inp" rows="3" placeholder="Write the Final Jeopardy clue here…" style="width:100%;padding:9px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.88rem;outline:none;resize:vertical;font-family:inherit;line-height:1.4;"></textarea>
+      </div>
+      <div style="margin-bottom:20px;text-align:left;">
+        <label style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.38);display:block;margin-bottom:5px;">Answer</label>
+        <input id="fj-ans-inp" type="text" placeholder="Correct answer" style="width:100%;padding:9px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.88rem;outline:none;font-family:inherit;">
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button onclick="fjRevealCategory()" style="background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:12px 28px;border-radius:7px;font-weight:800;cursor:pointer;font-size:.95rem;font-family:inherit;">Reveal Category →</button>
+        <button onclick="closeFJ()" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28);padding:12px 20px;border-radius:7px;cursor:pointer;font-family:inherit;">Cancel</button>
+      </div>
+    </div>
+    <div id="fj-step2" style="display:none;">
+      <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:2px;color:#f5c518;margin-bottom:12px;">Category</div>
+      <div id="fj-cat-display" style="font-size:clamp(1.4rem,4vw,2rem);font-weight:900;margin-bottom:24px;"></div>
+      <div style="color:rgba(255,255,255,.45);font-size:.88rem;margin-bottom:20px;">Teams — write your wagers now. 30 seconds!</div>
+      <div id="fj-scores" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:20px;"></div>
+      <button onclick="fjRevealClue()" style="background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:12px 28px;border-radius:7px;font-weight:800;cursor:pointer;font-family:inherit;">Reveal Clue →</button>
+    </div>
+    <div id="fj-step3" style="display:none;">
+      <div id="fj-clue-display" style="font-size:clamp(1rem,2.8vw,1.4rem);font-weight:700;line-height:1.5;margin-bottom:24px;"></div>
+      <div id="fj-ans-display" style="background:rgba(0,0,0,.35);border-radius:8px;padding:14px 18px;font-size:1.1rem;font-weight:800;color:#a5d6a7;display:none;margin-bottom:20px;"></div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-bottom:16px;">
+        <button id="fj-reveal-btn" onclick="fjRevealAnswer()" style="background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:11px 26px;border-radius:7px;font-weight:800;cursor:pointer;font-family:inherit;">Reveal Answer</button>
+        <button onclick="closeFJ()" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28);padding:11px 20px;border-radius:7px;cursor:pointer;font-family:inherit;">Close</button>
+      </div>
+      <div id="fj-adj" style="display:none;">
+        <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);margin-bottom:8px;">Adjust Scores (enter wager amount)</div>
+        <div id="fj-wager-inputs"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -442,6 +498,7 @@ function startGame() {
   document.getElementById('setup').style.display = 'none';
   document.getElementById('game').style.display = 'block';
   renderScoreboard();
+  initDailyDoubles();
   save();
 }
 
@@ -708,6 +765,133 @@ function loadSave() {
 }
 function clearSave() { try { localStorage.removeItem(SAVE); } catch(e) {} }
 
+// ── DAILY DOUBLE ──────────────────────────────────────────────────────────────
+var ddKeys = [];
+
+function initDailyDoubles() {
+  var cells = Array.from(document.querySelectorAll('.cell-wrap:not(.used)'));
+  var shuffled = cells.sort(function(){ return Math.random() - .5; });
+  ddKeys = shuffled.slice(0, 2).map(function(c){ return c.dataset.cat + '|' + c.dataset.pts; });
+}
+
+function isDailyDouble(cell) {
+  return ddKeys.includes(cell.dataset.cat + '|' + cell.dataset.pts);
+}
+
+function sndDailyDouble() {
+  // Dramatic fanfare
+  [[150,.5],[200,.4],[250,.3],[300,.25],[400,.2],[500,.15]].forEach(function(pair, i) {
+    beep(pair[0],'sine',pair[1],.22,i*.08);
+  });
+  beep(800,'triangle',.4,.18,.55);
+  beep(1000,'triangle',.4,.18,.65);
+}
+
+// Patch openCell to check for Daily Double
+var _origOpenCell = openCell;
+openCell = function(cell) {
+  if (cell.classList.contains('used')) return;
+  if (isDailyDouble(cell)) {
+    sndDailyDouble();
+    var ddEl = document.getElementById('dd-overlay');
+    ddEl.style.display = 'flex';
+    setTimeout(function() {
+      ddEl.style.display = 'none';
+      _origOpenCell(cell);
+    }, 3000);
+    return;
+  }
+  _origOpenCell(cell);
+};
+
+// ── FINAL JEOPARDY ────────────────────────────────────────────────────────────
+function triggerFinalJeopardy() {
+  // Reset steps
+  document.getElementById('fj-step1').style.display = 'block';
+  document.getElementById('fj-step2').style.display = 'none';
+  document.getElementById('fj-step3').style.display = 'none';
+  document.getElementById('fj-cat-inp').value = '';
+  document.getElementById('fj-clue-inp').value = '';
+  document.getElementById('fj-ans-inp').value = '';
+  document.getElementById('fj-overlay').style.display = 'flex';
+}
+
+function fjRevealCategory() {
+  var cat = document.getElementById('fj-cat-inp').value.trim();
+  if (!cat) { document.getElementById('fj-cat-inp').focus(); return; }
+  sndDailyDouble();
+  document.getElementById('fj-cat-display').textContent = cat;
+  // Show current scores
+  var scores = document.getElementById('fj-scores');
+  scores.innerHTML = '';
+  teams.forEach(function(t) {
+    var el = document.createElement('div');
+    el.style.cssText = 'background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:8px;padding:8px 14px;font-size:.82rem;text-align:center;';
+    el.innerHTML = '<div style="font-weight:700">' + escH(t.name) + '</div><div style="color:#f5c518;font-weight:900">' + t.score + '</div>';
+    scores.appendChild(el);
+  });
+  document.getElementById('fj-step1').style.display = 'none';
+  document.getElementById('fj-step2').style.display = 'block';
+}
+
+function fjRevealClue() {
+  var clue = document.getElementById('fj-clue-inp').value.trim();
+  document.getElementById('fj-clue-display').textContent = clue || '(No clue entered)';
+  document.getElementById('fj-ans-display').textContent = document.getElementById('fj-ans-inp').value.trim() || '';
+  document.getElementById('fj-ans-display').style.display = 'none';
+  document.getElementById('fj-reveal-btn').style.display = 'inline-block';
+  document.getElementById('fj-adj').style.display = 'none';
+  document.getElementById('fj-step2').style.display = 'none';
+  document.getElementById('fj-step3').style.display = 'block';
+  sndReveal();
+}
+
+function fjRevealAnswer() {
+  document.getElementById('fj-ans-display').style.display = 'block';
+  document.getElementById('fj-reveal-btn').style.display = 'none';
+  document.getElementById('fj-adj').style.display = 'block';
+  // Build wager inputs
+  var wrap = document.getElementById('fj-wager-inputs');
+  wrap.innerHTML = '';
+  teams.forEach(function(t, i) {
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:7px;';
+    row.innerHTML =
+      '<span style="flex:1;font-size:.82rem;font-weight:700">' + escH(t.name) + ' (' + t.score + ')</span>' +
+      '<input id="fj-wager-' + i + '" type="number" min="0" placeholder="Wager" style="width:90px;padding:6px 9px;border-radius:6px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-size:.85rem;outline:none;font-family:inherit;">' +
+      '<button onclick="fjAdj(' + i + ',1)" style="background:rgba(76,175,80,.2);border:1px solid rgba(76,175,80,.4);color:#a5d6a7;border-radius:5px;padding:6px 10px;cursor:pointer;font-weight:700;font-size:.75rem;font-family:inherit;">✓ +</button>' +
+      '<button onclick="fjAdj(' + i + ',-1)" style="background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.35);color:#ff8a80;border-radius:5px;padding:6px 10px;cursor:pointer;font-weight:700;font-size:.75rem;font-family:inherit;">✗ −</button>';
+    wrap.appendChild(row);
+  });
+  sndReveal();
+}
+
+function fjAdj(i, dir) {
+  var wagerEl = document.getElementById('fj-wager-' + i);
+  var wager = parseInt(wagerEl ? wagerEl.value : 0) || 0;
+  if (!wager) return;
+  teams[i].score += wager * dir;
+  updateScore(i);
+  animateScore(i, wager * dir);
+  save();
+}
+
+function closeFJ() {
+  document.getElementById('fj-overlay').style.display = 'none';
+}
+
+// ── PWA INSTALL ───────────────────────────────────────────────────────────────
+var deferredInstall = null;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault(); deferredInstall = e;
+  document.getElementById('install-btn').style.display = 'inline-block';
+});
+function installPWA() {
+  if (!deferredInstall) return;
+  deferredInstall.prompt();
+  deferredInstall.userChoice.then(function(){ deferredInstall = null; document.getElementById('install-btn').style.display = 'none'; });
+}
+
 // ── SERVICE WORKER ────────────────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(function(){});
@@ -719,6 +903,7 @@ if (loadSave() && teams.length) {
   document.getElementById('setup').style.display = 'none';
   document.getElementById('game').style.display = 'block';
   renderScoreboard();
+  initDailyDoubles();
 }
 </script>
 </body>

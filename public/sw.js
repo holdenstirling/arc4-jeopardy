@@ -1,9 +1,10 @@
-const CACHE = 'jeopardy-v3';
+const CACHE = 'jeopardy-v4';
 const ASSETS = [
   '/',
   '/index.html',
   '/play.html',
   '/builder.html',
+  '/library.html',
   '/manifest.json'
 ];
 

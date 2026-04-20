@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1a237e">
+<link rel="manifest" href="/manifest.json">
+<title>Game Library · Arc4 Jeopardy</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--gold:#f5c518;--bd:#0d1b5e;--bm:#1a237e;--bb:#2a3698;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bd);color:#fff;min-height:100vh;}
+header{background:linear-gradient(135deg,var(--bm),#283593);padding:16px 24px;border-bottom:4px solid var(--gold);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:50;}
+header h1{font-size:1.5rem;font-weight:900;color:var(--gold);letter-spacing:1px;}
+.header-nav{display:flex;gap:8px;align-items:center;}
+.nav-link{color:rgba(255,255,255,.5);text-decoration:none;font-size:.82rem;padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.1);transition:.15s;}
+.nav-link:hover{color:#fff;border-color:rgba(255,255,255,.3);}
+.wrapper{max-width:1200px;margin:0 auto;padding:28px 18px 60px;}
+.lib-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:28px;}
+.lib-header-left h2{font-size:1.4rem;font-weight:800;color:var(--gold);margin-bottom:4px;}
+.lib-stats{font-size:.8rem;color:rgba(255,255,255,.35);}
+.lib-actions{display:flex;gap:8px;}
+.btn-sm{border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:.78rem;font-weight:700;font-family:inherit;transition:.15s;}
+.btn-sm:hover{opacity:.85;transform:translateY(-1px);}
+.btn-danger{background:rgba(239,83,80,.1);border:1px solid rgba(239,83,80,.3);color:#ff8a80;}
+.btn-primary{background:linear-gradient(135deg,var(--gold),#e6b800);color:#1a1a1a;}
+
+/* OFFLINE SECTION */
+.offline-card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:20px 24px;margin-bottom:28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.offline-card .oc-icon{font-size:2.2rem;flex-shrink:0;}
+.offline-card h3{font-size:1rem;font-weight:700;margin-bottom:4px;}
+.offline-card p{font-size:.8rem;color:rgba(255,255,255,.45);line-height:1.5;}
+.offline-card .oc-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.badge-pwa{background:rgba(76,175,80,.12);border:1px solid rgba(76,175,80,.35);color:#a5d6a7;font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.5px;}
+
+/* GAMES GRID */
+#games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px;}
+.game-card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:10px;transition:border-color .18s,background .18s,transform .18s;}
+.game-card:hover{border-color:rgba(245,197,24,.28);background:rgba(255,255,255,.065);transform:translateY(-2px);}
+.gc-title{font-size:1rem;font-weight:800;color:#fff;line-height:1.3;}
+.gc-meta{font-size:.7rem;color:rgba(255,255,255,.32);}
+.gc-cats{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px;}
+.gc-cat{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:3px 9px;font-size:.67rem;color:rgba(255,255,255,.6);}
+.gc-info{display:flex;gap:14px;font-size:.7rem;color:rgba(255,255,255,.32);}
+.gc-actions{display:flex;gap:7px;margin-top:4px;}
+.gc-btn{flex:1;border:none;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:.76rem;font-weight:700;font-family:inherit;transition:.15s;white-space:nowrap;}
+.gc-btn:hover{opacity:.88;transform:translateY(-1px);}
+.gc-play{background:linear-gradient(135deg,var(--gold),#e6b800);color:#1a1a1a;}
+.gc-dl{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);color:#fff;}
+.gc-del{background:rgba(239,83,80,.09);border:1px solid rgba(239,83,80,.22);color:#ff8a80;flex:0;padding:8px 11px;}
+
+/* EMPTY STATE */
+#empty-state{display:none;text-align:center;padding:80px 20px;}
+.empty-icon{font-size:4rem;margin-bottom:18px;}
+#empty-state h3{font-size:1.2rem;font-weight:700;color:rgba(255,255,255,.55);margin-bottom:8px;}
+#empty-state p{font-size:.85rem;color:rgba(255,255,255,.3);margin-bottom:24px;}
+.btn-build{background:linear-gradient(135deg,var(--gold),#e6b800);color:#1a1a1a;border:none;padding:12px 28px;border-radius:8px;font-size:.9rem;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block;}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:#333;color:#fff;padding:11px 18px;border-radius:8px;font-size:.85rem;font-weight:600;z-index:999;opacity:0;transform:translateY(8px);transition:.28s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.ok{background:#2e7d32;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📚 Game Library</h1>
+  <nav class="header-nav">
+    <a href="/index.html" class="nav-link">⌂ Home</a>
+    <a href="/builder.html" class="nav-link">🛠 Builder</a>
+    <a href="/play.html" class="nav-link">▶ Play</a>
+  </nav>
+</header>
+
+<div class="wrapper">
+
+  <!-- Offline info -->
+  <div class="offline-card">
+    <div class="oc-icon">📲</div>
+    <div style="flex:1;">
+      <h3>Playing Offline &amp; Saving Games <span class="badge-pwa">PWA</span></h3>
+      <p>This app works fully offline once loaded. To install it on your device, look for the install icon (⊕) in your browser's address bar, or use the button below. Downloaded game files (.html) work anywhere with no internet — just open them in a browser.</p>
+      <div class="oc-actions">
+        <button class="btn-sm btn-primary" id="pwa-install-btn" style="display:none" onclick="installPWA()">⊕ Install App</button>
+        <a href="/builder.html" class="btn-sm btn-primary" style="text-decoration:none">🛠 Build a Game</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="lib-header">
+    <div class="lib-header-left">
+      <h2>Saved Games</h2>
+      <div class="lib-stats" id="lib-stats">Loading…</div>
+    </div>
+    <div class="lib-actions">
+      <button class="btn-sm btn-danger" onclick="clearLibrary()">🗑 Clear All</button>
+    </div>
+  </div>
+
+  <div id="games-grid"></div>
+
+  <div id="empty-state">
+    <div class="empty-icon">🎮</div>
+    <h3>No games saved yet</h3>
+    <p>Every game you generate in the Builder is automatically saved here.<br>You can play it again or download it any time.</p>
+    <a href="/builder.html" class="btn-build">🛠 Build Your First Game</a>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const LIB_KEY = 'arc4-jeopardy-library';
+let deferredInstall = null;
+
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredInstall = e;
+  document.getElementById('pwa-install-btn').style.display = 'inline-block';
+});
+
+function installPWA() {
+  if (!deferredInstall) return;
+  deferredInstall.prompt();
+  deferredInstall.userChoice.then(function() {
+    deferredInstall = null;
+    document.getElementById('pwa-install-btn').style.display = 'none';
+  });
+}
+
+function getLibrary() {
+  try { return JSON.parse(localStorage.getItem(LIB_KEY) || '[]'); } catch(e) { return []; }
+}
+function saveLibrary(lib) {
+  try { localStorage.setItem(LIB_KEY, JSON.stringify(lib)); } catch(e) {}
+}
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function cap(s) { return s ? s.charAt(0).toUpperCase()+s.slice(1) : ''; }
+
+function render() {
+  var lib = getLibrary();
+  var grid = document.getElementById('games-grid');
+  var empty = document.getElementById('empty-state');
+  var stats = document.getElementById('lib-stats');
+
+  if (!lib.length) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    stats.textContent = 'No games yet';
+    return;
+  }
+
+  empty.style.display = 'none';
+  var totalSize = 0;
+  lib.forEach(function(e){ totalSize += (e.html||'').length; });
+  stats.textContent = lib.length + ' game' + (lib.length!==1?'s':'') + ' · ~' + Math.round(totalSize/1024) + ' KB stored';
+
+  grid.innerHTML = '';
+  lib.forEach(function(entry, idx) {
+    var d = new Date(entry.createdAt);
+    var dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    var cats = (entry.categories||[]).map(function(c){ return '<div class="gc-cat">'+esc(c)+'</div>'; }).join('');
+    var card = document.createElement('div');
+    card.className = 'game-card';
+    card.innerHTML =
+      '<div class="gc-title">'+esc(entry.title)+'</div>'+
+      '<div class="gc-meta">📅 '+dateStr+'</div>'+
+      '<div class="gc-cats">'+cats+'</div>'+
+      '<div class="gc-info">'+
+        '<span>📋 '+(entry.numCats||5)+' cols</span>'+
+        '<span>📏 '+(entry.numRows||5)+' rows</span>'+
+        '<span>🎯 '+cap(entry.difficulty||'medium')+'</span>'+
+      '</div>'+
+      '<div class="gc-actions">'+
+        (entry.html?'<button class="gc-btn gc-play" onclick="playGame(\''+entry.id+'\')">▶ Play</button>':'')+
+        (entry.html?'<button class="gc-btn gc-dl" onclick="downloadGame(\''+entry.id+'\')">⬇ Download</button>':'')+
+        '<button class="gc-btn gc-del" onclick="deleteGame(\''+entry.id+'\')" title="Delete">🗑</button>'+
+      '</div>';
+    grid.appendChild(card);
+  });
+}
+
+function playGame(id) {
+  var lib = getLibrary();
+  var entry = lib.find(function(e){ return e.id===id; });
+  if (!entry||!entry.html) return;
+  var blob = new Blob([entry.html],{type:'text/html;charset=utf-8'});
+  window.open(URL.createObjectURL(blob),'_blank');
+}
+
+function downloadGame(id) {
+  var lib = getLibrary();
+  var entry = lib.find(function(e){ return e.id===id; });
+  if (!entry||!entry.html) return;
+  var fn = entry.title.replace(/[^a-z0-9]/gi,'-').toLowerCase()+'.html';
+  var blob = new Blob([entry.html],{type:'text/html;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href=url; a.download=fn;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('⬇ Downloaded!','ok');
+}
+
+function deleteGame(id) {
+  if (!confirm('Remove this game from your library?')) return;
+  saveLibrary(getLibrary().filter(function(e){ return e.id!==id; }));
+  render();
+}
+
+function clearLibrary() {
+  var lib = getLibrary();
+  if (!lib.length) return;
+  if (!confirm('Delete all '+lib.length+' saved games? This cannot be undone.')) return;
+  localStorage.removeItem(LIB_KEY);
+  render();
+}
+
+var _tt;
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show '+(type||'');
+  clearTimeout(_tt); _tt = setTimeout(function(){ t.className='toast'; }, 2800);
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+render();
+</script>
+</body>
+</html>

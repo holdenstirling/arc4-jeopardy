@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jeopardy Game Builder</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #0d1b5e;
+    color: #fff;
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+    padding: 28px 40px;
+    border-bottom: 4px solid #f5c518;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  header h1 {
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: #f5c518;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+  }
+
+  header p {
+    color: #b3c0f7;
+    font-size: 0.95rem;
+    margin-top: 4px;
+  }
+
+  .builder-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 36px 24px 60px;
+  }
+
+  /* Game title */
+  .section-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #f5c518;
+    margin-bottom: 8px;
+  }
+
+  .title-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+    margin-bottom: 36px;
+  }
+
+  .title-row > div { flex: 1; }
+
+  input[type="text"], textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: 2px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.07);
+    color: #fff;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  input[type="text"]:focus, textarea:focus {
+    border-color: #f5c518;
+    background: rgba(255,255,255,0.1);
+  }
+
+  input[type="text"]::placeholder, textarea::placeholder {
+    color: rgba(255,255,255,0.3);
+  }
+
+  /* Board grid */
+  .board-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+
+  .category-header {
+    margin-bottom: 16px;
+  }
+
+  .category-input {
+    text-align: center;
+    font-weight: 700;
+    font-size: 1rem;
+    background: rgba(245, 197, 24, 0.15);
+    border: 2px solid rgba(245, 197, 24, 0.4);
+  }
+
+  .category-input:focus {
+    border-color: #f5c518;
+    background: rgba(245, 197, 24, 0.2);
+  }
+
+  .col-wrapper { display: flex; flex-direction: column; gap: 10px; }
+
+  .clue-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 12px;
+    transition: background 0.15s;
+  }
+
+  .clue-card:hover { background: rgba(255,255,255,0.09); }
+
+  .points-badge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #f5c518;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .clue-card textarea {
+    width: 100%;
+    resize: vertical;
+    font-size: 0.82rem;
+    min-height: 58px;
+    margin-bottom: 6px;
+    padding: 8px 10px;
+    line-height: 1.4;
+  }
+
+  .clue-card .answer-input {
+    min-height: 36px;
+    font-size: 0.82rem;
+    padding: 6px 10px;
+    background: rgba(80,200,120,0.08);
+    border-color: rgba(80,200,120,0.25);
+  }
+
+  .clue-card .answer-input:focus {
+    border-color: #4caf50;
+    background: rgba(80,200,120,0.12);
+  }
+
+  .field-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 4px;
+  }
+
+  /* Generate button */
+  .generate-section {
+    margin-top: 40px;
+    text-align: center;
+  }
+
+  .btn-generate {
+    background: linear-gradient(135deg, #f5c518 0%, #e6b800 100%);
+    color: #1a1a1a;
+    border: none;
+    padding: 16px 48px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    border-radius: 8px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 20px rgba(245,197,24,0.35);
+    transition: transform 0.1s, box-shadow 0.1s;
+    text-transform: uppercase;
+  }
+
+  .btn-generate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(245,197,24,0.5);
+  }
+
+  .btn-generate:active { transform: translateY(0); }
+
+  .generate-hint {
+    margin-top: 12px;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.82rem;
+  }
+
+  /* Validation errors */
+  .error-box {
+    background: rgba(244,67,54,0.15);
+    border: 1px solid rgba(244,67,54,0.5);
+    border-radius: 6px;
+    padding: 12px 16px;
+    color: #ff8a80;
+    font-size: 0.88rem;
+    margin-top: 16px;
+    display: none;
+  }
+
+  /* Preview section */
+  .preview-section {
+    margin-top: 40px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 24px;
+  }
+
+  .preview-section h3 {
+    font-size: 1rem;
+    color: #f5c518;
+    margin-bottom: 16px;
+  }
+
+  .preview-board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    font-size: 0.78rem;
+  }
+
+  .preview-cat {
+    background: #1a237e;
+    border: 2px solid #000;
+    text-align: center;
+    padding: 8px 4px;
+    font-weight: 700;
+    font-size: 0.72rem;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+
+  .preview-cell {
+    background: #2a3698;
+    border: 2px solid #000;
+    text-align: center;
+    padding: 8px 4px;
+    font-weight: 800;
+    color: #f5c518;
+    font-size: 0.9rem;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>⚡ Jeopardy Game Builder</h1>
+    <p>Fill in your categories and clues, then generate a ready-to-play game file.</p>
+  </div>
+</header>
+
+<div class="builder-wrapper">
+
+  <!-- Game Title -->
+  <div class="title-row">
+    <div>
+      <div class="section-label">Game Title</div>
+      <input type="text" id="game-title" placeholder="e.g. Arc4 April 2026 Jeopardy" maxlength="80">
+    </div>
+  </div>
+
+  <!-- Categories header -->
+  <div class="section-label" style="margin-bottom:12px;">Categories &amp; Clues</div>
+  <div style="color:rgba(255,255,255,0.45); font-size:0.82rem; margin-bottom:20px;">
+    Enter a name for each category, then fill in the <span style="color:#b3e5fc">clue</span> (what players see) and <span style="color:#a5d6a7">answer</span> (revealed on click) for each point value.
+  </div>
+
+  <div class="board-grid" id="board-grid">
+    <!-- Injected by JS -->
+  </div>
+
+  <div class="generate-section">
+    <button class="btn-generate" onclick="generateGame()">🎮 Generate Game File</button>
+    <div class="generate-hint">Downloads a self-contained HTML file — open it in any browser to play.</div>
+    <div class="error-box" id="error-box"></div>
+  </div>
+
+  <!-- Board preview -->
+  <div class="preview-section">
+    <h3>Board Preview</h3>
+    <div class="preview-board" id="preview-board"></div>
+  </div>
+</div>
+
+<script>
+// ─── Configuration ───────────────────────────────────────────────────────────
+const POINTS = [100, 200, 300, 400, 500];
+const NUM_CATS = 5;
+
+// ─── Build the form ───────────────────────────────────────────────────────────
+const grid = document.getElementById('board-grid');
+
+for (let c = 0; c < NUM_CATS; c++) {
+  const col = document.createElement('div');
+  col.className = 'col-wrapper';
+
+  // Category name input
+  const catWrap = document.createElement('div');
+  catWrap.className = 'category-header';
+  catWrap.innerHTML = `
+    <div class="field-label">Category ${c + 1}</div>
+    <input type="text" class="category-input" id="cat-${c}" placeholder="Category name" maxlength="40">
+  `;
+  col.appendChild(catWrap);
+
+  // Clue cards for each point value
+  POINTS.forEach((pts, r) => {
+    const card = document.createElement('div');
+    card.className = 'clue-card';
+    card.innerHTML = `
+      <span class="points-badge">${pts} pts</span>
+      <div class="field-label">Clue (optional — shown to players)</div>
+      <textarea id="clue-${c}-${r}" placeholder="Leave blank to skip straight to the answer"></textarea>
+      <div class="field-label">Answer</div>
+      <textarea class="answer-input" id="ans-${c}-${r}" placeholder="e.g. Norway"></textarea>
+    `;
+    col.appendChild(card);
+  });
+
+  grid.appendChild(col);
+}
+
+// ─── Live board preview ───────────────────────────────────────────────────────
+function updatePreview() {
+  const pb = document.getElementById('preview-board');
+  pb.innerHTML = '';
+
+  for (let c = 0; c < NUM_CATS; c++) {
+    const catVal = document.getElementById(`cat-${c}`).value.trim() || `Category ${c + 1}`;
+    const cell = document.createElement('div');
+    cell.className = 'preview-cat';
+    cell.textContent = catVal;
+    pb.appendChild(cell);
+  }
+
+  POINTS.forEach(pts => {
+    for (let c = 0; c < NUM_CATS; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'preview-cell';
+      cell.textContent = `$${pts}`;
+      pb.appendChild(cell);
+    }
+  });
+}
+
+document.addEventListener('input', updatePreview);
+updatePreview();
+
+// ─── Validate ─────────────────────────────────────────────────────────────────
+function validate() {
+  const errors = [];
+  const title = document.getElementById('game-title').value.trim();
+  if (!title) errors.push('Please enter a Game Title.');
+
+  for (let c = 0; c < NUM_CATS; c++) {
+    const catName = document.getElementById(`cat-${c}`).value.trim();
+    if (!catName) errors.push(`Category ${c + 1} needs a name.`);
+
+    POINTS.forEach((pts, r) => {
+      const ans  = document.getElementById(`ans-${c}-${r}`).value.trim();
+      if (!ans)  errors.push(`Category ${c + 1}, ${pts}pts: missing answer.`);
+    });
+  }
+
+  const box = document.getElementById('error-box');
+  if (errors.length) {
+    box.innerHTML = errors.slice(0, 5).map(e => `• ${e}`).join('<br>') + (errors.length > 5 ? `<br>…and ${errors.length - 5} more.` : '');
+    box.style.display = 'block';
+    return false;
+  }
+  box.style.display = 'none';
+  return true;
+}
+
+// ─── Collect data ─────────────────────────────────────────────────────────────
+function collectData() {
+  const title = document.getElementById('game-title').value.trim();
+  const categories = [];
+  for (let c = 0; c < NUM_CATS; c++) {
+    const cat = {
+      name: document.getElementById(`cat-${c}`).value.trim(),
+      clues: []
+    };
+    POINTS.forEach((pts, r) => {
+      cat.clues.push({
+        points: pts,
+        clue: document.getElementById(`clue-${c}-${r}`).value.trim(),
+        answer: document.getElementById(`ans-${c}-${r}`).value.trim()
+      });
+    });
+    categories.push(cat);
+  }
+  return { title, categories };
+}
+
+// ─── Escape HTML ──────────────────────────────────────────────────────────────
+function esc(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// ─── Generate the game HTML ───────────────────────────────────────────────────
+function generateGame() {
+  if (!validate()) return;
+  const data = collectData();
+  const html = buildGameHTML(data);
+  downloadFile(data.title.replace(/[^a-z0-9]/gi, '-').toLowerCase() + '.html', html);
+}
+
+function downloadFile(filename, content) {
+  const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ─── Build game HTML ──────────────────────────────────────────────────────────
+function buildGameHTML({ title, categories }) {
+
+  // Build category header cells
+  const catHeaders = categories.map(cat =>
+    `<div class="cat-cell">${esc(cat.name)}</div>`
+  ).join('\n');
+
+  // Build point rows
+  let rowsHTML = '';
+  POINTS.forEach((pts, r) => {
+    let cells = '';
+    categories.forEach((cat, c) => {
+      const clue   = esc(cat.clues[r].clue);
+      const answer = esc(cat.clues[r].answer);
+      const catName = esc(cat.name);
+      cells += `
+        <div class="cell-wrap" data-clue="${clue}" data-answer="${answer}" data-cat="${catName}" data-pts="${pts}">
+          <div class="cell-pts">$${pts}</div>
+        </div>`;
+    });
+    rowsHTML += `<div class="board-row">${cells}</div>\n`;
+  });
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(title)}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Verdana,Arial,sans-serif;background:#0d1b5e;color:#fff;min-height:100vh;overflow-x:hidden;}
+
+/* ── TOP BAR ── */
+#topbar{background:linear-gradient(135deg,#1a237e,#283593);padding:14px 20px 10px;border-bottom:4px solid #f5c518;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+#topbar h1{font-size:1.4rem;font-weight:900;color:#f5c518;text-shadow:1px 1px 0 rgba(0,0,0,0.4);letter-spacing:1px;}
+#new-game-btn{background:#f5c518;color:#1a1a1a;border:none;padding:8px 18px;font-weight:800;font-size:0.85rem;border-radius:6px;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;}
+#new-game-btn:hover{background:#ffe033;}
+
+/* ── BOARD ── */
+#board{padding:16px;display:flex;flex-direction:column;gap:6px;max-width:100vw;}
+
+.cat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:2px;}
+.cat-cell{background:#1a237e;border:3px solid #000;text-align:center;padding:10px 6px;font-weight:700;font-size:clamp(0.6rem,1.5vw,0.9rem);text-transform:uppercase;letter-spacing:.5px;min-height:52px;display:flex;align-items:center;justify-content:center;}
+
+.board-row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+
+.cell-wrap{background:#2a3698;border:3px solid #000;text-align:center;cursor:pointer;transition:background .15s,transform .1s;position:relative;min-height:64px;display:flex;align-items:center;justify-content:center;}
+.cell-wrap:hover{background:#3949ab;border-color:#f5c518;}
+.cell-wrap:active{transform:scale(0.97);}
+.cell-wrap.used{background:#1a237e;border-color:#333;cursor:default;}
+.cell-wrap.used .cell-pts{opacity:0.08;}
+.cell-pts{font-size:clamp(1rem,3vw,1.8rem);font-weight:900;color:#f5c518;text-shadow:1px 1px 0 rgba(0,0,0,0.5);}
+
+/* ── TEAMS BAR ── */
+#teams{display:flex;gap:10px;flex-wrap:wrap;padding:12px 16px;background:rgba(0,0,0,0.3);border-top:2px solid rgba(255,255,255,0.08);}
+.team{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:8px;min-width:160px;}
+.team-name{font-weight:700;font-size:0.9rem;outline:none;cursor:text;min-width:60px;}
+.team-name:focus{border-bottom:1px solid #f5c518;}
+.team-score{font-size:1.2rem;font-weight:900;color:#f5c518;min-width:36px;text-align:center;}
+.team-btns{display:flex;gap:4px;}
+.team-btns button{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;width:26px;height:26px;border-radius:4px;cursor:pointer;font-size:0.9rem;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.team-btns button:hover{background:rgba(255,255,255,0.2);}
+.add-team-btn{background:rgba(245,197,24,0.12);border:1px dashed rgba(245,197,24,0.4);color:#f5c518;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:700;white-space:nowrap;}
+.add-team-btn:hover{background:rgba(245,197,24,0.2);}
+
+/* ── MODAL ── */
+#modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center;}
+#modal-overlay.open{display:flex;}
+#modal{background:linear-gradient(135deg,#1a237e,#0d47a1);border:4px solid #f5c518;border-radius:12px;max-width:640px;width:90%;padding:36px 36px 28px;text-align:center;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+#modal-cat{font-size:0.75rem;text-transform:uppercase;letter-spacing:2px;color:#f5c518;margin-bottom:6px;}
+#modal-pts{font-size:1rem;font-weight:900;color:rgba(245,197,24,0.7);margin-bottom:20px;}
+#modal-clue{font-size:clamp(1.1rem,3vw,1.5rem);font-weight:700;line-height:1.4;margin-bottom:28px;color:#fff;}
+#modal-answer{background:rgba(0,0,0,0.35);border-radius:8px;padding:18px 20px;font-size:clamp(1rem,2.5vw,1.3rem);font-weight:800;color:#a5d6a7;display:none;margin-bottom:24px;}
+#modal-answer.visible{display:block;}
+.modal-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.btn-reveal{background:#f5c518;color:#1a1a1a;border:none;padding:12px 28px;font-weight:800;font-size:1rem;border-radius:6px;cursor:pointer;text-transform:uppercase;}
+.btn-reveal:hover{background:#ffe033;}
+.btn-close{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:12px 28px;font-weight:700;font-size:1rem;border-radius:6px;cursor:pointer;}
+.btn-close:hover{background:rgba(255,255,255,0.2);}
+.score-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px;}
+.score-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:7px 14px;border-radius:5px;cursor:pointer;font-size:0.78rem;font-weight:700;transition:background .15s;}
+.score-btn:hover{background:rgba(255,255,255,0.18);}
+.score-btn.add{border-color:rgba(80,200,120,0.5);color:#a5d6a7;}
+.score-btn.add:hover{background:rgba(80,200,120,0.15);}
+.score-btn.sub{border-color:rgba(244,67,54,0.5);color:#ff8a80;}
+.score-btn.sub:hover{background:rgba(244,67,54,0.15);}
+#score-panel{margin-top:14px;display:none;}
+#score-panel.visible{display:block;}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <h1>${esc(title)}</h1>
+  <button id="new-game-btn" onclick="resetBoard()">↺ New Game</button>
+</div>
+
+<div id="board">
+  <div class="cat-row">
+    ${catHeaders}
+  </div>
+  ${rowsHTML}
+</div>
+
+<div id="teams">
+  <!-- Teams injected by JS -->
+  <button class="add-team-btn" onclick="addTeam()">+ Add Team</button>
+</div>
+
+<!-- Modal -->
+<div id="modal-overlay">
+  <div id="modal">
+    <div id="modal-cat"></div>
+    <div id="modal-pts"></div>
+    <div id="modal-clue"></div>
+    <div id="modal-answer"></div>
+    <div class="modal-actions">
+      <button class="btn-reveal" id="reveal-btn" onclick="revealAnswer()">Reveal Answer</button>
+      <button class="btn-close" onclick="closeModal()">Close</button>
+    </div>
+    <div id="score-panel">
+      <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Adjust Score</div>
+      <div class="score-btns" id="score-btns"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+var teams = [];
+var teamCount = 0;
+var currentCell = null;
+var currentPts = 0;
+
+// ── Team management ────────────────────────────────────────────────────────────
+function addTeam(name, score) {
+  teamCount++;
+  var id = 'team-' + teamCount;
+  teams.push({ id: id, name: name || ('Team ' + teamCount), score: score || 0 });
+  renderTeams();
+  renderScoreBtns();
+}
+
+function renderTeams() {
+  var bar = document.getElementById('teams');
+  var addBtn = bar.querySelector('.add-team-btn');
+  bar.innerHTML = '';
+  bar.appendChild(addBtn);
+
+  teams.forEach(function(t, i) {
+    var el = document.createElement('div');
+    el.className = 'team';
+    el.innerHTML =
+      '<span class="team-name" contenteditable="true" onblur="renameTeam(' + i + ',this)">' + escH(t.name) + '</span>' +
+      '<span class="team-score" id="score-' + t.id + '">' + t.score + '</span>' +
+      '<div class="team-btns">' +
+        '<button onclick="adjustScore(' + i + ',1)" title="Add points">▲</button>' +
+        '<button onclick="adjustScore(' + i + ',-1)" title="Subtract points">▼</button>' +
+      '</div>';
+    bar.insertBefore(el, addBtn);
+  });
+}
+
+function renameTeam(i, el) {
+  teams[i].name = el.innerText.trim() || ('Team ' + (i + 1));
+  el.innerText = teams[i].name;
+  renderScoreBtns();
+  saveState();
+}
+
+function adjustScore(i, dir) {
+  var pts = dir > 0 ? currentPts : -currentPts;
+  if (currentCell && currentCell.dataset.pts) pts = parseInt(currentCell.dataset.pts) * dir;
+  teams[i].score += pts;
+  document.getElementById('score-' + teams[i].id).innerText = teams[i].score;
+  saveState();
+}
+
+function renderScoreBtns() {
+  var container = document.getElementById('score-btns');
+  if (!container) return;
+  container.innerHTML = '';
+  teams.forEach(function(t, i) {
+    var a = document.createElement('button');
+    a.className = 'score-btn add';
+    a.textContent = '+ ' + t.name;
+    a.onclick = function() { adjustScore(i, 1); };
+    var s = document.createElement('button');
+    s.className = 'score-btn sub';
+    s.textContent = '- ' + t.name;
+    s.onclick = function() { adjustScore(i, -1); };
+    container.appendChild(a);
+    container.appendChild(s);
+  });
+  document.getElementById('score-panel').className = teams.length > 0 ? 'visible' : '';
+}
+
+// ── Modal ──────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.cell-wrap').forEach(function(cell) {
+  cell.addEventListener('click', function() {
+    if (cell.classList.contains('used')) return;
+    currentCell = cell;
+    currentPts = parseInt(cell.dataset.pts, 10);
+    document.getElementById('modal-cat').textContent = cell.dataset.cat;
+    document.getElementById('modal-pts').textContent = '$' + cell.dataset.pts;
+    var clueEl = document.getElementById('modal-clue');
+    var clueText = cell.dataset.clue || '';
+    clueEl.textContent = clueText;
+    clueEl.style.display = clueText ? 'block' : 'none';
+    document.getElementById('modal-answer').textContent = cell.dataset.answer;
+    document.getElementById('modal-answer').classList.remove('visible');
+    // If no clue, auto-reveal and mark used immediately
+    if (!clueText) {
+      document.getElementById('modal-answer').classList.add('visible');
+      document.getElementById('reveal-btn').style.display = 'none';
+      cell.classList.add('used');
+      saveState();
+    } else {
+      document.getElementById('reveal-btn').style.display = 'inline-block';
+    }
+    renderScoreBtns();
+    document.getElementById('modal-overlay').classList.add('open');
+  });
+});
+
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === ' ' && document.getElementById('modal-overlay').classList.contains('open')) {
+    e.preventDefault();
+    revealAnswer();
+  }
+});
+
+function revealAnswer() {
+  document.getElementById('modal-answer').classList.add('visible');
+  document.getElementById('reveal-btn').style.display = 'none';
+  if (currentCell) {
+    currentCell.classList.add('used');
+  }
+  saveState();
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  currentCell = null;
+}
+
+// ── Reset board ────────────────────────────────────────────────────────────────
+function resetBoard() {
+  if (!confirm('Reset the board? This will clear all used cells and scores.')) return;
+  document.querySelectorAll('.cell-wrap.used').forEach(function(c) { c.classList.remove('used'); });
+  teams.forEach(function(t) { t.score = 0; });
+  renderTeams();
+  clearState();
+}
+
+// ── Persistence ────────────────────────────────────────────────────────────────
+var SAVE_KEY = 'jeopardy-${esc(title).replace(/[^a-z0-9]/gi,'-')}';
+
+function saveState() {
+  try {
+    var usedIds = [];
+    document.querySelectorAll('.cell-wrap.used').forEach(function(c) {
+      usedIds.push(c.dataset.cat + '-' + c.dataset.pts);
+    });
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ teams: teams, used: usedIds }));
+  } catch(e) {}
+}
+
+function loadState() {
+  try {
+    var raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    var state = JSON.parse(raw);
+    if (state.teams) {
+      state.teams.forEach(function(t) { addTeam(t.name, t.score); });
+    }
+    if (state.used) {
+      state.used.forEach(function(key) {
+        document.querySelectorAll('.cell-wrap').forEach(function(c) {
+          if ((c.dataset.cat + '-' + c.dataset.pts) === key) c.classList.add('used');
+        });
+      });
+    }
+    return true;
+  } catch(e) { return false; }
+}
+
+function clearState() {
+  try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+}
+
+function escH(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+if (!loadState()) {
+  addTeam('Team 1', 0);
+  addTeam('Team 2', 0);
+}
+<\/script>
+</body>
+</html>`;
+}
+</script>
+
+</body>
+</html>

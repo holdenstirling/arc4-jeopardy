@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arc4 Trivia Challenge</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Verdana,Arial,sans-serif;background:#0d1b5e;color:#fff;min-height:100vh;overflow-x:hidden;}
+
+/* ── TOP BAR ── */
+#topbar{background:linear-gradient(135deg,#1a237e,#283593);padding:14px 20px 10px;border-bottom:4px solid #f5c518;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+#topbar h1{font-size:1.4rem;font-weight:900;color:#f5c518;text-shadow:1px 1px 0 rgba(0,0,0,0.4);letter-spacing:1px;}
+#new-game-btn{background:#f5c518;color:#1a1a1a;border:none;padding:8px 18px;font-weight:800;font-size:0.85rem;border-radius:6px;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;}
+#new-game-btn:hover{background:#ffe033;}
+
+/* ── BOARD ── */
+#board{padding:16px;display:flex;flex-direction:column;gap:6px;max-width:100vw;}
+
+.cat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:2px;}
+.cat-cell{background:#1a237e;border:3px solid #000;text-align:center;padding:10px 6px;font-weight:700;font-size:clamp(0.6rem,1.5vw,0.85rem);text-transform:uppercase;letter-spacing:.5px;min-height:52px;display:flex;align-items:center;justify-content:center;}
+
+.board-row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+
+.cell-wrap{background:#2a3698;border:3px solid #000;text-align:center;cursor:pointer;transition:background .15s,transform .1s;position:relative;min-height:64px;display:flex;align-items:center;justify-content:center;}
+.cell-wrap:hover{background:#3949ab;border-color:#f5c518;}
+.cell-wrap:active{transform:scale(0.97);}
+.cell-wrap.used{background:#1a237e;border-color:#333;cursor:default;}
+.cell-wrap.used .cell-pts{opacity:0.08;}
+.cell-pts{font-size:clamp(1rem,3vw,1.8rem);font-weight:900;color:#f5c518;text-shadow:1px 1px 0 rgba(0,0,0,0.5);}
+
+/* ── TEAMS BAR ── */
+#teams{display:flex;gap:10px;flex-wrap:wrap;padding:12px 16px;background:rgba(0,0,0,0.3);border-top:2px solid rgba(255,255,255,0.08);}
+.team{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:8px;min-width:160px;}
+.team-name{font-weight:700;font-size:0.9rem;outline:none;cursor:text;min-width:60px;}
+.team-name:focus{border-bottom:1px solid #f5c518;}
+.team-score{font-size:1.2rem;font-weight:900;color:#f5c518;min-width:36px;text-align:center;}
+.team-btns{display:flex;gap:4px;}
+.team-btns button{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;width:26px;height:26px;border-radius:4px;cursor:pointer;font-size:0.9rem;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.team-btns button:hover{background:rgba(255,255,255,0.2);}
+.add-team-btn{background:rgba(245,197,24,0.12);border:1px dashed rgba(245,197,24,0.4);color:#f5c518;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:700;white-space:nowrap;}
+.add-team-btn:hover{background:rgba(245,197,24,0.2);}
+
+/* ── MODAL ── */
+#modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:center;justify-content:center;}
+#modal-overlay.open{display:flex;}
+#modal{background:linear-gradient(135deg,#1a237e,#0d47a1);border:4px solid #f5c518;border-radius:12px;max-width:660px;width:92%;padding:36px 36px 28px;text-align:center;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+#modal-cat{font-size:0.75rem;text-transform:uppercase;letter-spacing:2px;color:#f5c518;margin-bottom:6px;}
+#modal-pts{font-size:1rem;font-weight:900;color:rgba(245,197,24,0.7);margin-bottom:20px;}
+#modal-clue{font-size:clamp(1.05rem,2.8vw,1.45rem);font-weight:700;line-height:1.45;margin-bottom:28px;color:#fff;}
+#modal-answer{background:rgba(0,0,0,0.35);border-radius:8px;padding:18px 20px;font-size:clamp(1rem,2.5vw,1.3rem);font-weight:800;color:#a5d6a7;display:none;margin-bottom:24px;line-height:1.4;}
+#modal-answer.visible{display:block;}
+.modal-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.btn-reveal{background:#f5c518;color:#1a1a1a;border:none;padding:12px 28px;font-weight:800;font-size:1rem;border-radius:6px;cursor:pointer;text-transform:uppercase;}
+.btn-reveal:hover{background:#ffe033;}
+.btn-close{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:12px 28px;font-weight:700;font-size:1rem;border-radius:6px;cursor:pointer;}
+.btn-close:hover{background:rgba(255,255,255,0.2);}
+.score-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px;}
+.score-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:7px 14px;border-radius:5px;cursor:pointer;font-size:0.78rem;font-weight:700;transition:background .15s;}
+.score-btn.add{border-color:rgba(80,200,120,0.5);color:#a5d6a7;}
+.score-btn.add:hover{background:rgba(80,200,120,0.15);}
+.score-btn.sub{border-color:rgba(244,67,54,0.5);color:#ff8a80;}
+.score-btn.sub:hover{background:rgba(244,67,54,0.15);}
+#score-panel{margin-top:14px;display:none;}
+#score-panel.visible{display:block;}
+#score-label{font-size:0.72rem;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <h1>⚡ Arc4 Trivia Challenge</h1>
+  <button id="new-game-btn" onclick="resetBoard()">↺ New Game</button>
+</div>
+
+<div id="board">
+  <div class="cat-row">
+    <div class="cat-cell">Science &amp; Nature</div>
+    <div class="cat-cell">History &amp; Leaders</div>
+    <div class="cat-cell">Words &amp; Language</div>
+    <div class="cat-cell">Tech &amp; Innovation</div>
+    <div class="cat-cell">Arts &amp; Culture</div>
+  </div>
+
+  <!-- $100 row -->
+  <div class="board-row">
+    <div class="cell-wrap" data-pts="100" data-cat="Science &amp; Nature"
+      data-clue="The word 'muscle' comes from the Latin 'musculus,' meaning this small animal — because of the way muscles appear to move under skin."
+      data-answer="Mouse (Latin: musculus)">
+      <div class="cell-pts">$100</div>
+    </div>
+    <div class="cell-wrap" data-pts="100" data-cat="History &amp; Leaders"
+      data-clue="This ancient Greek philosopher wrote 'The Republic' and proposed a society governed by philosopher-kings."
+      data-answer="Plato">
+      <div class="cell-pts">$100</div>
+    </div>
+    <div class="cell-wrap" data-pts="100" data-cat="Words &amp; Language"
+      data-clue="A word that reads the same forwards and backwards — like 'racecar,' 'level,' or 'civic' — is called this."
+      data-answer="A palindrome">
+      <div class="cell-pts">$100</div>
+    </div>
+    <div class="cell-wrap" data-pts="100" data-cat="Tech &amp; Innovation"
+      data-clue="This distributed version-control system, created by Linus Torvalds in 2005, is the most widely used tool for tracking changes in source code."
+      data-answer="Git">
+      <div class="cell-pts">$100</div>
+    </div>
+    <div class="cell-wrap" data-pts="100" data-cat="Arts &amp; Culture"
+      data-clue="This British author wrote both '1984' and 'Animal Farm,' two of the most influential critiques of totalitarianism ever published."
+      data-answer="George Orwell">
+      <div class="cell-pts">$100</div>
+    </div>
+  </div>
+
+  <!-- $200 row -->
+  <div class="board-row">
+    <div class="cell-wrap" data-pts="200" data-cat="Science &amp; Nature"
+      data-clue="This principle in quantum mechanics states that the more precisely you know a particle's position, the less precisely you can know its momentum — and vice versa."
+      data-answer="The Heisenberg Uncertainty Principle">
+      <div class="cell-pts">$200</div>
+    </div>
+    <div class="cell-wrap" data-pts="200" data-cat="History &amp; Leaders"
+      data-clue="This ancient Carthaginian general famously crossed the Alps with war elephants in 218 BC to invade the Roman Republic during the Second Punic War."
+      data-answer="Hannibal Barca">
+      <div class="cell-pts">$200</div>
+    </div>
+    <div class="cell-wrap" data-pts="200" data-cat="Words &amp; Language"
+      data-clue="This rhetorical device places seemingly contradictory terms side by side — examples include 'deafening silence,' 'bittersweet,' and 'living death.'"
+      data-answer="Oxymoron">
+      <div class="cell-pts">$200</div>
+    </div>
+    <div class="cell-wrap" data-pts="200" data-cat="Tech &amp; Innovation"
+      data-clue="This wireless standard, named after a 10th-century Danish king who united warring tribes, connects devices over short distances using radio waves."
+      data-answer="Bluetooth (named after Harald Bluetooth)">
+      <div class="cell-pts">$200</div>
+    </div>
+    <div class="cell-wrap" data-pts="200" data-cat="Arts &amp; Culture"
+      data-clue="The 'Mona Lisa' is believed to depict this woman — the wife of a Florentine merchant, whose identity was confirmed by a 2005 document discovery."
+      data-answer="Lisa Gherardini (Lisa del Giocondo)">
+      <div class="cell-pts">$200</div>
+    </div>
+  </div>
+
+  <!-- $300 row -->
+  <div class="board-row">
+    <div class="cell-wrap" data-pts="300" data-cat="Science &amp; Nature"
+      data-clue="This plant-cell organelle contains chlorophyll, captures sunlight, and is the site of photosynthesis. Animal cells lack it entirely."
+      data-answer="The chloroplast">
+      <div class="cell-pts">$300</div>
+    </div>
+    <div class="cell-wrap" data-pts="300" data-cat="History &amp; Leaders"
+      data-clue="This pandemic of 1347–1351, caused by the bacterium Yersinia pestis, killed an estimated 30–60% of Europe's population in under five years."
+      data-answer="The Black Death (Bubonic Plague)">
+      <div class="cell-pts">$300</div>
+    </div>
+    <div class="cell-wrap" data-pts="300" data-cat="Words &amp; Language"
+      data-clue="The word 'salary' traces back to the Latin 'salarium,' because Roman soldiers were partly paid in — or could buy — this essential commodity."
+      data-answer="Salt">
+      <div class="cell-pts">$300</div>
+    </div>
+    <div class="cell-wrap" data-pts="300" data-cat="Tech &amp; Innovation"
+      data-clue="This sorting algorithm, developed by Tony Hoare in 1959, uses a 'divide and conquer' strategy and averages O(n log n) performance — making it one of the fastest in practice."
+      data-answer="Quicksort">
+      <div class="cell-pts">$300</div>
+    </div>
+    <div class="cell-wrap" data-pts="300" data-cat="Arts &amp; Culture"
+      data-clue="This Czech composer wrote his famous 'New World Symphony' while living in America, weaving in themes inspired by African-American spirituals and Native American music."
+      data-answer="Antonín Dvořák">
+      <div class="cell-pts">$300</div>
+    </div>
+  </div>
+
+  <!-- $400 row -->
+  <div class="board-row">
+    <div class="cell-wrap" data-pts="400" data-cat="Science &amp; Nature"
+      data-clue="This element — atomic number 43 — was the first to be artificially produced in a laboratory and has no stable isotopes, making it essentially absent from nature."
+      data-answer="Technetium (Tc)">
+      <div class="cell-pts">$400</div>
+    </div>
+    <div class="cell-wrap" data-pts="400" data-cat="History &amp; Leaders"
+      data-clue="In 1905, Albert Einstein published four landmark papers in a single year, revolutionizing physics. This German phrase — translating to 'miracle year' — describes it."
+      data-answer="Annus Mirabilis">
+      <div class="cell-pts">$400</div>
+    </div>
+    <div class="cell-wrap" data-pts="400" data-cat="Words &amp; Language"
+      data-clue="The word 'serendipity' was coined by Horace Walpole in 1754, based on a Persian fairy tale set in the ancient name for this island nation."
+      data-answer="Sri Lanka (ancient name: Serendip)">
+      <div class="cell-pts">$400</div>
+    </div>
+    <div class="cell-wrap" data-pts="400" data-cat="Tech &amp; Innovation"
+      data-clue="This theoretical model of computation, proposed in 1936, defines the fundamental limits of what any algorithm can compute — and gave computer science one of its founding frameworks."
+      data-answer="The Turing Machine (Alan Turing)">
+      <div class="cell-pts">$400</div>
+    </div>
+    <div class="cell-wrap" data-pts="400" data-cat="Arts &amp; Culture"
+      data-clue="This 1605 Spanish novel — widely considered the first modern novel — follows an aging nobleman who reads so many chivalric romances that he loses his mind and sets off as a knight-errant."
+      data-answer="Don Quixote (by Miguel de Cervantes)">
+      <div class="cell-pts">$400</div>
+    </div>
+  </div>
+
+  <!-- $500 row -->
+  <div class="board-row">
+    <div class="cell-wrap" data-pts="500" data-cat="Science &amp; Nature"
+      data-clue="This unproven mathematical conjecture, posed by a Prussian mathematician in 1742, states that every even integer greater than 2 can be expressed as the sum of two prime numbers."
+      data-answer="Goldbach's Conjecture">
+      <div class="cell-pts">$500</div>
+    </div>
+    <div class="cell-wrap" data-pts="500" data-cat="History &amp; Leaders"
+      data-clue="This 2nd-century BC Greek astronomer, working in Alexandria, calculated the Earth's circumference to within ~2% accuracy using the angle of shadows in two cities — without ever leaving Egypt."
+      data-answer="Eratosthenes">
+      <div class="cell-pts">$500</div>
+    </div>
+    <div class="cell-wrap" data-pts="500" data-cat="Words &amp; Language"
+      data-clue="In linguistics, this term describes words whose pronunciation imitates the sound they describe — 'buzz,' 'sizzle,' 'murmur,' and 'crackle' are classic examples."
+      data-answer="Onomatopoeia">
+      <div class="cell-pts">$500</div>
+    </div>
+    <div class="cell-wrap" data-pts="500" data-cat="Tech &amp; Innovation"
+      data-clue="Claude Shannon's channel capacity theorem gives the theoretical maximum data rate of a noisy communication channel as a function of bandwidth and this ratio."
+      data-answer="Signal-to-noise ratio (SNR)">
+      <div class="cell-pts">$500</div>
+    </div>
+    <div class="cell-wrap" data-pts="500" data-cat="Arts &amp; Culture"
+      data-clue="This early-20th-century movement, launched by André Breton's 1924 manifesto in Paris, sought to unlock the unconscious mind through automatic writing, dream imagery, and irrational juxtaposition."
+      data-answer="Surrealism">
+      <div class="cell-pts">$500</div>
+    </div>
+  </div>
+
+</div>
+
+<div id="teams">
+  <button class="add-team-btn" onclick="addTeam()">+ Add Team</button>
+</div>
+
+<!-- Modal -->
+<div id="modal-overlay">
+  <div id="modal">
+    <div id="modal-cat"></div>
+    <div id="modal-pts"></div>
+    <div id="modal-clue"></div>
+    <div id="modal-answer"></div>
+    <div class="modal-actions">
+      <button class="btn-reveal" id="reveal-btn" onclick="revealAnswer()">Reveal Answer</button>
+      <button class="btn-close" onclick="closeModal()">Close</button>
+    </div>
+    <div id="score-panel">
+      <div id="score-label">Adjust Score</div>
+      <div class="score-btns" id="score-btns"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var teams = [];
+var teamCount = 0;
+var currentCell = null;
+var currentPts = 0;
+var SAVE_KEY = 'jeopardy-arc4-trivia';
+
+function escH(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── Teams ── */
+function addTeam(name, score){
+  teamCount++;
+  teams.push({id:'team-'+teamCount, name:name||('Team '+teamCount), score:score||0});
+  renderTeams();
+  renderScoreBtns();
+}
+
+function renderTeams(){
+  var bar = document.getElementById('teams');
+  var addBtn = bar.querySelector('.add-team-btn');
+  bar.innerHTML = '';
+  bar.appendChild(addBtn);
+  teams.forEach(function(t,i){
+    var el = document.createElement('div');
+    el.className = 'team';
+    el.innerHTML =
+      '<span class="team-name" contenteditable="true" onblur="renameTeam('+i+',this)">'+escH(t.name)+'</span>'+
+      '<span class="team-score" id="score-'+t.id+'">'+t.score+'</span>'+
+      '<div class="team-btns">'+
+        '<button onclick="adjustScore('+i+',1)" title="Add points">▲</button>'+
+        '<button onclick="adjustScore('+i+',-1)" title="Subtract points">▼</button>'+
+      '</div>';
+    bar.insertBefore(el, addBtn);
+  });
+}
+
+function renameTeam(i,el){
+  teams[i].name = el.innerText.trim()||('Team '+(i+1));
+  el.innerText = teams[i].name;
+  renderScoreBtns();
+  saveState();
+}
+
+function adjustScore(i, dir){
+  var pts = (currentCell && currentCell.dataset.pts) ? parseInt(currentCell.dataset.pts)*dir : currentPts*dir;
+  teams[i].score += pts;
+  document.getElementById('score-'+teams[i].id).innerText = teams[i].score;
+  saveState();
+}
+
+function renderScoreBtns(){
+  var container = document.getElementById('score-btns');
+  if(!container) return;
+  container.innerHTML = '';
+  teams.forEach(function(t,i){
+    var a = document.createElement('button');
+    a.className='score-btn add'; a.textContent='+ '+t.name;
+    a.onclick=function(){adjustScore(i,1);};
+    var s = document.createElement('button');
+    s.className='score-btn sub'; s.textContent='- '+t.name;
+    s.onclick=function(){adjustScore(i,-1);};
+    container.appendChild(a);
+    container.appendChild(s);
+  });
+  document.getElementById('score-panel').className = teams.length>0 ? 'visible' : '';
+}
+
+/* ── Modal ── */
+document.querySelectorAll('.cell-wrap').forEach(function(cell){
+  cell.addEventListener('click', function(){
+    if(cell.classList.contains('used')) return;
+    currentCell = cell;
+    currentPts = parseInt(cell.dataset.pts, 10);
+    document.getElementById('modal-cat').textContent = cell.dataset.cat;
+    document.getElementById('modal-pts').textContent = '$'+cell.dataset.pts;
+    var clueEl = document.getElementById('modal-clue');
+    var clueText = cell.dataset.clue||'';
+    clueEl.textContent = clueText;
+    clueEl.style.display = clueText ? 'block' : 'none';
+    document.getElementById('modal-answer').textContent = cell.dataset.answer;
+    document.getElementById('modal-answer').classList.remove('visible');
+    if(!clueText){
+      document.getElementById('modal-answer').classList.add('visible');
+      document.getElementById('reveal-btn').style.display='none';
+      cell.classList.add('used');
+      saveState();
+    } else {
+      document.getElementById('reveal-btn').style.display='inline-block';
+    }
+    renderScoreBtns();
+    document.getElementById('modal-overlay').classList.add('open');
+  });
+});
+
+document.getElementById('modal-overlay').addEventListener('click',function(e){
+  if(e.target===this) closeModal();
+});
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape') closeModal();
+  if(e.key===' ' && document.getElementById('modal-overlay').classList.contains('open')){
+    e.preventDefault(); revealAnswer();
+  }
+});
+
+function revealAnswer(){
+  document.getElementById('modal-answer').classList.add('visible');
+  document.getElementById('reveal-btn').style.display='none';
+  if(currentCell){ currentCell.classList.add('used'); }
+  saveState();
+}
+
+function closeModal(){
+  document.getElementById('modal-overlay').classList.remove('open');
+  currentCell = null;
+}
+
+function resetBoard(){
+  if(!confirm('Reset the board? This clears all answered cells and scores.')) return;
+  document.querySelectorAll('.cell-wrap.used').forEach(function(c){c.classList.remove('used');});
+  teams.forEach(function(t){t.score=0;});
+  renderTeams();
+  clearState();
+}
+
+/* ── Persistence ── */
+function saveState(){
+  try{
+    var used=[];
+    document.querySelectorAll('.cell-wrap.used').forEach(function(c){
+      used.push(c.dataset.cat+'-'+c.dataset.pts);
+    });
+    localStorage.setItem(SAVE_KEY, JSON.stringify({teams:teams,used:used}));
+  }catch(e){}
+}
+
+function loadState(){
+  try{
+    var raw=localStorage.getItem(SAVE_KEY);
+    if(!raw) return false;
+    var state=JSON.parse(raw);
+    if(state.teams) state.teams.forEach(function(t){addTeam(t.name,t.score);});
+    if(state.used) state.used.forEach(function(key){
+      document.querySelectorAll('.cell-wrap').forEach(function(c){
+        if((c.dataset.cat+'-'+c.dataset.pts)===key) c.classList.add('used');
+      });
+    });
+    return true;
+  }catch(e){return false;}
+}
+
+function clearState(){
+  try{localStorage.removeItem(SAVE_KEY);}catch(e){}
+}
+
+if(!loadState()){
+  addTeam('Team 1',0);
+  addTeam('Team 2',0);
+}
+</script>
+</body>
+</html>

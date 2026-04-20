@@ -118,8 +118,7 @@ label.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba
     <p>Generate, customize &amp; export self-contained Jeopardy games</p>
   </div>
   <div class="header-nav">
-    <a href="/index.html" class="nav-link">← Home</a>
-    <a href="/play.html" class="nav-link">▶ Play</a>
+    <a href="/index.html" class="nav-link">⌂ Home</a>
     <a href="/library.html" class="nav-link">📚 Library</a>
     <span class="badge" id="sw-badge">● Offline Ready</span>
   </div>
@@ -202,10 +201,10 @@ label.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba
 <!-- ── GENERATE GAME ── -->
 <div class="gen-section">
   <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
-    <button class="btn btn-gold btn-lg" onclick="generateGame()">⬇ Download Game File</button>
-    <button class="btn btn-ghost btn-lg" onclick="previewGame()">▶ Open in Browser</button>
+    <button class="btn btn-gold btn-lg" onclick="saveAndPlay()">▶ Save &amp; Play</button>
+    <button class="btn btn-ghost btn-lg" onclick="generateGame()">⬇ Download</button>
   </div>
-  <div class="gen-hint">Download creates a self-contained HTML file that works offline forever · Open plays it instantly in a new tab</div>
+  <div class="gen-hint">Save &amp; Play — saves to your library and opens the game instantly · Download — creates a standalone HTML file you can share or use offline</div>
   <div class="err-box" id="err-box"></div>
 </div>
 
@@ -831,10 +830,7 @@ function saveToLibrary(title, cats, html) {
 function generateGame() {
   if(!validate()) return;
   const title=document.getElementById('game-title').value.trim();
-  const cats=[];
-  for(let c=0;c<numCats;c++){
-    cats.push({name:document.getElementById(`cat-${c}`).value.trim(),clues:POINTS.map((_,r)=>({pts:POINTS[r],clue:document.getElementById(`clue-${c}-${r}`).value.trim(),ans:document.getElementById(`ans-${c}-${r}`).value.trim()}))});
-  }
+  const cats=collectCats();
   const html=buildGameHTML(title,cats,numCats);
   // Save to library
   saveToLibrary(title, cats, html);
@@ -1015,6 +1011,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
     <div class="setup-actions"><button class="btn-setup btn-rand" onclick="randomTeamNames()">🎲 Random Names</button></div>
   </div>
   <button class="btn-setup btn-start" onclick="startGame()">▶ Start Game</button>
+  <button onclick="window.close()" style="background:none;border:none;color:rgba(255,255,255,.28);font-size:.75rem;cursor:pointer;margin-top:14px;font-family:inherit;text-decoration:underline;">✕ Close this tab</button>
 </div>
 
 <div id="game">
@@ -1025,6 +1022,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
       <button class="hdr-btn" id="timer-btn" onclick="toggleTimer()" title="30s countdown">⏱</button>
       <button class="hdr-btn" onclick="resetBoard()">↺ Reset</button>
       <button class="hdr-btn" onclick="goSetup()">⚙ Teams</button>
+      <button class="hdr-btn" onclick="window.close()" title="Close this game tab">✕ Close</button>
     </div>
   </div>
   <div id="scoreboard"></div>
@@ -1138,18 +1136,29 @@ if(loadSave()&&teams.length){document.getElementById('setup').style.display='non
 </html>`;
 }
 
-// ─── Preview (open in browser without downloading) ────────────────────────────
-function previewGame() {
-  if (!validate()) return;
-  const title = document.getElementById('game-title').value.trim();
+// ─── Collect current cats helper ─────────────────────────────────────────────
+function collectCats() {
   const cats = [];
   for (let c = 0; c < numCats; c++) {
     cats.push({ name: document.getElementById(`cat-${c}`).value.trim(), clues: POINTS.map((_, r) => ({ pts: POINTS[r], clue: document.getElementById(`clue-${c}-${r}`).value.trim(), ans: document.getElementById(`ans-${c}-${r}`).value.trim() })) });
   }
+  return cats;
+}
+
+// ─── Save & Play (primary CTA — saves to library + opens in browser) ─────────
+function saveAndPlay() {
+  if (!validate()) return;
+  const title = document.getElementById('game-title').value.trim();
+  const cats = collectCats();
   const html = buildGameHTML(title, cats, numCats);
+  saveToLibrary(title, cats, html);
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   window.open(URL.createObjectURL(blob), '_blank');
+  showToast('💾 Saved to library &amp; opening…', 'ok');
 }
+
+// ─── Preview (legacy alias — same as saveAndPlay) ─────────────────────────────
+function previewGame() { saveAndPlay(); }
 
 // ─── Draft autosave ───────────────────────────────────────────────────────────
 const DRAFT_KEY = 'arc4-builder-draft';

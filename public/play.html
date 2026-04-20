@@ -1098,7 +1098,8 @@ function fjShowWagerForTeam(i) {
     '<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:18px 16px;margin-bottom:12px;">' +
       '<div style="font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);margin-bottom:6px;">Team ' + (i+1) + ' — Private Wager</div>' +
       '<div style="font-size:1.05rem;font-weight:800;margin-bottom:4px;">' + escH(teams[i].name) + '</div>' +
-      '<div style="font-size:.78rem;color:rgba(255,255,255,.42);margin-bottom:16px;">Your score: <span style="color:#f5c518;font-weight:700">' + teams[i].score + '</span>&ensp;·&ensp;Max wager: <span style="color:#f5c518;font-weight:700">' + maxWager + '</span></div>' +
+      '<div style="font-size:.78rem;color:rgba(255,255,255,.42);margin-bottom:' + (maxWager === 0 ? '8' : '16') + 'px;">Your score: <span style="color:#f5c518;font-weight:700">' + teams[i].score + '</span>&ensp;·&ensp;Max wager: <span style="color:#f5c518;font-weight:700">' + maxWager + '</span></div>' +
+      (maxWager === 0 ? '<div style="background:rgba(255,193,7,.1);border:1px solid rgba(255,193,7,.3);border-radius:6px;padding:8px 12px;font-size:.75rem;color:#ffe082;margin-bottom:14px;">⚠️ Your score is too low to wager — you need more than 200 points to put anything at stake. Your score won\'t change this round.</div>' : '') +
       '<div style="text-align:left;margin-bottom:14px;">' +
         '<label style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);display:block;margin-bottom:5px;">Your Wager (0 – ' + maxWager + ')</label>' +
         '<input id="fj-wager-inp" type="number" min="0" max="' + maxWager + '" placeholder="Enter amount…" style="width:100%;padding:10px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#fff;font-size:1.1rem;outline:none;font-family:inherit;text-align:center;">' +

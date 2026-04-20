@@ -1011,7 +1011,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
     <div class="setup-actions"><button class="btn-setup btn-rand" onclick="randomTeamNames()">🎲 Random Names</button></div>
   </div>
   <button class="btn-setup btn-start" onclick="startGame()">▶ Start Game</button>
-  <button onclick="window.close()" style="background:none;border:none;color:rgba(255,255,255,.28);font-size:.75rem;cursor:pointer;margin-top:14px;font-family:inherit;text-decoration:underline;">✕ Close this tab</button>
+  <button onclick="tryClose()" style="background:none;border:none;color:rgba(255,255,255,.28);font-size:.75rem;cursor:pointer;margin-top:14px;font-family:inherit;text-decoration:underline;">✕ Close this tab</button>
 </div>
 
 <div id="game">
@@ -1022,7 +1022,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
       <button class="hdr-btn" id="timer-btn" onclick="toggleTimer()" title="30s countdown">⏱</button>
       <button class="hdr-btn" onclick="resetBoard()">↺ Reset</button>
       <button class="hdr-btn" onclick="goSetup()">⚙ Teams</button>
-      <button class="hdr-btn" onclick="window.close()" title="Close this game tab">✕ Close</button>
+      <button class="hdr-btn" onclick="tryClose()" title="Close this game tab">✕ Close</button>
     </div>
   </div>
   <div id="scoreboard"></div>
@@ -1128,6 +1128,7 @@ function resetBoard(){if(!confirm('Reset the board and all scores?'))return;docu
 function save(){try{var used=[],owners={};document.querySelectorAll('.cell-wrap.used').forEach(function(c){var k=c.dataset.cat+'|'+c.dataset.pts;used.push(k);if(c.dataset.owner!==undefined&&c.dataset.owner!=='')owners[k]=parseInt(c.dataset.owner);});localStorage.setItem(SAVE,JSON.stringify({teams:teams,used:used,owners:owners,nTeams:nTeams}));}catch(e){}checkWinner();}
 function loadSave(){try{var raw=localStorage.getItem(SAVE);if(!raw)return false;var s=JSON.parse(raw);if(s.teams&&s.teams.length){teams=s.teams;nTeams=teams.length;document.querySelectorAll('.num-pill').forEach(function(p){p.classList.toggle('sel',parseInt(p.dataset.n)===nTeams);});buildTeamInputs();teams.forEach(function(t,i){var el=document.getElementById('ti-'+i);if(el)el.value=t.name;});}if(s.used)s.used.forEach(function(k){document.querySelectorAll('.cell-wrap').forEach(function(c){if(c.dataset.cat+'|'+c.dataset.pts===k){c.classList.add('used');if(s.owners&&s.owners[k]!==undefined){c.dataset.owner=s.owners[k];updateCellOwner(c,s.owners[k],false);}}});});return true;}catch(e){return false;}}
 function clearSave(){try{localStorage.removeItem(SAVE);}catch(e){}}
+function tryClose(){window.close();setTimeout(function(){if(!window.closed){var t=document.createElement('div');t.style.cssText='position:fixed;bottom:22px;right:22px;background:#333;color:#fff;padding:11px 18px;border-radius:8px;font-size:.85rem;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.4);';t.textContent='Press \u2318W (Mac) or Ctrl+W to close this tab';document.body.appendChild(t);setTimeout(function(){t.remove();},3500);}},80);}
 
 buildTeamInputs();
 if(loadSave()&&teams.length){document.getElementById('setup').style.display='none';document.getElementById('game').style.display='block';renderScoreboard();initDD();}

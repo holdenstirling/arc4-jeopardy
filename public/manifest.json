@@ -1,7 +1,7 @@
 {
-  "name": "Arc4 Jeopardy",
+  "name": "Holden's Jeopardy",
   "short_name": "Jeopardy",
-  "description": "Arc4 team trivia builder and game player",
+  "description": "Holden's team trivia builder and game player",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0d1b5e",

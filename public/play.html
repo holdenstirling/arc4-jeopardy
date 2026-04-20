@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#1a237e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Arc4 Jeopardy">
+<meta name="apple-mobile-web-app-title" content="Holden's Jeopardy">
 <link rel="manifest" href="/manifest.json">
-<title>Arc4 Trivia Challenge</title>
+<title>Holden's Jeopardy</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--gold:#f5c518;--bd:#0d1b5e;--bm:#1a237e;--bb:#2a3698;--bl:#3949ab;}
@@ -118,6 +118,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
 .timer-bar{height:100%;background:var(--gold);border-radius:3px;transition:width .95s linear,background .25s;}
 .timer-bar.warning{background:#ff8a00;}
 .timer-bar.danger{background:#ff4444;}
+
+/* ── STEAL / CELL OWNERSHIP ── */
+.cell-owner-badge{position:absolute;top:3px;right:3px;width:10px;height:10px;border-radius:50%;border:2px solid rgba(0,0,0,.5);z-index:2;pointer-events:none;}
+.steal-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,100,0,.72);border-radius:inherit;font-size:clamp(.42rem,1.1vw,.65rem);font-weight:900;color:#fff;letter-spacing:.3px;opacity:0;z-index:3;pointer-events:none;animation:stealFlash 1s ease-out forwards;}
+@keyframes stealFlash{0%{opacity:1;}65%{opacity:1;}100%{opacity:0;}}
+.sg-steal{background:rgba(255,140,0,.22) !important;border:1px solid rgba(255,140,0,.55) !important;color:#ffb74d !important;}
 
 /* ── WINNER OVERLAY ── */
 #winner-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:300;align-items:center;justify-content:center;padding:20px;}
@@ -275,13 +281,13 @@ body{padding-bottom:env(safe-area-inset-bottom,0);}
 <div id="portrait-hint">
   <div class="ph-icon">📱</div>
   <h3>Rotate for best experience</h3>
-  <p>Arc4 Jeopardy is designed for landscape mode — turn your device sideways for the full board view.</p>
+  <p>Holden's Jeopardy is designed for landscape mode — turn your device sideways for the full board view.</p>
   <button onclick="document.getElementById('portrait-hint').style.display='none'">Continue in portrait →</button>
 </div>
 
 <!-- ── SETUP ── -->
 <div id="setup">
-  <h1>⚡ Arc4 Trivia Challenge</h1>
+  <h1>⚡ Holden's Jeopardy</h1>
   <p class="sub">Set up your teams, then play</p>
 
   <div class="setup-card">
@@ -312,7 +318,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0);}
 <!-- ── GAME ── -->
 <div id="game">
   <div id="topbar">
-    <h1>⚡ Arc4 Trivia Challenge</h1>
+    <h1>⚡ Holden's Jeopardy</h1>
     <div class="topbar-right">
       <button class="hdr-btn" id="mute-btn" onclick="toggleMute()" title="Toggle sound">🔊</button>
       <button class="hdr-btn" id="timer-btn" onclick="toggleTimer()" title="Toggle 30s countdown timer">⏱</button>
@@ -411,20 +417,22 @@ body{padding-bottom:env(safe-area-inset-bottom,0);}
 
 <!-- ── FINAL JEOPARDY MODAL ── -->
 <div id="fj-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:400;align-items:center;justify-content:center;padding:20px;">
-  <div id="fj-card" style="background:linear-gradient(135deg,#1a237e,#0d47a1);border:4px solid #f5c518;border-radius:16px;max-width:640px;width:100%;padding:32px;text-align:center;animation:modalIn .25s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto;">
-    <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:#f5c518;margin-bottom:6px;">Final Jeopardy</div>
+  <div id="fj-card" style="background:linear-gradient(135deg,#1a237e,#0d47a1);border:4px solid #f5c518;border-radius:16px;max-width:640px;width:100%;padding:32px;text-align:center;animation:modalIn .25s cubic-bezier(.34,1.56,.64,1);max-height:92vh;overflow-y:auto;">
+    <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:#f5c518;margin-bottom:10px;">🏁 Final Jeopardy</div>
+
+    <!-- Step 1: Host enters category/clue/answer -->
     <div id="fj-step1">
-      <div style="font-size:1.1rem;font-weight:700;margin-bottom:20px;">Enter the Final Jeopardy category &amp; clue</div>
+      <div style="font-size:1.05rem;font-weight:700;margin-bottom:18px;">Set up Final Jeopardy</div>
       <div style="margin-bottom:12px;text-align:left;">
         <label style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.38);display:block;margin-bottom:5px;">Category</label>
         <input id="fj-cat-inp" type="text" placeholder="e.g. Famous Scientists" style="width:100%;padding:9px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.95rem;outline:none;font-family:inherit;">
       </div>
-      <div style="margin-bottom:20px;text-align:left;">
+      <div style="margin-bottom:12px;text-align:left;">
         <label style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.38);display:block;margin-bottom:5px;">Clue</label>
         <textarea id="fj-clue-inp" rows="3" placeholder="Write the Final Jeopardy clue here…" style="width:100%;padding:9px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.88rem;outline:none;resize:vertical;font-family:inherit;line-height:1.4;"></textarea>
       </div>
       <div style="margin-bottom:20px;text-align:left;">
-        <label style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.38);display:block;margin-bottom:5px;">Answer</label>
+        <label style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.38);display:block;margin-bottom:5px;">Answer (host only)</label>
         <input id="fj-ans-inp" type="text" placeholder="Correct answer" style="width:100%;padding:9px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.88rem;outline:none;font-family:inherit;">
       </div>
       <div style="display:flex;gap:10px;justify-content:center;">
@@ -432,24 +440,31 @@ body{padding-bottom:env(safe-area-inset-bottom,0);}
         <button onclick="closeFJ()" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28);padding:12px 20px;border-radius:7px;cursor:pointer;font-family:inherit;">Cancel</button>
       </div>
     </div>
+
+    <!-- Step 2: Category shown + sequential private wagering -->
     <div id="fj-step2" style="display:none;">
-      <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:2px;color:#f5c518;margin-bottom:12px;">Category</div>
-      <div id="fj-cat-display" style="font-size:clamp(1.4rem,4vw,2rem);font-weight:900;margin-bottom:24px;"></div>
-      <div style="color:rgba(255,255,255,.45);font-size:.88rem;margin-bottom:20px;">Teams — write your wagers now. 30 seconds!</div>
-      <div id="fj-scores" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:20px;"></div>
-      <button onclick="fjRevealClue()" style="background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:12px 28px;border-radius:7px;font-weight:800;cursor:pointer;font-family:inherit;">Reveal Clue →</button>
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:2px;color:#f5c518;margin-bottom:8px;">Category</div>
+      <div id="fj-cat-display" style="font-size:clamp(1.3rem,4vw,2rem);font-weight:900;margin-bottom:20px;"></div>
+      <div id="fj-wager-section"><!-- injected by fjShowWagerForTeam() --></div>
     </div>
+
+    <!-- Step 3: Clue display + answer reveal -->
     <div id="fj-step3" style="display:none;">
       <div id="fj-clue-display" style="font-size:clamp(1rem,2.8vw,1.4rem);font-weight:700;line-height:1.5;margin-bottom:24px;"></div>
-      <div id="fj-ans-display" style="background:rgba(0,0,0,.35);border-radius:8px;padding:14px 18px;font-size:1.1rem;font-weight:800;color:#a5d6a7;display:none;margin-bottom:20px;"></div>
-      <div style="display:flex;gap:10px;justify-content:center;margin-bottom:16px;">
+      <div id="fj-ans-display" style="background:rgba(0,0,0,.35);border-radius:8px;padding:14px 18px;font-size:1.05rem;font-weight:800;color:#a5d6a7;display:none;margin-bottom:20px;"></div>
+      <div style="display:flex;gap:10px;justify-content:center;">
         <button id="fj-reveal-btn" onclick="fjRevealAnswer()" style="background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:11px 26px;border-radius:7px;font-weight:800;cursor:pointer;font-family:inherit;">Reveal Answer</button>
         <button onclick="closeFJ()" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28);padding:11px 20px;border-radius:7px;cursor:pointer;font-family:inherit;">Close</button>
       </div>
-      <div id="fj-adj" style="display:none;">
-        <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);margin-bottom:8px;">Adjust Scores (enter wager amount)</div>
-        <div id="fj-wager-inputs"></div>
-      </div>
+    </div>
+
+    <!-- Step 4: Mark each team correct/wrong, apply scores -->
+    <div id="fj-step4" style="display:none;">
+      <div id="fj-clue-display2" style="font-size:clamp(.88rem,2.3vw,1.05rem);font-weight:600;line-height:1.5;margin-bottom:8px;color:rgba(255,255,255,.65);"></div>
+      <div id="fj-ans-display2" style="background:rgba(0,0,0,.35);border-radius:8px;padding:10px 14px;font-size:.95rem;font-weight:800;color:#a5d6a7;margin-bottom:18px;"></div>
+      <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.32);margin-bottom:10px;">Mark each team's answer</div>
+      <div id="fj-results-grid" style="display:flex;flex-direction:column;gap:7px;margin-bottom:18px;"></div>
+      <button onclick="closeFJ()" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28);padding:11px 28px;border-radius:7px;cursor:pointer;font-family:inherit;">Close</button>
     </div>
   </div>
 </div>
@@ -539,6 +554,7 @@ function stopTimer() { clearInterval(_timerInterval); document.getElementById('t
 // ── DATA ──────────────────────────────────────────────────────────────────────
 var RAND_NAMES=['The Trivia Titans','Brain Trust','Les Quizerables','The Fact Finders','Smarty Pants','Agatha Quiztie','The Think Tank','Wild Guessers','I Am Smarticus','Tequila Mockingbird','404: Name Not Found','Ctrl+Alt+Defeat','Stack Overflow','The Dark Horses','Know-It-Alls','The Underdogs','The Renaissance Crew','Trivia Newton John','Quiz Khalifa','Team Phenomenal'];
 var SAVE = 'arc4-trivia-v3';
+var TEAM_COLORS = ['#4ecdc4','#ff6b6b','#a29bfe','#45b7d1','#fd79a8','#ffd32a','#55efc4','#badc58'];
 var teams = [];
 var nTeams = 2;
 var current = null;
@@ -721,10 +737,57 @@ function quickAdj(i, dir) {
 function adjScore(i, dir) {
   if (!current) return;
   var delta = parseInt(current.dataset.pts) * dir;
+  var prevOwnerStr = current.dataset.owner;
+  var prevOwner = (prevOwnerStr !== undefined && prevOwnerStr !== '') ? parseInt(prevOwnerStr) : -1;
+  var isSteal = (dir > 0 && prevOwner >= 0 && prevOwner !== i);
+
+  // Steal: original owner loses their points (transfer, not duplication)
+  if (isSteal) {
+    teams[prevOwner].score -= delta;
+    updateScore(prevOwner);
+    animateScore(prevOwner, -delta);
+  }
+
   teams[i].score += delta;
   updateScore(i);
   animateScore(i, delta);
+
+  // Update cell ownership
+  if (dir > 0) {
+    current.dataset.owner = i;
+    updateCellOwner(current, i, isSteal);
+  } else if (prevOwner === i) {
+    // Deducting from owner clears ownership
+    delete current.dataset.owner;
+    updateCellOwner(current, -1, false);
+  }
+
   save();
+  renderScoreButtons(); // refresh steal button labels
+}
+
+function updateCellOwner(cell, teamIdx, isSteal) {
+  // Remove existing badge
+  var badge = cell.querySelector('.cell-owner-badge');
+  if (badge) badge.remove();
+  // Remove any lingering steal overlay
+  var old = cell.querySelector('.steal-overlay');
+  if (old) old.remove();
+
+  if (teamIdx >= 0 && teamIdx < teams.length) {
+    var b = document.createElement('div');
+    b.className = 'cell-owner-badge';
+    b.style.background = TEAM_COLORS[teamIdx % TEAM_COLORS.length];
+    cell.appendChild(b);
+  }
+
+  if (isSteal) {
+    var overlay = document.createElement('div');
+    overlay.className = 'steal-overlay';
+    overlay.textContent = '🔄 STOLEN!';
+    cell.appendChild(overlay);
+    setTimeout(function(){ overlay.remove(); }, 1050);
+  }
 }
 
 // ── BOARD / MODAL ─────────────────────────────────────────────────────────────
@@ -777,11 +840,30 @@ function reveal() {
 
 function renderScoreButtons() {
   var g = document.getElementById('score-grid'); g.innerHTML = '';
+  var ownerStr = current ? current.dataset.owner : undefined;
+  var ownerIdx = (ownerStr !== undefined && ownerStr !== '') ? parseInt(ownerStr) : -1;
   teams.forEach(function(t, i) {
-    var a = document.createElement('button'); a.className = 'sg-btn sg-add';
-    a.textContent = '+ ' + t.name; a.onclick = function(){ adjScore(i, 1); };
-    var s = document.createElement('button'); s.className = 'sg-btn sg-sub';
-    s.textContent = '− ' + t.name; s.onclick = function(){ adjScore(i, -1); };
+    var a = document.createElement('button');
+    var s = document.createElement('button');
+
+    if (ownerIdx >= 0 && ownerIdx !== i) {
+      // This team can steal from the current owner
+      a.className = 'sg-btn sg-steal';
+      a.textContent = '🔄 ' + t.name;
+    } else if (ownerIdx === i) {
+      // This team already owns it
+      a.className = 'sg-btn sg-add';
+      a.textContent = '✓ ' + t.name;
+    } else {
+      a.className = 'sg-btn sg-add';
+      a.textContent = '+ ' + t.name;
+    }
+    a.onclick = (function(idx){ return function(){ adjScore(idx, 1); }; })(i);
+
+    s.className = 'sg-btn sg-sub';
+    s.textContent = '− ' + t.name;
+    s.onclick = (function(idx){ return function(){ adjScore(idx, -1); }; })(i);
+
     g.appendChild(a); g.appendChild(s);
   });
 }
@@ -873,7 +955,12 @@ function launchConfetti() {
 
 function resetBoard() {
   if (!confirm('Reset the board and all scores?')) return;
-  document.querySelectorAll('.cell-wrap.used').forEach(function(c){ c.classList.remove('used'); });
+  document.querySelectorAll('.cell-wrap').forEach(function(c){
+    c.classList.remove('used');
+    delete c.dataset.owner;
+    var badge = c.querySelector('.cell-owner-badge');
+    if (badge) badge.remove();
+  });
   teams.forEach(function(t, i){ t.score = 0; updateScore(i); });
   document.getElementById('winner-overlay').classList.remove('open');
   clearSave(); closeModal();
@@ -883,8 +970,13 @@ function resetBoard() {
 function save() {
   try {
     var used = [];
-    document.querySelectorAll('.cell-wrap.used').forEach(function(c){ used.push(c.dataset.cat+'|'+c.dataset.pts); });
-    localStorage.setItem(SAVE, JSON.stringify({ teams: teams, used: used, nTeams: nTeams, teamPlayers: teamPlayers }));
+    var owners = {};
+    document.querySelectorAll('.cell-wrap.used').forEach(function(c){
+      var key = c.dataset.cat+'|'+c.dataset.pts;
+      used.push(key);
+      if (c.dataset.owner !== undefined && c.dataset.owner !== '') owners[key] = parseInt(c.dataset.owner);
+    });
+    localStorage.setItem(SAVE, JSON.stringify({ teams: teams, used: used, owners: owners, nTeams: nTeams, teamPlayers: teamPlayers }));
   } catch(e) {}
   checkWinner();
 }
@@ -902,7 +994,13 @@ function loadSave() {
     }
     if (s.used) s.used.forEach(function(k){
       document.querySelectorAll('.cell-wrap').forEach(function(c){
-        if (c.dataset.cat+'|'+c.dataset.pts === k) c.classList.add('used');
+        if (c.dataset.cat+'|'+c.dataset.pts === k) {
+          c.classList.add('used');
+          if (s.owners && s.owners[k] !== undefined) {
+            c.dataset.owner = s.owners[k];
+            updateCellOwner(c, s.owners[k], false);
+          }
+        }
       });
     });
     return true;
@@ -949,12 +1047,21 @@ openCell = function(cell) {
   _origOpenCell(cell);
 };
 
-// ── FINAL JEOPARDY ────────────────────────────────────────────────────────────
+// ── FINAL JEOPARDY (blind wager) ─────────────────────────────────────────────
+var fjWagers = [];
+var fjResultsApplied = [];
+var fjCategory = '';
+var fjClue = '';
+var fjAnswer = '';
+
 function triggerFinalJeopardy() {
-  // Reset steps
+  fjWagers = [];
+  fjResultsApplied = [];
+  fjCategory = ''; fjClue = ''; fjAnswer = '';
   document.getElementById('fj-step1').style.display = 'block';
   document.getElementById('fj-step2').style.display = 'none';
   document.getElementById('fj-step3').style.display = 'none';
+  document.getElementById('fj-step4').style.display = 'none';
   document.getElementById('fj-cat-inp').value = '';
   document.getElementById('fj-clue-inp').value = '';
   document.getElementById('fj-ans-inp').value = '';
@@ -964,61 +1071,122 @@ function triggerFinalJeopardy() {
 function fjRevealCategory() {
   var cat = document.getElementById('fj-cat-inp').value.trim();
   if (!cat) { document.getElementById('fj-cat-inp').focus(); return; }
+  fjCategory = cat;
+  fjClue = document.getElementById('fj-clue-inp').value.trim();
+  fjAnswer = document.getElementById('fj-ans-inp').value.trim();
   sndDailyDouble();
   document.getElementById('fj-cat-display').textContent = cat;
-  // Show current scores
-  var scores = document.getElementById('fj-scores');
-  scores.innerHTML = '';
-  teams.forEach(function(t) {
-    var el = document.createElement('div');
-    el.style.cssText = 'background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:8px;padding:8px 14px;font-size:.82rem;text-align:center;';
-    el.innerHTML = '<div style="font-weight:700">' + escH(t.name) + '</div><div style="color:#f5c518;font-weight:900">' + t.score + '</div>';
-    scores.appendChild(el);
-  });
   document.getElementById('fj-step1').style.display = 'none';
   document.getElementById('fj-step2').style.display = 'block';
+  fjWagers = new Array(teams.length).fill(null);
+  fjShowWagerForTeam(0);
+}
+
+function fjShowWagerForTeam(i) {
+  var section = document.getElementById('fj-wager-section');
+  var maxWager = Math.max(0, teams[i].score - 200);
+  section.innerHTML =
+    '<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:18px 16px;margin-bottom:12px;">' +
+      '<div style="font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);margin-bottom:6px;">Team ' + (i+1) + ' — Private Wager</div>' +
+      '<div style="font-size:1.05rem;font-weight:800;margin-bottom:4px;">' + escH(teams[i].name) + '</div>' +
+      '<div style="font-size:.78rem;color:rgba(255,255,255,.42);margin-bottom:16px;">Your score: <span style="color:#f5c518;font-weight:700">' + teams[i].score + '</span>&ensp;·&ensp;Max wager: <span style="color:#f5c518;font-weight:700">' + maxWager + '</span></div>' +
+      '<div style="text-align:left;margin-bottom:14px;">' +
+        '<label style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);display:block;margin-bottom:5px;">Your Wager (0 – ' + maxWager + ')</label>' +
+        '<input id="fj-wager-inp" type="number" min="0" max="' + maxWager + '" placeholder="Enter amount…" style="width:100%;padding:10px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#fff;font-size:1.1rem;outline:none;font-family:inherit;text-align:center;">' +
+      '</div>' +
+      '<button onclick="fjLockWager(' + i + ')" style="background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:12px 0;border-radius:7px;font-weight:800;cursor:pointer;font-size:.95rem;font-family:inherit;width:100%;">🔒 Lock In Wager</button>' +
+    '</div>' +
+    '<div style="font-size:.7rem;color:rgba(255,255,255,.25);margin-top:2px;">Other teams: look away! 👀 This wager is private.</div>';
+  setTimeout(function(){ var inp = document.getElementById('fj-wager-inp'); if (inp) inp.focus(); }, 60);
+}
+
+function fjLockWager(i) {
+  var inp = document.getElementById('fj-wager-inp');
+  var val = inp ? parseInt(inp.value) : 0;
+  var maxWager = Math.max(0, teams[i].score - 200);
+  if (isNaN(val) || val < 0) val = 0;
+  if (val > maxWager) val = maxWager;
+  fjWagers[i] = val;
+
+  var section = document.getElementById('fj-wager-section');
+  var nextTeam = i + 1;
+
+  if (nextTeam < teams.length) {
+    section.innerHTML =
+      '<div style="text-align:center;padding:24px 16px;">' +
+        '<div style="font-size:2rem;margin-bottom:10px;">✅</div>' +
+        '<div style="font-size:1rem;font-weight:700;margin-bottom:8px;">' + escH(teams[i].name) + ' locked in!</div>' +
+        '<div style="font-size:.85rem;color:rgba(255,255,255,.42);">Pass the screen to <strong style="color:#fff">' + escH(teams[nextTeam].name) + '</strong></div>' +
+      '</div>';
+    setTimeout(function(){ fjShowWagerForTeam(nextTeam); }, 2200);
+  } else {
+    section.innerHTML =
+      '<div style="text-align:center;padding:20px 16px;">' +
+        '<div style="font-size:2rem;margin-bottom:10px;">🔒</div>' +
+        '<div style="font-size:1rem;font-weight:700;margin-bottom:16px;">All wagers locked!</div>' +
+        '<button onclick="fjRevealClue()" style="background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:12px 28px;border-radius:7px;font-weight:800;cursor:pointer;font-size:.95rem;font-family:inherit;">▶ Reveal the Clue</button>' +
+      '</div>';
+  }
 }
 
 function fjRevealClue() {
-  var clue = document.getElementById('fj-clue-inp').value.trim();
-  document.getElementById('fj-clue-display').textContent = clue || '(No clue entered)';
-  document.getElementById('fj-ans-display').textContent = document.getElementById('fj-ans-inp').value.trim() || '';
+  document.getElementById('fj-clue-display').textContent = fjClue || '(No clue entered)';
   document.getElementById('fj-ans-display').style.display = 'none';
   document.getElementById('fj-reveal-btn').style.display = 'inline-block';
-  document.getElementById('fj-adj').style.display = 'none';
   document.getElementById('fj-step2').style.display = 'none';
   document.getElementById('fj-step3').style.display = 'block';
   sndReveal();
 }
 
 function fjRevealAnswer() {
+  document.getElementById('fj-ans-display').textContent = fjAnswer || '(No answer entered)';
   document.getElementById('fj-ans-display').style.display = 'block';
   document.getElementById('fj-reveal-btn').style.display = 'none';
-  document.getElementById('fj-adj').style.display = 'block';
-  // Build wager inputs
-  var wrap = document.getElementById('fj-wager-inputs');
-  wrap.innerHTML = '';
+  sndReveal();
+  // Build results grid
+  fjResultsApplied = new Array(teams.length).fill(false);
+  var grid = document.getElementById('fj-results-grid');
+  grid.innerHTML = '';
   teams.forEach(function(t, i) {
     var row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:7px;';
+    row.id = 'fj-result-row-' + i;
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 12px;transition:background .2s,border-color .2s;';
     row.innerHTML =
-      '<span style="flex:1;font-size:.82rem;font-weight:700">' + escH(t.name) + ' (' + t.score + ')</span>' +
-      '<input id="fj-wager-' + i + '" type="number" min="0" placeholder="Wager" style="width:90px;padding:6px 9px;border-radius:6px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-size:.85rem;outline:none;font-family:inherit;">' +
-      '<button onclick="fjAdj(' + i + ',1)" style="background:rgba(76,175,80,.2);border:1px solid rgba(76,175,80,.4);color:#a5d6a7;border-radius:5px;padding:6px 10px;cursor:pointer;font-weight:700;font-size:.75rem;font-family:inherit;">✓ +</button>' +
-      '<button onclick="fjAdj(' + i + ',-1)" style="background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.35);color:#ff8a80;border-radius:5px;padding:6px 10px;cursor:pointer;font-weight:700;font-size:.75rem;font-family:inherit;">✗ −</button>';
-    wrap.appendChild(row);
+      '<div style="flex:1;text-align:left;">' +
+        '<div style="font-weight:700;font-size:.88rem;">' + escH(t.name) + '</div>' +
+        '<div style="font-size:.7rem;color:rgba(255,255,255,.38);">Wagered: <span style="color:#f5c518;font-weight:700">' + (fjWagers[i] || 0) + '</span>&ensp;·&ensp;Score: <span id="fj-score-' + i + '" style="font-weight:700">' + t.score + '</span></div>' +
+      '</div>' +
+      '<button id="fj-c-' + i + '" onclick="fjMarkResult(' + i + ',true)" style="background:rgba(76,175,80,.2);border:1px solid rgba(76,175,80,.4);color:#a5d6a7;border-radius:5px;padding:8px 12px;cursor:pointer;font-weight:700;font-size:.78rem;font-family:inherit;">✓</button>' +
+      '<button id="fj-w-' + i + '" onclick="fjMarkResult(' + i + ',false)" style="background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.35);color:#ff8a80;border-radius:5px;padding:8px 12px;cursor:pointer;font-weight:700;font-size:.78rem;font-family:inherit;">✗</button>';
+    grid.appendChild(row);
   });
-  sndReveal();
+  document.getElementById('fj-clue-display2').textContent = fjClue;
+  document.getElementById('fj-ans-display2').textContent = fjAnswer;
+  document.getElementById('fj-step3').style.display = 'none';
+  document.getElementById('fj-step4').style.display = 'block';
 }
 
-function fjAdj(i, dir) {
-  var wagerEl = document.getElementById('fj-wager-' + i);
-  var wager = parseInt(wagerEl ? wagerEl.value : 0) || 0;
-  if (!wager) return;
-  teams[i].score += wager * dir;
+function fjMarkResult(i, correct) {
+  if (fjResultsApplied[i]) return;
+  fjResultsApplied[i] = true;
+  var wager = fjWagers[i] || 0;
+  var delta = correct ? wager : -wager;
+  teams[i].score += delta;
   updateScore(i);
-  animateScore(i, wager * dir);
+  animateScore(i, delta);
   save();
+  // Update row UI
+  var row = document.getElementById('fj-result-row-' + i);
+  var scoreEl = document.getElementById('fj-score-' + i);
+  if (scoreEl) scoreEl.textContent = teams[i].score;
+  if (row) {
+    row.style.background = correct ? 'rgba(76,175,80,.12)' : 'rgba(239,83,80,.1)';
+    row.style.borderColor = correct ? 'rgba(76,175,80,.5)' : 'rgba(239,83,80,.4)';
+  }
+  var btnC = document.getElementById('fj-c-' + i);
+  var btnW = document.getElementById('fj-w-' + i);
+  if (btnC) { btnC.disabled = true; btnC.style.opacity = correct ? '1' : '.28'; }
+  if (btnW) { btnW.disabled = true; btnW.style.opacity = correct ? '.28' : '1'; }
 }
 
 function closeFJ() {

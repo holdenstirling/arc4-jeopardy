@@ -120,6 +120,7 @@ label.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba
   <div class="header-nav">
     <a href="/index.html" class="nav-link">⌂ Home</a>
     <a href="/library.html" class="nav-link">📚 Library</a>
+    <a href="#" class="nav-link" onclick="saveAndPlay();return false;" style="color:#f5c518;border-color:rgba(245,197,24,.35);font-weight:800;">▶ Play</a>
     <span class="badge" id="sw-badge">● Offline Ready</span>
   </div>
 </header>
@@ -814,16 +815,18 @@ const LIB_KEY = 'arc4-jeopardy-library';
 function saveToLibrary(title, cats, html) {
   try {
     const lib = JSON.parse(localStorage.getItem(LIB_KEY)||'[]');
+    const id = Date.now().toString(36)+Math.random().toString(36).slice(2,5);
     lib.unshift({
-      id: Date.now().toString(36)+Math.random().toString(36).slice(2,5),
-      title, createdAt: new Date().toISOString(),
+      id, title, createdAt: new Date().toISOString(),
       numCats, numRows, difficulty,
       categories: cats.map(c=>c.name),
+      catData: cats,
       html
     });
     if(lib.length>60) lib.length=60;
     localStorage.setItem(LIB_KEY, JSON.stringify(lib));
-  } catch(e) {}
+    return id;
+  } catch(e) { return null; }
 }
 
 // ─── Download ─────────────────────────────────────────────────────────────────
@@ -1146,16 +1149,21 @@ function collectCats() {
   return cats;
 }
 
-// ─── Save & Play (primary CTA — saves to library + opens in browser) ─────────
+// ─── Save & Play (primary CTA — saves to library + opens at unique URL) ──────
 function saveAndPlay() {
   if (!validate()) return;
   const title = document.getElementById('game-title').value.trim();
   const cats = collectCats();
   const html = buildGameHTML(title, cats, numCats);
-  saveToLibrary(title, cats, html);
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-  window.open(URL.createObjectURL(blob), '_blank');
-  showToast('💾 Saved to library &amp; opening…', 'ok');
+  const id = saveToLibrary(title, cats, html);
+  if (id) {
+    window.open('/play.html?game=' + id, '_blank');
+  } else {
+    // fallback if localStorage is full
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    window.open(URL.createObjectURL(blob), '_blank');
+  }
+  showToast('💾 Saved &amp; opening game…', 'ok');
 }
 
 // ─── Preview (legacy alias — same as saveAndPlay) ─────────────────────────────

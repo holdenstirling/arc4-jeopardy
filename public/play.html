@@ -799,9 +799,13 @@ function updateCellOwner(cell, teamIdx, isSteal) {
 }
 
 // ── BOARD / MODAL ─────────────────────────────────────────────────────────────
-document.querySelectorAll('.cell-wrap').forEach(function(cell) {
-  cell.addEventListener('click', function(){ openCell(cell); });
-  cell.addEventListener('keydown', function(e){ if (e.key==='Enter'||e.key===' '){ e.preventDefault(); openCell(cell); } });
+// Event delegation — works for both hardcoded and dynamically-built boards
+document.getElementById('board').addEventListener('click', function(e) {
+  var cell = e.target.closest('.cell-wrap'); if (cell) openCell(cell);
+});
+document.getElementById('board').addEventListener('keydown', function(e) {
+  var cell = e.target.closest('.cell-wrap');
+  if (cell && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openCell(cell); }
 });
 
 function openCell(cell) {
@@ -973,6 +977,50 @@ function resetBoard() {
   teams.forEach(function(t, i){ t.score = 0; updateScore(i); });
   document.getElementById('winner-overlay').classList.remove('open');
   clearSave(); closeModal();
+}
+
+// ── CUSTOM GAME LOADER ────────────────────────────────────────────────────────
+function buildBoardFromGame(entry) {
+  var cats = entry.catData || [];
+  if (!cats.length || !cats[0].clues || !cats[0].clues.length) return false;
+  var numCols = cats.length;
+  var board = document.getElementById('board');
+  board.innerHTML = '';
+  // Category header row
+  var catRow = document.createElement('div');
+  catRow.className = 'cat-row';
+  catRow.style.gridTemplateColumns = 'repeat(' + numCols + ',minmax(0,1fr))';
+  cats.forEach(function(cat) {
+    var cell = document.createElement('div');
+    cell.className = 'cat-cell';
+    cell.textContent = cat.name;
+    catRow.appendChild(cell);
+  });
+  board.appendChild(catRow);
+  // Clue rows
+  var numRows = cats[0].clues.length;
+  for (var r = 0; r < numRows; r++) {
+    var row = document.createElement('div');
+    row.className = 'board-row';
+    row.style.gridTemplateColumns = 'repeat(' + numCols + ',minmax(0,1fr))';
+    cats.forEach(function(cat) {
+      var clue = cat.clues[r];
+      var cell = document.createElement('div');
+      cell.className = 'cell-wrap';
+      cell.tabIndex = 0;
+      cell.dataset.pts  = clue.pts;
+      cell.dataset.cat  = cat.name;
+      cell.dataset.clue = clue.clue;
+      cell.dataset.ans  = clue.ans;
+      var pts = document.createElement('div');
+      pts.className = 'cell-pts';
+      pts.textContent = '$' + clue.pts;
+      cell.appendChild(pts);
+      row.appendChild(cell);
+    });
+    board.appendChild(row);
+  }
+  return true;
 }
 
 // ── PERSISTENCE ───────────────────────────────────────────────────────────────
@@ -1221,6 +1269,24 @@ if ('serviceWorker' in navigator) {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
+// Load custom game from ?game=<id> if present
+(function() {
+  var gameId = new URLSearchParams(location.search).get('game');
+  if (!gameId) return;
+  try {
+    var lib = JSON.parse(localStorage.getItem('arc4-jeopardy-library') || '[]');
+    var entry = lib.find(function(e) { return e.id === gameId; });
+    if (entry && buildBoardFromGame(entry)) {
+      // Scope save state to this specific game so games don't overwrite each other
+      SAVE = 'arc4-trivia-' + gameId;
+      // Update titles
+      document.title = entry.title + ' · Holden\'s Jeopardy';
+      var tbh1 = document.querySelector('#topbar h1');
+      if (tbh1) tbh1.textContent = '⚡ ' + entry.title;
+    }
+  } catch(e) {}
+})();
+
 buildTeamBlocks();
 if (loadSave() && teams.length) {
   document.getElementById('setup').style.display = 'none';

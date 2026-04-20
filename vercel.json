@@ -1,12 +1,3 @@
 {
-  "version": 2,
-  "outputDirectory": "public",
-  "builds": [
-    { "src": "public/**", "use": "@vercel/static" }
-  ],
-  "routes": [
-    { "src": "/builder", "dest": "/public/builder.html" },
-    { "src": "/play",    "dest": "/public/play.html" },
-    { "src": "/",        "dest": "/public/index.html" }
-  ]
+  "outputDirectory": "public"
 }

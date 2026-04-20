@@ -3,88 +3,45 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1a237e">
+<link rel="manifest" href="/manifest.json">
 <title>Arc4 Jeopardy</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    background: linear-gradient(135deg, #0d1b5e 0%, #1a237e 100%);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    padding: 40px 24px;
-  }
-  h1 {
-    font-size: clamp(2rem, 6vw, 3.5rem);
-    font-weight: 900;
-    color: #f5c518;
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
-    letter-spacing: 2px;
-    text-align: center;
-    margin-bottom: 12px;
-  }
-  .subtitle {
-    color: rgba(255,255,255,0.55);
-    font-size: 1rem;
-    margin-bottom: 56px;
-    text-align: center;
-  }
-  .cards {
-    display: flex;
-    gap: 24px;
-    flex-wrap: wrap;
-    justify-content: center;
-    max-width: 720px;
-  }
-  .card {
-    background: rgba(255,255,255,0.06);
-    border: 2px solid rgba(255,255,255,0.12);
-    border-radius: 14px;
-    padding: 36px 32px;
-    width: 300px;
-    text-decoration: none;
-    color: #fff;
-    transition: transform 0.15s, border-color 0.15s, background 0.15s;
-    text-align: center;
-  }
-  .card:hover {
-    transform: translateY(-4px);
-    border-color: #f5c518;
-    background: rgba(255,255,255,0.1);
-  }
-  .card-icon { font-size: 2.8rem; margin-bottom: 16px; }
-  .card h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; }
-  .card p { font-size: 0.85rem; color: rgba(255,255,255,0.55); line-height: 1.5; }
-  .card.primary { border-color: rgba(245,197,24,0.35); background: rgba(245,197,24,0.07); }
-  .card.primary:hover { background: rgba(245,197,24,0.14); }
-  footer {
-    margin-top: 64px;
-    color: rgba(255,255,255,0.2);
-    font-size: 0.78rem;
-    text-align: center;
-  }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(160deg,#0d1b5e 0%,#1a237e 60%,#0d47a1 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;padding:40px 24px;}
+h1{font-size:clamp(2.2rem,6vw,3.8rem);font-weight:900;color:#f5c518;text-shadow:2px 3px 0 rgba(0,0,0,0.35);letter-spacing:2px;text-align:center;margin-bottom:8px;}
+.sub{color:rgba(255,255,255,0.45);font-size:1rem;text-align:center;margin-bottom:52px;}
+.cards{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;max-width:780px;}
+.card{background:rgba(255,255,255,0.055);border:2px solid rgba(255,255,255,0.11);border-radius:16px;padding:38px 32px;width:320px;text-decoration:none;color:#fff;transition:transform .18s,border-color .18s,background .18s;text-align:center;}
+.card:hover{transform:translateY(-5px);border-color:#f5c518;background:rgba(255,255,255,0.09);}
+.card-icon{font-size:3rem;margin-bottom:18px;display:block;}
+.card h2{font-size:1.25rem;font-weight:800;margin-bottom:8px;}
+.card p{font-size:0.85rem;color:rgba(255,255,255,0.5);line-height:1.55;}
+.card.primary{border-color:rgba(245,197,24,0.3);background:rgba(245,197,24,0.07);}
+.card.primary:hover{background:rgba(245,197,24,0.13);}
+footer{margin-top:60px;color:rgba(255,255,255,0.18);font-size:0.75rem;}
 </style>
 </head>
 <body>
-  <h1>⚡ Arc4 Jeopardy</h1>
-  <p class="subtitle">Team trivia for smart people</p>
-
-  <div class="cards">
-    <a href="/play.html" class="card primary">
-      <div class="card-icon">🎮</div>
-      <h2>Play Current Game</h2>
-      <p>Open the latest trivia game and start playing with your team right now.</p>
-    </a>
-    <a href="/builder.html" class="card">
-      <div class="card-icon">🛠️</div>
-      <h2>Build a New Game</h2>
-      <p>Create a custom Jeopardy game — fill in categories and clues, then download the HTML file.</p>
-    </a>
-  </div>
-
-  <footer>Arc4 &mdash; Internal Tools</footer>
+<h1>⚡ Arc4 Jeopardy</h1>
+<p class="sub">Team trivia for smart people</p>
+<div class="cards">
+  <a href="/play.html" class="card primary">
+    <span class="card-icon">🎮</span>
+    <h2>Play Current Game</h2>
+    <p>Open the latest Arc4 trivia game and start playing with your team right now.</p>
+  </a>
+  <a href="/builder.html" class="card">
+    <span class="card-icon">🛠️</span>
+    <h2>Build a New Game</h2>
+    <p>Create a custom Jeopardy game — pick categories, auto-generate questions, download and play.</p>
+  </a>
+</div>
+<footer>Arc4 · Internal Tools</footer>
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js').catch(()=>{});
+}
+</script>
 </body>
 </html>

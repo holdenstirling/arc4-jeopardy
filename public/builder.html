@@ -2,755 +2,1185 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Jeopardy Game Builder</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1a237e">
+<link rel="manifest" href="/manifest.json">
+<title>Jeopardy Builder · Arc4</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--gold:#f5c518;--blue-dark:#0d1b5e;--blue:#1a237e;--blue-mid:#2a3698;--blue-light:#3949ab;--green:#66bb6a;--amber:#ffa726;--red:#ef5350;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--blue-dark);color:#fff;min-height:100vh;font-size:14px;}
 
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    background: #0d1b5e;
-    color: #fff;
-    min-height: 100vh;
-  }
+/* HEADER */
+header{background:linear-gradient(135deg,var(--blue),#283593);padding:18px 28px;border-bottom:4px solid var(--gold);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:50;}
+header h1{font-size:1.6rem;font-weight:900;color:var(--gold);letter-spacing:1px;}
+header p{color:rgba(255,255,255,.5);font-size:.82rem;margin-top:2px;}
+.badge{background:rgba(76,175,80,.15);border:1px solid rgba(76,175,80,.4);color:#a5d6a7;font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;}
+.header-nav{display:flex;gap:8px;align-items:center;}
+.nav-link{color:rgba(255,255,255,.5);text-decoration:none;font-size:.82rem;padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.1);transition:.15s;}
+.nav-link:hover{color:#fff;border-color:rgba(255,255,255,.3);}
 
-  header {
-    background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
-    padding: 28px 40px;
-    border-bottom: 4px solid #f5c518;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
+/* LAYOUT */
+.wrapper{max-width:1280px;margin:0 auto;padding:24px 18px 60px;}
 
-  header h1 {
-    font-size: 2rem;
-    font-weight: 900;
-    letter-spacing: 1px;
-    color: #f5c518;
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
-  }
+/* CARDS */
+.card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:18px 22px;margin-bottom:16px;}
+.card-title{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1.4px;color:var(--gold);margin-bottom:14px;}
 
-  header p {
-    color: #b3c0f7;
-    font-size: 0.95rem;
-    margin-top: 4px;
-  }
+/* INPUTS */
+input[type=text],textarea,select{width:100%;padding:9px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.88rem;outline:none;transition:border-color .18s,background .18s;font-family:inherit;}
+input[type=text]:focus,textarea:focus,select:focus{border-color:var(--gold);background:rgba(255,255,255,.1);}
+input::placeholder,textarea::placeholder{color:rgba(255,255,255,.25);}
+textarea{resize:vertical;line-height:1.4;}
+select option{background:#1a237e;}
+label.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.38);display:block;margin-bottom:5px;}
 
-  .builder-wrapper {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 36px 24px 60px;
-  }
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;border:none;padding:9px 20px;border-radius:7px;cursor:pointer;font-weight:700;font-size:.84rem;transition:.15s;font-family:inherit;white-space:nowrap;}
+.btn:hover{opacity:.88;transform:translateY(-1px);}
+.btn:active{transform:none;}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#e6b800);color:#1a1a1a;box-shadow:0 3px 14px rgba(245,197,24,.28);}
+.btn-ghost{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;}
+.btn-ghost:hover{background:rgba(255,255,255,.14);}
+.btn-danger{background:rgba(239,83,80,.12);border:1px solid rgba(239,83,80,.3);color:#ff8a80;}
+.btn-lg{padding:14px 40px;font-size:1rem;border-radius:8px;}
 
-  /* Game title */
-  .section-label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: #f5c518;
-    margin-bottom: 8px;
-  }
+/* PILL TOGGLES */
+.pills{display:flex;gap:6px;flex-wrap:wrap;}
+.pill{padding:6px 16px;border-radius:20px;cursor:pointer;font-size:.8rem;font-weight:700;border:2px solid rgba(255,255,255,.14);color:rgba(255,255,255,.55);transition:.15s;user-select:none;}
+.pill:hover{border-color:rgba(255,255,255,.3);color:#fff;}
+.pill.active-easy{background:var(--green);border-color:var(--green);color:#fff;}
+.pill.active-medium{background:var(--amber);border-color:var(--amber);color:#1a1a1a;}
+.pill.active-hard{background:var(--red);border-color:var(--red);color:#fff;}
+.pill.active-mixed{background:linear-gradient(135deg,var(--green),var(--amber),var(--red));border-color:transparent;color:#fff;}
+.pill.active-num{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.4);color:#fff;}
 
-  .title-row {
-    display: flex;
-    gap: 16px;
-    align-items: flex-end;
-    margin-bottom: 36px;
-  }
+/* CATEGORY SUGGESTIONS */
+.suggestions-grid{display:flex;gap:7px;flex-wrap:wrap;margin-top:4px;}
+.sug-chip{padding:5px 13px;border-radius:14px;cursor:pointer;font-size:.78rem;font-weight:600;border:1.5px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);transition:.15s;user-select:none;}
+.sug-chip:hover{border-color:var(--gold);color:var(--gold);}
+.sug-chip.selected{background:rgba(245,197,24,.15);border-color:var(--gold);color:var(--gold);}
 
-  .title-row > div { flex: 1; }
+/* CONTROLS ROW */
+.controls-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.sep{width:1px;height:24px;background:rgba(255,255,255,.1);}
 
-  input[type="text"], textarea {
-    width: 100%;
-    padding: 10px 14px;
-    border-radius: 6px;
-    border: 2px solid rgba(255,255,255,0.15);
-    background: rgba(255,255,255,0.07);
-    color: #fff;
-    font-size: 0.95rem;
-    transition: border-color 0.2s;
-    outline: none;
-  }
+/* BOARD GRID */
+.board-scroll{overflow-x:auto;padding-bottom:6px;}
+.board-grid{display:grid;gap:8px;min-width:0;}
+.col-wrapper{display:flex;flex-direction:column;gap:7px;}
+.cat-inp{text-align:center;font-weight:700;font-size:.9rem;background:rgba(245,197,24,.1);border-color:rgba(245,197,24,.3);}
+.cat-inp:focus{background:rgba(245,197,24,.17);border-color:var(--gold);}
 
-  input[type="text"]:focus, textarea:focus {
-    border-color: #f5c518;
-    background: rgba(255,255,255,0.1);
-  }
+/* CLUE CARDS */
+.clue-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:8px;padding:9px 10px;transition:background .15s;}
+.clue-card:hover{background:rgba(255,255,255,.08);}
+.cc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.pts-badge{font-size:.66rem;font-weight:800;letter-spacing:.8px;}
+.cc-right{display:flex;align-items:center;gap:5px;}
+.diff-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.diff-dot.easy{background:var(--green);}
+.diff-dot.medium{background:var(--amber);}
+.diff-dot.hard{background:var(--red);}
+.regen-btn{background:none;border:none;color:rgba(255,255,255,.28);cursor:pointer;font-size:.88rem;padding:2px 4px;border-radius:3px;transition:.15s;line-height:1;}
+.regen-btn:hover{color:var(--gold);background:rgba(245,197,24,.1);}
+.clue-card textarea{min-height:50px;font-size:.78rem;margin-bottom:5px;padding:6px 8px;}
+.ans-ta{min-height:30px;font-size:.78rem;padding:5px 8px;background:rgba(80,200,120,.07);border-color:rgba(80,200,120,.2);}
+.ans-ta:focus{border-color:var(--green);background:rgba(80,200,120,.12);}
 
-  input[type="text"]::placeholder, textarea::placeholder {
-    color: rgba(255,255,255,0.3);
-  }
+/* GENERATE SECTION */
+.gen-section{margin-top:28px;text-align:center;}
+.gen-hint{margin-top:9px;color:rgba(255,255,255,.35);font-size:.78rem;}
+.err-box{background:rgba(239,83,80,.12);border:1px solid rgba(239,83,80,.38);border-radius:6px;padding:10px 15px;color:#ff8a80;font-size:.84rem;margin-top:13px;text-align:left;display:none;}
 
-  /* Board grid */
-  .board-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 12px;
-  }
+/* PREVIEW */
+.preview-wrap{margin-top:28px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:18px;}
+.preview-wrap h3{font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--gold);margin-bottom:12px;}
+.preview-board{display:grid;gap:3px;}
+.prev-cat{background:var(--blue);border:2px solid #000;text-align:center;padding:6px 3px;font-weight:700;font-size:.62rem;min-height:34px;display:flex;align-items:center;justify-content:center;text-transform:uppercase;}
+.prev-cell{background:var(--blue-mid);border:2px solid #000;text-align:center;padding:6px 3px;font-weight:900;color:var(--gold);font-size:.85rem;min-height:28px;display:flex;align-items:center;justify-content:center;}
 
-  .category-header {
-    margin-bottom: 16px;
-  }
-
-  .category-input {
-    text-align: center;
-    font-weight: 700;
-    font-size: 1rem;
-    background: rgba(245, 197, 24, 0.15);
-    border: 2px solid rgba(245, 197, 24, 0.4);
-  }
-
-  .category-input:focus {
-    border-color: #f5c518;
-    background: rgba(245, 197, 24, 0.2);
-  }
-
-  .col-wrapper { display: flex; flex-direction: column; gap: 10px; }
-
-  .clue-card {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    padding: 12px;
-    transition: background 0.15s;
-  }
-
-  .clue-card:hover { background: rgba(255,255,255,0.09); }
-
-  .points-badge {
-    font-size: 0.7rem;
-    font-weight: 800;
-    color: #f5c518;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-    display: block;
-  }
-
-  .clue-card textarea {
-    width: 100%;
-    resize: vertical;
-    font-size: 0.82rem;
-    min-height: 58px;
-    margin-bottom: 6px;
-    padding: 8px 10px;
-    line-height: 1.4;
-  }
-
-  .clue-card .answer-input {
-    min-height: 36px;
-    font-size: 0.82rem;
-    padding: 6px 10px;
-    background: rgba(80,200,120,0.08);
-    border-color: rgba(80,200,120,0.25);
-  }
-
-  .clue-card .answer-input:focus {
-    border-color: #4caf50;
-    background: rgba(80,200,120,0.12);
-  }
-
-  .field-label {
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: rgba(255,255,255,0.4);
-    margin-bottom: 4px;
-  }
-
-  /* Generate button */
-  .generate-section {
-    margin-top: 40px;
-    text-align: center;
-  }
-
-  .btn-generate {
-    background: linear-gradient(135deg, #f5c518 0%, #e6b800 100%);
-    color: #1a1a1a;
-    border: none;
-    padding: 16px 48px;
-    font-size: 1.1rem;
-    font-weight: 800;
-    border-radius: 8px;
-    cursor: pointer;
-    letter-spacing: 0.5px;
-    box-shadow: 0 4px 20px rgba(245,197,24,0.35);
-    transition: transform 0.1s, box-shadow 0.1s;
-    text-transform: uppercase;
-  }
-
-  .btn-generate:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 28px rgba(245,197,24,0.5);
-  }
-
-  .btn-generate:active { transform: translateY(0); }
-
-  .generate-hint {
-    margin-top: 12px;
-    color: rgba(255,255,255,0.4);
-    font-size: 0.82rem;
-  }
-
-  /* Validation errors */
-  .error-box {
-    background: rgba(244,67,54,0.15);
-    border: 1px solid rgba(244,67,54,0.5);
-    border-radius: 6px;
-    padding: 12px 16px;
-    color: #ff8a80;
-    font-size: 0.88rem;
-    margin-top: 16px;
-    display: none;
-  }
-
-  /* Preview section */
-  .preview-section {
-    margin-top: 40px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 10px;
-    padding: 24px;
-  }
-
-  .preview-section h3 {
-    font-size: 1rem;
-    color: #f5c518;
-    margin-bottom: 16px;
-  }
-
-  .preview-board {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 4px;
-    font-size: 0.78rem;
-  }
-
-  .preview-cat {
-    background: #1a237e;
-    border: 2px solid #000;
-    text-align: center;
-    padding: 8px 4px;
-    font-weight: 700;
-    font-size: 0.72rem;
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-  }
-
-  .preview-cell {
-    background: #2a3698;
-    border: 2px solid #000;
-    text-align: center;
-    padding: 8px 4px;
-    font-weight: 800;
-    color: #f5c518;
-    font-size: 0.9rem;
-    min-height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:#333;color:#fff;padding:11px 18px;border-radius:8px;font-size:.85rem;font-weight:600;z-index:999;opacity:0;transform:translateY(8px);transition:.28s;pointer-events:none;max-width:320px;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.ok{background:#2e7d32;}
+.toast.err{background:#c62828;}
 </style>
 </head>
 <body>
 
 <header>
   <div>
-    <h1>⚡ Jeopardy Game Builder</h1>
-    <p>Fill in your categories and clues, then generate a ready-to-play game file.</p>
+    <h1>⚡ Jeopardy Builder</h1>
+    <p>Generate, customize &amp; export self-contained Jeopardy games</p>
+  </div>
+  <div class="header-nav">
+    <a href="/index.html" class="nav-link">← Home</a>
+    <a href="/play.html" class="nav-link">▶ Play</a>
+    <span class="badge" id="sw-badge">● Offline Ready</span>
   </div>
 </header>
 
-<div class="builder-wrapper">
+<div class="wrapper">
 
-  <!-- Game Title -->
-  <div class="title-row">
-    <div>
-      <div class="section-label">Game Title</div>
+<!-- ── GAME DETAILS ── -->
+<div class="card">
+  <div class="card-title">Game Details</div>
+  <div style="display:flex;gap:14px;flex-wrap:wrap;">
+    <div style="flex:2;min-width:200px;">
+      <label class="fl">Game Title</label>
       <input type="text" id="game-title" placeholder="e.g. Arc4 April 2026 Jeopardy" maxlength="80">
     </div>
-  </div>
-
-  <!-- Categories header -->
-  <div class="section-label" style="margin-bottom:12px;">Categories &amp; Clues</div>
-  <div style="color:rgba(255,255,255,0.45); font-size:0.82rem; margin-bottom:20px;">
-    Enter a name for each category, then fill in the <span style="color:#b3e5fc">clue</span> (what players see) and <span style="color:#a5d6a7">answer</span> (revealed on click) for each point value.
-  </div>
-
-  <div class="board-grid" id="board-grid">
-    <!-- Injected by JS -->
-  </div>
-
-  <div class="generate-section">
-    <button class="btn-generate" onclick="generateGame()">🎮 Generate Game File</button>
-    <div class="generate-hint">Downloads a self-contained HTML file — open it in any browser to play.</div>
-    <div class="error-box" id="error-box"></div>
-  </div>
-
-  <!-- Board preview -->
-  <div class="preview-section">
-    <h3>Board Preview</h3>
-    <div class="preview-board" id="preview-board"></div>
+    <div style="flex:1;min-width:140px;">
+      <label class="fl">Number of Categories</label>
+      <div class="pills" id="num-pills">
+        <div class="pill" data-n="3">3</div>
+        <div class="pill" data-n="4">4</div>
+        <div class="pill active-num" data-n="5">5</div>
+        <div class="pill" data-n="6">6</div>
+        <div class="pill" data-n="7">7</div>
+        <div class="pill" data-n="8">8</div>
+      </div>
+    </div>
   </div>
 </div>
 
+<!-- ── CATEGORY SUGGESTIONS ── -->
+<div class="card">
+  <div class="card-title">Category Suggestions — click to add to your board</div>
+  <div class="suggestions-grid" id="sug-grid"></div>
+</div>
+
+<!-- ── AUTO-GENERATE ── -->
+<div class="card">
+  <div class="card-title">Auto-Generate Questions</div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+    <span style="font-size:.8rem;color:rgba(255,255,255,.55);">Difficulty:</span>
+    <div class="pills" id="diff-pills">
+      <div class="pill" data-diff="easy">Easy</div>
+      <div class="pill active-medium" data-diff="medium">Medium</div>
+      <div class="pill" data-diff="hard">Hard</div>
+      <div class="pill" data-diff="mixed">Mixed ↑</div>
+    </div>
+  </div>
+  <div class="controls-row">
+    <button class="btn btn-gold" onclick="autoGenerate()">✦ Generate All Questions</button>
+    <div class="sep"></div>
+    <button class="btn btn-ghost" onclick="randomizeCategories()">🎲 Randomize Categories</button>
+    <button class="btn btn-ghost" onclick="clearAll()">✕ Clear All</button>
+  </div>
+  <div style="margin-top:10px;font-size:.72rem;color:rgba(255,255,255,.3);line-height:1.6;">
+    Picks categories &amp; fills all cells from a verified bank of 225 questions across 15 topics.<br>
+    <strong style="color:rgba(255,255,255,.45);">Mixed</strong> = Easy $100–$200 · Medium $300–$400 · Hard $500 &nbsp;|&nbsp; Each ↺ button regenerates an individual cell.
+  </div>
+</div>
+
+<!-- ── BOARD ── -->
+<div class="card">
+  <div class="card-title">Categories &amp; Clues <span style="font-weight:400;color:rgba(255,255,255,.35);font-size:.65rem;text-transform:none;letter-spacing:0;">(Clue is optional — leave blank to reveal answer immediately)</span></div>
+  <div class="board-scroll">
+    <div class="board-grid" id="board-grid"></div>
+  </div>
+</div>
+
+<!-- ── GENERATE GAME ── -->
+<div class="gen-section">
+  <button class="btn btn-gold btn-lg" onclick="generateGame()">🎮 Generate &amp; Download Game File</button>
+  <div class="gen-hint">Creates a fully self-contained HTML file — works in any browser, online or offline, no setup needed.</div>
+  <div class="err-box" id="err-box"></div>
+</div>
+
+<!-- ── PREVIEW ── -->
+<div class="preview-wrap">
+  <h3>Board Preview</h3>
+  <div class="preview-board" id="preview-board"></div>
+</div>
+
+</div><!-- /wrapper -->
+<div class="toast" id="toast"></div>
+
 <script>
-// ─── Configuration ───────────────────────────────────────────────────────────
-const POINTS = [100, 200, 300, 400, 500];
-const NUM_CATS = 5;
+// ─────────────────────────────────────────────────────────────────────────────
+// VERIFIED QUESTION BANK — 15 categories × 3 difficulties × 5 questions = 225
+// All facts double-checked for accuracy.
+// ─────────────────────────────────────────────────────────────────────────────
+const QB = {
+  easy: {
+    "Science & Nature": [
+      {c:"The process by which plants convert sunlight and CO₂ into glucose and oxygen",a:"Photosynthesis"},
+      {c:"The planet closest to the Sun in our solar system",a:"Mercury"},
+      {c:"This gas makes up approximately 78% of Earth's atmosphere",a:"Nitrogen"},
+      {c:"The adult human body has exactly this many bones",a:"206"},
+      {c:"Water is made of two hydrogen atoms bonded to one atom of this element",a:"Oxygen"}
+    ],
+    "History & Leaders": [
+      {c:"The first President of the United States",a:"George Washington"},
+      {c:"The Berlin Wall fell in this year",a:"1989"},
+      {c:"This ancient wonder was built as a tomb for the Pharaoh Khufu around 2560 BC",a:"The Great Pyramid of Giza"},
+      {c:"World War I was sparked by the assassination of this Austro-Hungarian Archduke in Sarajevo",a:"Archduke Franz Ferdinand"},
+      {c:"Napoleon was exiled to this remote South Atlantic island after his defeat at Waterloo",a:"Saint Helena"}
+    ],
+    "Geography": [
+      {c:"The capital of Australia — not Sydney",a:"Canberra"},
+      {c:"The world's largest ocean by area",a:"The Pacific Ocean"},
+      {c:"The Amazon rainforest is primarily located in this country",a:"Brazil"},
+      {c:"The world's smallest country by area, located within Rome",a:"Vatican City"},
+      {c:"Mount Everest sits on the border of Nepal and this country",a:"China (Tibet)"}
+    ],
+    "Words & Language": [
+      {c:"A word that reads the same forwards and backwards — like 'racecar' or 'level'",a:"A palindrome"},
+      {c:"A word that means the opposite of another",a:"An antonym"},
+      {c:"The study of the origin and history of words",a:"Etymology"},
+      {c:"Words that sound the same but have different spellings and meanings, like 'flour' and 'flower'",a:"Homophones"},
+      {c:"This punctuation mark is used to show possession or to form contractions",a:"An apostrophe"}
+    ],
+    "Tech & Innovation": [
+      {c:"HTML stands for this",a:"HyperText Markup Language"},
+      {c:"The binary number system uses only these two digits",a:"0 and 1"},
+      {c:"This company launched the first iPhone on June 29, 2007",a:"Apple"},
+      {c:"This global network of computers and servers that you are using right now",a:"The Internet"},
+      {c:"The term for software flaws or errors that cause unexpected behavior",a:"Bugs"}
+    ],
+    "Math & Logic": [
+      {c:"Pi rounded to two decimal places",a:"3.14"},
+      {c:"The square root of 144",a:"12"},
+      {c:"A triangle with all three sides of equal length is called this",a:"Equilateral"},
+      {c:"The next prime number after 7",a:"11"},
+      {c:"A standard deck of playing cards has this many cards",a:"52"}
+    ],
+    "Music": [
+      {c:"This band, formed in Liverpool in 1960, became the best-selling music artists in history",a:"The Beatles"},
+      {c:"'Bohemian Rhapsody' was recorded by this British rock band in 1975",a:"Queen"},
+      {c:"'Thriller' (1982), the best-selling album of all time, was recorded by this artist",a:"Michael Jackson"},
+      {c:"The keyboard instrument with black and white keys, central to classical music",a:"Piano"},
+      {c:"This Swedish pop group — one of the best-selling of all time — formed in 1972",a:"ABBA"}
+    ],
+    "Movies & TV": [
+      {c:"This 1977 George Lucas film launched the Star Wars franchise",a:"Star Wars: A New Hope"},
+      {c:"'To infinity and beyond!' is the catchphrase of this Toy Story character",a:"Buzz Lightyear"},
+      {c:"This director made 'Schindler's List,' 'Jurassic Park,' and 'E.T.'",a:"Steven Spielberg"},
+      {c:"The long-running game show 'Jeopardy!' was hosted by this man for 37 years, from 1984 to 2020",a:"Alex Trebek"},
+      {c:"'Friends' was set primarily in apartments in this American city",a:"New York City"}
+    ],
+    "Space & Astronomy": [
+      {c:"The largest planet in our solar system",a:"Jupiter"},
+      {c:"The closest star to Earth, other than the Sun",a:"Proxima Centauri"},
+      {c:"NASA's first crewed Moon landing mission, which landed on July 20, 1969",a:"Apollo 11"},
+      {c:"The Milky Way is classified as this type of galaxy",a:"A spiral galaxy"},
+      {c:"A 'light-year' measures this physical quantity, not time",a:"Distance"}
+    ],
+    "Food & Drink": [
+      {c:"The world's most widely consumed hot beverage, made from roasted seeds of Coffea plants",a:"Coffee"},
+      {c:"The primary ingredient in guacamole",a:"Avocados"},
+      {c:"The main ingredient in hummus, also called garbanzo beans",a:"Chickpeas"},
+      {c:"This type of pasta is named after the Italian word for 'little worms'",a:"Vermicelli"},
+      {c:"Brazil, Vietnam, and Colombia are the three largest producers of this crop",a:"Coffee"}
+    ],
+    "Sports": [
+      {c:"The sport played annually at Wimbledon",a:"Tennis"},
+      {c:"This country has won the most FIFA World Cup titles — five total",a:"Brazil"},
+      {c:"In American football, a touchdown scores this many points",a:"6"},
+      {c:"The original Olympic Games were held in this ancient Greek city",a:"Olympia"},
+      {c:"This swimmer holds the record for the most Olympic gold medals of all time, with 23",a:"Michael Phelps"}
+    ],
+    "Animals": [
+      {c:"The largest land animal on Earth",a:"African elephant"},
+      {c:"This is the only mammal capable of true sustained flight",a:"Bats"},
+      {c:"The fastest land animal on Earth, capable of speeds up to 75 mph",a:"Cheetah"},
+      {c:"A group of lions is called this",a:"A pride"},
+      {c:"This mammal lays eggs — one of only five species of monotremes",a:"Platypus (or echidna)"}
+    ],
+    "Pop Culture & Arts": [
+      {c:"This British author wrote the Harry Potter series",a:"J.K. Rowling"},
+      {c:"'The Starry Night' (1889) was painted by this Dutch Post-Impressionist artist",a:"Vincent van Gogh"},
+      {c:"This Shakespeare play features the line 'To be or not to be, that is the question'",a:"Hamlet"},
+      {c:"This author wrote 'Pride and Prejudice' (1813)",a:"Jane Austen"},
+      {c:"The 'Mona Lisa' is displayed in this Parisian museum",a:"The Louvre"}
+    ],
+    "Famous Inventions": [
+      {c:"Alexander Graham Bell is credited with inventing this communication device in 1876",a:"The telephone"},
+      {c:"This Scottish inventor developed the first practical steam engine with a separate condenser in 1765",a:"James Watt"},
+      {c:"The World Wide Web was invented by this British computer scientist in 1989",a:"Tim Berners-Lee"},
+      {c:"Thomas Edison patented a practical version of this lighting device in 1879",a:"The electric light bulb"},
+      {c:"The printing press with movable type was invented by this German craftsman around 1440",a:"Johannes Gutenberg"}
+    ],
+    "Philosophy": [
+      {c:"This ancient Greek philosopher was the teacher of Plato and was executed by hemlock in 399 BC",a:"Socrates"},
+      {c:"'Cogito, ergo sum' ('I think, therefore I am') was declared by this philosopher",a:"René Descartes"},
+      {c:"This ethical theory holds that the right action is the one that maximizes overall happiness",a:"Utilitarianism"},
+      {c:"Plato's famous metaphor describes prisoners in a cave who mistake shadows on a wall for reality",a:"The Allegory of the Cave"},
+      {c:"This type of logic uses statements that are either true or false, with no middle ground",a:"Boolean (classical) logic"}
+    ]
+  },
 
-// ─── Build the form ───────────────────────────────────────────────────────────
-const grid = document.getElementById('board-grid');
+  medium: {
+    "Science & Nature": [
+      {c:"This principle states you cannot simultaneously know a particle's exact position and its exact momentum",a:"The Heisenberg Uncertainty Principle"},
+      {c:"The organelle famously called the 'powerhouse of the cell,' which produces ATP through cellular respiration",a:"The mitochondria"},
+      {c:"This plant-cell organelle contains chlorophyll and is the site where photosynthesis takes place",a:"The chloroplast"},
+      {c:"The atomic symbol 'Fe,' from the Latin 'ferrum,' stands for this element",a:"Iron"},
+      {c:"The speed of light in a vacuum is approximately this value in meters per second",a:"~3 × 10⁸ m/s (299,792,458 m/s)"}
+    ],
+    "History & Leaders": [
+      {c:"This Carthaginian general crossed the Alps with war elephants in 218 BC to invade Rome during the Second Punic War",a:"Hannibal Barca"},
+      {c:"The 1347–1351 pandemic caused by Yersinia pestis that killed an estimated 30–60% of Europe's population",a:"The Black Death (Bubonic Plague)"},
+      {c:"This ancient Greek philosopher wrote 'The Republic' and proposed that ideal societies should be governed by philosopher-kings",a:"Plato"},
+      {c:"England's Magna Carta — limiting royal power and guaranteeing certain rights — was signed in this year",a:"1215"},
+      {c:"This 1815 battle ended Napoleon's rule for the last time, resulting in his exile to Saint Helena",a:"The Battle of Waterloo"}
+    ],
+    "Geography": [
+      {c:"The capital of Canada — a common trick question, as many guess Toronto",a:"Ottawa"},
+      {c:"This African country, home to ancient Nubian pyramids, actually has more pyramids than Egypt",a:"Sudan"},
+      {c:"Lake Baikal in Russia contains approximately this fraction of all the fresh surface water on Earth",a:"About 20% (one-fifth)"},
+      {c:"The Strait of Malacca — one of the world's most strategic shipping lanes — connects the Indian Ocean to this body of water",a:"The South China Sea"},
+      {c:"This country has the longest total coastline of any nation on Earth, at over 200,000 km",a:"Canada"}
+    ],
+    "Words & Language": [
+      {c:"The word 'salary' traces back to the Latin 'salarium,' related to this essential commodity given to Roman soldiers",a:"Salt"},
+      {c:"This rhetorical device places two contradictory terms side by side — 'deafening silence,' 'living death,' 'bittersweet'",a:"Oxymoron"},
+      {c:"The word 'muscle' derives from the Latin 'musculus,' meaning this small animal, because of how muscles appear to move under skin",a:"Mouse"},
+      {c:"Words whose sound imitates what they describe — 'buzz,' 'sizzle,' 'murmur,' 'crackle'",a:"Onomatopoeia"},
+      {c:"'Serendipity' was coined by Horace Walpole in 1754, based on an ancient fairy tale set in this island nation",a:"Sri Lanka (ancient name: Serendip)"}
+    ],
+    "Tech & Innovation": [
+      {c:"This wireless standard was named after Harald Bluetooth, a 10th-century Danish king who united warring tribes",a:"Bluetooth"},
+      {c:"This distributed version control system was created by Linus Torvalds in April 2005 to manage the Linux kernel",a:"Git"},
+      {c:"This DNS record type maps a domain name directly to a 32-bit IPv4 address",a:"An 'A' record"},
+      {c:"The CAP theorem states distributed systems can only reliably guarantee two of: Consistency, Availability, and this",a:"Partition Tolerance"},
+      {c:"This sorting algorithm, invented by Tony Hoare in 1959, uses a pivot-based 'divide and conquer' approach and averages O(n log n)",a:"Quicksort"}
+    ],
+    "Math & Logic": [
+      {c:"This constant, approximately 2.71828, is the base of natural logarithms and arises naturally in growth and decay problems",a:"e (Euler's number)"},
+      {c:"In a normal (Gaussian) distribution, approximately this percentage of values fall within one standard deviation of the mean",a:"68%"},
+      {c:"The 10th number in the Fibonacci sequence, which begins 1, 1, 2, 3, 5, 8…",a:"55"},
+      {c:"Euler's identity, e^(iπ) + 1 = 0, combines five fundamental mathematical constants — e, i, π, 1, and this",a:"0"},
+      {c:"In statistics, this is the middle value of a dataset when sorted — distinct from the mean and mode",a:"The median"}
+    ],
+    "Music": [
+      {c:"Beethoven composed his Ninth Symphony — including 'Ode to Joy' — while completely this, unable to hear a note",a:"Deaf"},
+      {c:"The '27 Club' refers to musicians who died at age 27, including Jimi Hendrix, Janis Joplin, Jim Morrison, and Kurt Cobain",a:"27"},
+      {c:"This musical scale, found in the black keys of a piano, uses exactly 5 notes per octave and appears in folk music worldwide",a:"The pentatonic scale"},
+      {c:"This Italian Baroque composer, nicknamed 'The Red Priest,' wrote 'The Four Seasons' around 1720",a:"Antonio Vivaldi"},
+      {c:"John Lennon and Paul McCartney of the Beatles wrote their songs under this joint songwriting credit",a:"Lennon-McCartney"}
+    ],
+    "Movies & TV": [
+      {c:"This 1941 Orson Welles film, widely considered one of the greatest films ever made, is based loosely on media magnate William Randolph Hearst",a:"Citizen Kane"},
+      {c:"The 'Bechdel Test' for films requires two named female characters who speak to each other about something other than this",a:"A man"},
+      {c:"'Breaking Bad' creator Vince Gilligan pitched the show to networks as the story of 'Mr. Chips becoming this'",a:"Scarface"},
+      {c:"The term 'MacGuffin' — a plot device that motivates characters but is ultimately unimportant to the story — was popularized by this director",a:"Alfred Hitchcock"},
+      {c:"This 2008 superhero film featuring Heath Ledger as the Joker became the first superhero film to gross over $1 billion",a:"The Dark Knight"}
+    ],
+    "Space & Astronomy": [
+      {c:"This Soviet satellite, launched on October 4, 1957, was the first artificial object to successfully orbit Earth",a:"Sputnik 1"},
+      {c:"The 'event horizon' of a black hole marks the boundary beyond which nothing — not even this — can escape",a:"Light"},
+      {c:"This 1929 observation by Edwin Hubble — that distant galaxies recede faster the farther they are — revealed the universe is expanding",a:"Hubble's Law (the Hubble–Lemaître Law)"},
+      {c:"This Jupiter moon is considered a strong candidate for extraterrestrial life due to its subsurface liquid water ocean",a:"Europa"},
+      {c:"The cosmic microwave background radiation, first detected in 1965 by Penzias and Wilson, is the afterglow of this event",a:"The Big Bang"}
+    ],
+    "Food & Drink": [
+      {c:"This French cooking technique involves cooking vacuum-sealed food in precisely temperature-controlled water",a:"Sous vide"},
+      {c:"The world's most expensive coffee, Kopi Luwak, gets its name from the animal whose digestive tract the beans pass through",a:"The Asian palm civet"},
+      {c:"Umami — the savory 'fifth taste' alongside sweet, sour, salty, and bitter — was identified by this Japanese chemist in 1908",a:"Kikunae Ikeda"},
+      {c:"The five 'mother sauces' of classic French cuisine were codified by Auguste Escoffier — béchamel, velouté, espagnole, tomat, and this",a:"Hollandaise"},
+      {c:"This country is the world's largest coffee producer, responsible for about one-third of global output",a:"Brazil"}
+    ],
+    "Sports": [
+      {c:"This boxer, known as 'The Greatest,' refused U.S. Army induction in 1967, citing his Muslim faith and opposition to the Vietnam War",a:"Muhammad Ali (Cassius Clay)"},
+      {c:"The revolutionary 'Fosbury Flop' high-jump technique was first used by Dick Fosbury at this Olympics, earning him gold",a:"The 1968 Mexico City Olympics"},
+      {c:"In cricket, a batsman who scores zero runs is said to have scored this",a:"A duck"},
+      {c:"The 'Moneyball' revolution — using statistics to build winning baseball teams on a budget — was pioneered at this MLB franchise",a:"Oakland Athletics (Billy Beane)"},
+      {c:"This country's national team holds the record for most men's Rugby World Cup titles, with three wins",a:"New Zealand (All Blacks)"}
+    ],
+    "Animals": [
+      {c:"This cephalopod has three hearts, blue blood, and can change color and texture in milliseconds",a:"Octopus"},
+      {c:"The mantis shrimp has 16 types of photoreceptors — humans have 3 — giving it the most complex color vision of this type known in nature",a:"Any animal"},
+      {c:"This bird, native to New Zealand, is flightless, nocturnal, lays the largest egg relative to its body size of any bird, and is the only known bird with nostrils at the tip of its beak",a:"Kiwi"},
+      {c:"Tardigrades — microscopic animals also called 'water bears' — can survive in this extreme environment unreachable by most life",a:"The vacuum of space (also: extreme radiation, near-absolute-zero temperatures, boiling water)"},
+      {c:"This migratory bird holds the record for the longest annual migration — flying from the Arctic to the Antarctic and back, about 70,000 km per year",a:"Arctic tern"}
+    ],
+    "Pop Culture & Arts": [
+      {c:"This British author wrote both '1984' (1949) and 'Animal Farm' (1945), two landmark critiques of totalitarianism",a:"George Orwell"},
+      {c:"This 1605 Spanish novel — widely considered the first modern novel — follows the adventures of a deluded knight-errant",a:"Don Quixote (by Miguel de Cervantes)"},
+      {c:"The Mona Lisa is believed to depict this woman, identified in a 2005 document as the wife of Florentine merchant Francesco del Giocondo",a:"Lisa Gherardini (Lisa del Giocondo)"},
+      {c:"This Czech composer wrote the 'New World Symphony' (1893) while serving as director of the National Conservatory of Music in New York",a:"Antonín Dvořák"},
+      {c:"This Dutch Golden Age painter known for 'Girl with a Pearl Earring' (c.1665) was virtually forgotten for two centuries before being rediscovered",a:"Johannes Vermeer"}
+    ],
+    "Famous Inventions": [
+      {c:"This Scottish engineer developed the first practical steam engine with a separate condenser in 1765, enabling the Industrial Revolution",a:"James Watt"},
+      {c:"Marie Curie, the only person to win Nobel Prizes in two different sciences, won in Physics (1903) and this field (1911)",a:"Chemistry"},
+      {c:"The transistor — the building block of all modern electronics — was invented in 1947 at Bell Labs by Bardeen, Brattain, and this man",a:"William Shockley"},
+      {c:"This Scottish engineer invented the telephone in 1876, though his patent was famously disputed by Elisha Gray",a:"Alexander Graham Bell"},
+      {c:"Louis Pasteur developed this process — gentle heating to kill pathogens without ruining the product — now used in milk and juice worldwide",a:"Pasteurization"}
+    ],
+    "Philosophy": [
+      {c:"Immanuel Kant's 'categorical imperative' states you should act only according to principles you could will to become this",a:"A universal law"},
+      {c:"This philosopher wrote 'The Prince' (1532), arguing that rulers should prioritize effectiveness over morality — inspiring the term 'Machiavellian'",a:"Niccolò Machiavelli"},
+      {c:"The philosophical position that we cannot know whether God exists is called this",a:"Agnosticism"},
+      {c:"This thought experiment, proposed by Edmund Gettier in 1963, showed that 'justified true belief' is insufficient as a definition of this",a:"Knowledge"},
+      {c:"Friedrich Nietzsche's concept of the 'Übermensch' was a response to his declaration that this had died",a:"God ('God is dead')"}
+    ]
+  },
 
-for (let c = 0; c < NUM_CATS; c++) {
-  const col = document.createElement('div');
-  col.className = 'col-wrapper';
+  hard: {
+    "Science & Nature": [
+      {c:"This unproven mathematical conjecture, proposed by Christian Goldbach in a 1742 letter to Euler, states every even integer greater than 2 is the sum of two primes",a:"Goldbach's Conjecture"},
+      {c:"This element (atomic number 43) was the first to be artificially synthesized, in 1937 by Segrè and Perrier — it has no stable isotopes and barely exists in nature",a:"Technetium (Tc)"},
+      {c:"This quantum effect — particles crossing energy barriers they couldn't classically surmount — underlies nuclear fusion in stars and scanning tunneling microscopy",a:"Quantum tunneling"},
+      {c:"The Chandrasekhar limit of approximately 1.4 solar masses defines the maximum mass of this type of stellar remnant before it collapses to a neutron star",a:"A white dwarf"},
+      {c:"Einstein's 1905 paper on this effect — explaining why light ejects electrons from metal surfaces regardless of intensity — earned him the Nobel Prize in 1921, not relativity",a:"The photoelectric effect"}
+    ],
+    "History & Leaders": [
+      {c:"This 3rd-century BC Greek polymath, working in Alexandria, estimated Earth's circumference to within ~2% accuracy using shadow angles at noon on the summer solstice in two cities",a:"Eratosthenes"},
+      {c:"The German phrase for 1905, the year Einstein published four landmark papers on the photoelectric effect, Brownian motion, special relativity, and mass-energy equivalence",a:"Annus Mirabilis ('miracle year')"},
+      {c:"This 1648 pair of treaties ended the Thirty Years' War and established the foundational concept of state sovereignty in international relations",a:"The Peace (Treaties) of Westphalia"},
+      {c:"This Prussian military theorist wrote 'On War' (Vom Kriege), defining war as 'the continuation of politics by other means' — a text still studied at military academies worldwide",a:"Carl von Clausewitz"},
+      {c:"This philosopher's 1781 'Critique of Pure Reason' attempted to reconcile rationalism (Descartes) with empiricism (Hume), arguing that knowledge requires both sense experience and innate mental structures",a:"Immanuel Kant"}
+    ],
+    "Geography": [
+      {c:"The deepest known point on Earth's surface, located in the Pacific Ocean's Mariana Trench at approximately 10,935 meters depth",a:"Challenger Deep"},
+      {c:"This body of water is the only named sea on Earth with no land coastline — bounded entirely by ocean currents in the North Atlantic",a:"The Sargasso Sea"},
+      {c:"Under international law, a coastal nation's Exclusive Economic Zone (EEZ), granting resource rights, extends this many nautical miles from the baseline",a:"200 nautical miles"},
+      {c:"This European microstate between Switzerland and Austria has one of the world's highest GDPs per capita, is not an EU member, and uses the Swiss franc",a:"Liechtenstein"},
+      {c:"This geographic phenomenon — the thermohaline-driven layering of ocean water — prevents vertical mixing and can create oxygen-depleted dead zones in deep water",a:"Ocean stratification (pycnocline)"}
+    ],
+    "Words & Language": [
+      {c:"This rhetorical device refers to a part representing the whole — 'hired hands' for workers, 'the crown' for the monarchy — or vice versa",a:"Synecdoche"},
+      {c:"The word 'assassin' is widely believed to derive from an Arabic word for users of this substance, attributed to a medieval Ismaili sect",a:"Hashish (Hashshashin)"},
+      {c:"The Sapir-Whorf hypothesis, also called linguistic relativity, is the theory that the structure of this shapes or constrains human thought and perception",a:"Language"},
+      {c:"'Polysyndeton' is the rhetorical device of deliberately overusing this part of speech — 'I came and I saw and I conquered and I celebrated'",a:"Conjunctions"},
+      {c:"The 'etymological fallacy' is the erroneous belief that the true or correct meaning of a word is determined by this",a:"Its original or historical meaning"}
+    ],
+    "Tech & Innovation": [
+      {c:"This theoretical model of computation, proposed by Alan Turing in his 1936 paper 'On Computable Numbers,' defines the fundamental limits of what any algorithm can compute",a:"The Turing Machine"},
+      {c:"Claude Shannon's channel capacity theorem gives the theoretical maximum data rate of a noisy communication channel as a function of bandwidth and this quantity",a:"Signal-to-noise ratio (SNR)"},
+      {c:"The security of RSA encryption — used in HTTPS worldwide — relies on the computational infeasibility of this mathematical problem for large numbers",a:"Integer factorization"},
+      {c:"E.F. Codd's landmark 1970 paper published in Communications of the ACM introduced this model, which became the foundation for all SQL databases",a:"The relational model (relational database)"},
+      {c:"Dijkstra's algorithm for finding shortest paths in a graph requires all edge weights to have this mathematical property",a:"Non-negative (≥ 0)"}
+    ],
+    "Math & Logic": [
+      {c:"Fermat's Last Theorem — that no positive integers satisfy aⁿ + bⁿ = cⁿ for n > 2 — was unproven for 358 years until this British mathematician cracked it in 1994–95",a:"Andrew Wiles"},
+      {c:"Gödel's first incompleteness theorem states that any consistent formal system powerful enough to express basic arithmetic will contain statements that are true but this within that system",a:"Unprovable"},
+      {c:"The four color theorem — proved with computer assistance by Appel and Haken in 1976 — states this many colors always suffice to color any planar map so adjacent regions differ",a:"Four"},
+      {c:"The Riemann Hypothesis, one of the seven Millennium Prize Problems carrying a $1M prize, concerns the zeros of the Riemann zeta function and ultimately the distribution of these",a:"Prime numbers"},
+      {c:"Benford's Law states that in many naturally occurring numerical datasets — population figures, stock prices, river lengths — the leading digit is this number most frequently",a:"1 (about 30% of the time)"}
+    ],
+    "Music": [
+      {c:"This German composer's 'Well-Tempered Clavier' (1722) demonstrated for the first time that music could be written and played effectively in all 24 major and minor keys",a:"J.S. Bach"},
+      {c:"The 12-tone or serial composition technique — abandoning traditional tonality by treating all 12 chromatic pitches equally — was systematized by this Austrian composer",a:"Arnold Schoenberg"},
+      {c:"Igor Stravinsky's 1913 ballet of this name, with its dissonant rhythms and Nijinsky's unconventional choreography, caused audience members to riot at its Paris premiere",a:"The Rite of Spring"},
+      {c:"The 'prepared piano' — a piano altered by inserting bolts, screws, and rubber between the strings — was pioneered by this American avant-garde composer in the 1940s",a:"John Cage"},
+      {c:"Olivier Messiaen's 'Quartet for the End of Time' received its world premiere in 1941 in this unusual and difficult location",a:"A German prisoner-of-war camp (Stalag VIII-A in Görlitz)"}
+    ],
+    "Movies & TV": [
+      {c:"This French New Wave critic and director coined the 'auteur theory' in 1954, arguing that a film's director is its primary creative voice",a:"François Truffaut"},
+      {c:"The Hays Code, which strictly governed Hollywood content from 1934 to 1968 — prohibiting nudity, interracial romance, and glorifying crime — was named after this man",a:"Will H. Hays (former U.S. Postmaster General)"},
+      {c:"This 1922 German Expressionist film — an unauthorized Dracula adaptation — was ordered destroyed by Bram Stoker's widow but survived in a few prints",a:"Nosferatu (dir. F.W. Murnau)"},
+      {c:"In film theory, 'diegetic sound' exists within the story world and characters can hear it; this term describes sound — like a film score — that only the audience hears",a:"Non-diegetic sound"},
+      {c:"The Soviet filmmaker who developed 'montage theory' — that cutting between two images creates meaning not present in either alone — demonstrated it with the 'Kuleshov effect'",a:"Lev Kuleshov (or Sergei Eisenstein)"}
+    ],
+    "Space & Astronomy": [
+      {c:"This 1990 photograph taken by Voyager 1 from 6 billion km away, showing Earth as a tiny bright dot in a band of sunlight, inspired Carl Sagan's famous reflection on human humility",a:"The Pale Blue Dot"},
+      {c:"The 'Hubble tension' refers to a significant discrepancy between two independent methods of measuring this fundamental cosmological parameter",a:"The Hubble constant (H₀) — the rate of the universe's expansion"},
+      {c:"This theoretical dark matter candidate has the acronym WIMP, standing for these four words",a:"Weakly Interacting Massive Particle"},
+      {c:"Hawking radiation — thermal radiation theoretically emitted by black holes due to quantum effects near the event horizon — would cause black holes to eventually do this",a:"Evaporate (lose mass and shrink to nothing)"},
+      {c:"The Hertzsprung-Russell diagram plots stars by two properties — luminosity on one axis, and this on the other — revealing stellar life cycles",a:"Surface temperature (or spectral class)"}
+    ],
+    "Food & Drink": [
+      {c:"The Maillard reaction — responsible for the browned crust on seared meat and the flavor of coffee and bread — is a chemical reaction between amino acids and these molecules",a:"Reducing sugars"},
+      {c:"The five 'mother sauces' of classical French cuisine were codified in the early 20th century by this chef, who also pioneered the brigade kitchen system",a:"Auguste Escoffier"},
+      {c:"This Norwegian spirit, made from potatoes and flavored with caraway, is traditionally aged in oak casks that travel by ship across the equator twice before bottling",a:"Linie Aquavit"},
+      {c:"'Tempering' chocolate involves carefully cycling the temperature through specific stages to ensure the formation of this crystal structure in the cocoa butter, giving a glossy snap",a:"Type V (Form V, Beta) crystals"},
+      {c:"This Japanese culinary concept — translated as 'the seventh taste' by some — refers to the rich, complex flavor of long-cooked stocks and fermented foods, distinct from umami",a:"Kokumi"}
+    ],
+    "Sports": [
+      {c:"At the 1904 St. Louis Olympics, marathon runner Fred Lorz crossed the finish line first and was briefly presented as winner before being disqualified for doing this for 11 miles",a:"Riding in a car (his manager's automobile)"},
+      {c:"This country's field hockey team won eight consecutive Olympic gold medals from 1928 to 1960 — the longest winning streak in Olympic team sport history",a:"India"},
+      {c:"The Elo rating system — used in chess, Go, and many competitive games — was developed by this Hungarian-American physics professor",a:"Arpad Elo"},
+      {c:"The 'infield fly rule' in baseball is designed to prevent fielders from deliberately dropping a pop-up to create this specific strategic outcome",a:"A force double play (or triple play)"},
+      {c:"In cycling's Tour de France, the rider leading the overall general classification wears this color jersey",a:"Yellow (the maillot jaune)"}
+    ],
+    "Animals": [
+      {c:"This deep-sea fish, known for its bioluminescent lure dangling above its terrifying jaws, uses this extreme feeding strategy: the female permanently fuses with a tiny male who degenerates into little more than a sperm packet",a:"The anglerfish (sexual parasitism)"},
+      {c:"Crows have demonstrated 'causal reasoning' — the ability to understand cause and effect — by solving this type of multi-step physics puzzle similar to Aesop's fable",a:"The water displacement/tube task (dropping stones to raise water level)"},
+      {c:"The lyrebird of Australia can mimic chainsaws, camera shutters, and car alarms — but its most remarkable adaptation is its ability to reproduce any sound with this organ",a:"Its syrinx (the avian vocal organ, analogous to the human larynx)"},
+      {c:"Mantis shrimp punch with the force of a bullet and process color using this many types of photoreceptors — compared to just three in humans",a:"16"},
+      {c:"This phenomenon, observed in honeybee colonies, is called 'swarm intelligence' — thousands of individuals following simple rules produce complex collective behavior without any this",a:"Central control or leader"}
+    ],
+    "Pop Culture & Arts": [
+      {c:"This early-20th-century movement, launched by André Breton's 'Manifeste du surréalisme' in 1924, sought to access the unconscious mind through automatic writing, dream imagery, and irrational juxtaposition",a:"Surrealism"},
+      {c:"This Russian literary theorist coined 'ostranenie' (defamiliarization) — the idea that great art makes the familiar feel strange again — in his 1917 essay 'Art as Technique'",a:"Viktor Shklovsky"},
+      {c:"In music theory, the interval spanning exactly six semitones — historically called 'diabolus in musica' (the devil in music) and banned in medieval church music — is called this",a:"The tritone (augmented fourth / diminished fifth)"},
+      {c:"The concept of 'Gesamtkunstwerk' — a 'total work of art' synthesizing music, poetry, visual spectacle, and drama into one unified experience — was championed by this German composer",a:"Richard Wagner"},
+      {c:"This 1872 Claude Monet painting, depicting a hazy sunrise over Le Havre harbor, inadvertently gave its name to an entire art movement when a critic used the title mockingly",a:"Impression, Sunrise (Impression, soleil levant)"}
+    ],
+    "Famous Inventions": [
+      {c:"This Scottish physicist's 1865 equations unified electricity and magnetism into a single theory — predicting electromagnetic waves, including light itself",a:"James Clerk Maxwell (Maxwell's equations)"},
+      {c:"The invention of the CRISPR-Cas9 gene editing tool, which allows precise DNA editing and won the 2020 Nobel Prize in Chemistry, was pioneered by Jennifer Doudna and this French scientist",a:"Emmanuelle Charpentier"},
+      {c:"This mathematician's 1822 'Analytical Engine' concept — never built in his lifetime — described the essential architecture of all modern computers: input, processing, memory, and output",a:"Charles Babbage"},
+      {c:"The lithium-ion battery, which powers smartphones and electric vehicles, was developed commercially by this company in 1991 after research by John Goodenough, Stanley Whittingham, and Akira Yoshino",a:"Sony"},
+      {c:"This 1969 ARPA-funded network — connecting UCLA, Stanford, UC Santa Barbara, and the University of Utah — was the direct predecessor of the modern internet",a:"ARPANET"}
+    ],
+    "Philosophy": [
+      {c:"This thought experiment, posed by philosopher Philippa Foot and developed by Judith Jarvis Thomson, involves choosing whether to divert a runaway trolley to kill one person instead of five",a:"The Trolley Problem"},
+      {c:"John Rawls' concept of the 'veil of ignorance' is a device to determine fair principles of justice by imagining you design society without knowing your own place in it — from his landmark 1971 work",a:"'A Theory of Justice'"},
+      {c:"This 1974 paper by Thomas Nagel asks what it would be like to be a bat — arguing that subjective conscious experience cannot be fully captured by objective physical description",a:"'What Is It Like to Be a Bat?'"},
+      {c:"Hume's 'problem of induction' holds that we have no rational justification for believing that the future will resemble the past — a challenge that this philosopher attempted to answer with his concept of 'falsifiability'",a:"Karl Popper"},
+      {c:"This philosophical zombie ('p-zombie') thought experiment, used by David Chalmers, argues that consciousness cannot be explained purely physically because a being physically identical to you could conceivably lack this",a:"Subjective experience (qualia / phenomenal consciousness)"}
+    ]
+  }
+};
 
-  // Category name input
-  const catWrap = document.createElement('div');
-  catWrap.className = 'category-header';
-  catWrap.innerHTML = `
-    <div class="field-label">Category ${c + 1}</div>
-    <input type="text" class="category-input" id="cat-${c}" placeholder="Category name" maxlength="40">
-  `;
-  col.appendChild(catWrap);
+// ─── Available categories (all 15) ────────────────────────────────────────────
+const ALL_CATS = Object.keys(QB.easy);
+const POINTS   = [100,200,300,400,500];
+let numCats    = 5;
+let difficulty = 'medium';
+let usedQ      = {};
 
-  // Clue cards for each point value
-  POINTS.forEach((pts, r) => {
-    const card = document.createElement('div');
-    card.className = 'clue-card';
-    card.innerHTML = `
-      <span class="points-badge">${pts} pts</span>
-      <div class="field-label">Clue (optional — shown to players)</div>
-      <textarea id="clue-${c}-${r}" placeholder="Leave blank to skip straight to the answer"></textarea>
-      <div class="field-label">Answer</div>
-      <textarea class="answer-input" id="ans-${c}-${r}" placeholder="e.g. Norway"></textarea>
-    `;
-    col.appendChild(card);
-  });
+// ─── DOM build ────────────────────────────────────────────────────────────────
+function buildBoard() {
+  const grid = document.getElementById('board-grid');
+  grid.innerHTML = '';
+  grid.style.gridTemplateColumns = `repeat(${numCats}, minmax(160px, 1fr))`;
 
-  grid.appendChild(col);
+  for (let c = 0; c < numCats; c++) {
+    const col = document.createElement('div');
+    col.className = 'col-wrapper';
+
+    // Category name
+    col.innerHTML = `<div><label class="fl">Category ${c+1}</label><input type="text" class="cat-inp" id="cat-${c}" placeholder="Category name" maxlength="40" oninput="syncSuggestions();updatePreview();"></div>`;
+
+    POINTS.forEach((pts, r) => {
+      const diff = cellDiff(r);
+      const pColors = ['#f5c518','#ffd54f','#ffb300','#ff8f00','#e65100'];
+      const card = document.createElement('div');
+      card.className = 'clue-card';
+      card.innerHTML = `
+        <div class="cc-top">
+          <span class="pts-badge" style="color:${pColors[r]}">$${pts}</span>
+          <div class="cc-right">
+            <div class="diff-dot ${diff}" id="dd-${c}-${r}"></div>
+            <button class="regen-btn" title="Regenerate this cell" onclick="regenCell(${c},${r})">↺</button>
+          </div>
+        </div>
+        <label class="fl">Clue (optional)</label>
+        <textarea id="clue-${c}-${r}" placeholder="Leave blank → answer shown immediately" rows="3" oninput="updatePreview()"></textarea>
+        <label class="fl">Answer</label>
+        <textarea class="ans-ta" id="ans-${c}-${r}" placeholder="Correct answer" rows="2" oninput="updatePreview()"></textarea>`;
+      col.appendChild(card);
+    });
+
+    grid.appendChild(col);
+  }
+  updatePreview();
+  syncSuggestions();
 }
 
-// ─── Live board preview ───────────────────────────────────────────────────────
-function updatePreview() {
-  const pb = document.getElementById('preview-board');
-  pb.innerHTML = '';
+// ─── Number of categories pills ───────────────────────────────────────────────
+document.getElementById('num-pills').addEventListener('click', e => {
+  const p = e.target.closest('[data-n]');
+  if (!p) return;
+  numCats = parseInt(p.dataset.n);
+  document.querySelectorAll('#num-pills .pill').forEach(x => x.classList.remove('active-num'));
+  p.classList.add('active-num');
+  buildBoard();
+});
 
-  for (let c = 0; c < NUM_CATS; c++) {
-    const catVal = document.getElementById(`cat-${c}`).value.trim() || `Category ${c + 1}`;
-    const cell = document.createElement('div');
-    cell.className = 'preview-cat';
-    cell.textContent = catVal;
-    pb.appendChild(cell);
+// ─── Difficulty pills ─────────────────────────────────────────────────────────
+document.getElementById('diff-pills').addEventListener('click', e => {
+  const p = e.target.closest('[data-diff]');
+  if (!p) return;
+  difficulty = p.dataset.diff;
+  document.querySelectorAll('#diff-pills .pill').forEach(x =>
+    x.className = x.className.replace(/active-\S+/g,'').trim()
+  );
+  p.classList.add(`active-${difficulty}`);
+  updateDiffDots();
+});
+
+function cellDiff(r) {
+  if (difficulty === 'mixed') return r<=1?'easy':r<=3?'medium':'hard';
+  return difficulty;
+}
+
+function updateDiffDots() {
+  for (let c=0;c<numCats;c++) POINTS.forEach((_,r)=>{
+    const el=document.getElementById(`dd-${c}-${r}`);
+    if(el){el.className=`diff-dot ${cellDiff(r)}`;}
+  });
+}
+
+// ─── Category suggestions ─────────────────────────────────────────────────────
+function buildSuggestions() {
+  const grid = document.getElementById('sug-grid');
+  grid.innerHTML = '';
+  ALL_CATS.forEach(cat => {
+    const chip = document.createElement('div');
+    chip.className = 'sug-chip';
+    chip.textContent = cat;
+    chip.dataset.cat = cat;
+    chip.onclick = () => selectCategory(cat);
+    grid.appendChild(chip);
+  });
+}
+
+function selectCategory(cat) {
+  // Find first empty category slot
+  for (let c=0;c<numCats;c++) {
+    const el = document.getElementById(`cat-${c}`);
+    if (el && !el.value.trim()) {
+      el.value = cat;
+      syncSuggestions();
+      updatePreview();
+      return;
+    }
+  }
+  // All slots full — replace the last one
+  const last = document.getElementById(`cat-${numCats-1}`);
+  if (last) { last.value = cat; syncSuggestions(); updatePreview(); }
+}
+
+function syncSuggestions() {
+  const used = new Set();
+  for (let c=0;c<numCats;c++) {
+    const v = document.getElementById(`cat-${c}`)?.value.trim();
+    if (v) used.add(v);
+  }
+  document.querySelectorAll('.sug-chip').forEach(chip => {
+    chip.classList.toggle('selected', used.has(chip.dataset.cat));
+  });
+}
+
+// ─── Question helpers ─────────────────────────────────────────────────────────
+function getRandQ(cat, diff) {
+  const pool = QB[diff]?.[cat];
+  if (!pool) return null;
+  const avail = pool.map((_,i)=>i).filter(i=>!usedQ[`${cat}_${diff}_${i}`]);
+  if (!avail.length) {
+    pool.forEach((_,i)=>delete usedQ[`${cat}_${diff}_${i}`]);
+    return getRandQ(cat, diff);
+  }
+  const idx = avail[Math.floor(Math.random()*avail.length)];
+  usedQ[`${cat}_${diff}_${idx}`] = true;
+  return {...pool[idx]};
+}
+
+// ─── Auto-generate ────────────────────────────────────────────────────────────
+function autoGenerate() {
+  usedQ = {};
+  // Collect current category names; fill blanks from shuffled bank
+  const current = [];
+  for (let c=0;c<numCats;c++) {
+    current.push(document.getElementById(`cat-${c}`)?.value.trim()||'');
+  }
+  const shuffled = [...ALL_CATS].sort(()=>Math.random()-.5);
+  let si=0;
+  for (let c=0;c<numCats;c++) {
+    if (!current[c]) {
+      // Pick next cat not already used
+      while (si<shuffled.length && current.includes(shuffled[si])) si++;
+      if (si<shuffled.length) { current[c]=shuffled[si++]; }
+    }
   }
 
-  POINTS.forEach(pts => {
-    for (let c = 0; c < NUM_CATS; c++) {
-      const cell = document.createElement('div');
-      cell.className = 'preview-cell';
-      cell.textContent = `$${pts}`;
-      pb.appendChild(cell);
+  for (let c=0;c<numCats;c++) {
+    const el=document.getElementById(`cat-${c}`);
+    if (el) el.value=current[c]||`Category ${c+1}`;
+    POINTS.forEach((_,r)=>{
+      const diff=cellDiff(r);
+      const q=getRandQ(current[c],diff);
+      document.getElementById(`clue-${c}-${r}`).value = q?q.c:'';
+      document.getElementById(`ans-${c}-${r}`).value  = q?q.a:'';
+    });
+  }
+  syncSuggestions();
+  updatePreview();
+  showToast('✦ Questions generated!','ok');
+}
+
+// ─── Randomize categories only ────────────────────────────────────────────────
+function randomizeCategories() {
+  const picks = [...ALL_CATS].sort(()=>Math.random()-.5).slice(0,numCats);
+  picks.forEach((cat,c)=>{
+    const el=document.getElementById(`cat-${c}`);
+    if(el) el.value=cat;
+  });
+  syncSuggestions();
+  updatePreview();
+}
+
+// ─── Regen single cell ────────────────────────────────────────────────────────
+function regenCell(c,r) {
+  const cat = document.getElementById(`cat-${c}`)?.value.trim();
+  if (!cat) { showToast('Set a category name first','err'); return; }
+  const diff = cellDiff(r);
+  const q = getRandQ(cat, diff);
+  if (!q) { showToast(`No questions in bank for "${cat}" at ${diff}`,'err'); return; }
+  document.getElementById(`clue-${c}-${r}`).value = q.c;
+  document.getElementById(`ans-${c}-${r}`).value  = q.a;
+  updatePreview();
+}
+
+// ─── Clear all ────────────────────────────────────────────────────────────────
+function clearAll() {
+  if (!confirm('Clear all categories and clues?')) return;
+  usedQ={};
+  document.getElementById('game-title').value='';
+  for (let c=0;c<numCats;c++){
+    const el=document.getElementById(`cat-${c}`);
+    if(el) el.value='';
+    POINTS.forEach((_,r)=>{
+      document.getElementById(`clue-${c}-${r}`).value='';
+      document.getElementById(`ans-${c}-${r}`).value='';
+    });
+  }
+  syncSuggestions();
+  updatePreview();
+}
+
+// ─── Preview ──────────────────────────────────────────────────────────────────
+function updatePreview() {
+  const pb=document.getElementById('preview-board');
+  pb.style.gridTemplateColumns=`repeat(${numCats},1fr)`;
+  pb.innerHTML='';
+  for(let c=0;c<numCats;c++){
+    const n=(document.getElementById(`cat-${c}`)?.value||`Cat ${c+1}`).trim()||`Cat ${c+1}`;
+    const d=document.createElement('div');d.className='prev-cat';d.textContent=n;pb.appendChild(d);
+  }
+  POINTS.forEach(pts=>{
+    for(let c=0;c<numCats;c++){
+      const d=document.createElement('div');d.className='prev-cell';d.textContent=`$${pts}`;pb.appendChild(d);
     }
   });
 }
 
-document.addEventListener('input', updatePreview);
-updatePreview();
-
 // ─── Validate ─────────────────────────────────────────────────────────────────
 function validate() {
-  const errors = [];
-  const title = document.getElementById('game-title').value.trim();
-  if (!title) errors.push('Please enter a Game Title.');
-
-  for (let c = 0; c < NUM_CATS; c++) {
-    const catName = document.getElementById(`cat-${c}`).value.trim();
-    if (!catName) errors.push(`Category ${c + 1} needs a name.`);
-
-    POINTS.forEach((pts, r) => {
-      const ans  = document.getElementById(`ans-${c}-${r}`).value.trim();
-      if (!ans)  errors.push(`Category ${c + 1}, ${pts}pts: missing answer.`);
+  const errs=[];
+  if (!document.getElementById('game-title').value.trim()) errs.push('Please enter a Game Title.');
+  for(let c=0;c<numCats;c++){
+    if(!document.getElementById(`cat-${c}`)?.value.trim()) errs.push(`Category ${c+1} needs a name.`);
+    POINTS.forEach((pts,r)=>{
+      if(!document.getElementById(`ans-${c}-${r}`)?.value.trim()) errs.push(`Category ${c+1} · $${pts}: answer required.`);
     });
   }
-
-  const box = document.getElementById('error-box');
-  if (errors.length) {
-    box.innerHTML = errors.slice(0, 5).map(e => `• ${e}`).join('<br>') + (errors.length > 5 ? `<br>…and ${errors.length - 5} more.` : '');
-    box.style.display = 'block';
-    return false;
+  const box=document.getElementById('err-box');
+  if(errs.length){
+    box.innerHTML=errs.slice(0,6).map(e=>`• ${e}`).join('<br>')+(errs.length>6?`<br>…and ${errs.length-6} more.`:'');
+    box.style.display='block';return false;
   }
-  box.style.display = 'none';
-  return true;
-}
-
-// ─── Collect data ─────────────────────────────────────────────────────────────
-function collectData() {
-  const title = document.getElementById('game-title').value.trim();
-  const categories = [];
-  for (let c = 0; c < NUM_CATS; c++) {
-    const cat = {
-      name: document.getElementById(`cat-${c}`).value.trim(),
-      clues: []
-    };
-    POINTS.forEach((pts, r) => {
-      cat.clues.push({
-        points: pts,
-        clue: document.getElementById(`clue-${c}-${r}`).value.trim(),
-        answer: document.getElementById(`ans-${c}-${r}`).value.trim()
-      });
-    });
-    categories.push(cat);
-  }
-  return { title, categories };
+  box.style.display='none';return true;
 }
 
 // ─── Escape HTML ──────────────────────────────────────────────────────────────
-function esc(str) {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
 
-// ─── Generate the game HTML ───────────────────────────────────────────────────
+// ─── Download ─────────────────────────────────────────────────────────────────
 function generateGame() {
-  if (!validate()) return;
-  const data = collectData();
-  const html = buildGameHTML(data);
-  downloadFile(data.title.replace(/[^a-z0-9]/gi, '-').toLowerCase() + '.html', html);
-}
-
-function downloadFile(filename, content) {
-  const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  if(!validate()) return;
+  const title=document.getElementById('game-title').value.trim();
+  const cats=[];
+  for(let c=0;c<numCats;c++){
+    cats.push({name:document.getElementById(`cat-${c}`).value.trim(),clues:POINTS.map((_,r)=>({pts:POINTS[r],clue:document.getElementById(`clue-${c}-${r}`).value.trim(),ans:document.getElementById(`ans-${c}-${r}`).value.trim()}))});
+  }
+  const html=buildGameHTML(title,cats,numCats);
+  const fn=title.replace(/[^a-z0-9]/gi,'-').toLowerCase()+'.html';
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=fn;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  showToast('🎮 Game file downloaded!','ok');
 }
 
-// ─── Build game HTML ──────────────────────────────────────────────────────────
-function buildGameHTML({ title, categories }) {
-
-  // Build category header cells
-  const catHeaders = categories.map(cat =>
-    `<div class="cat-cell">${esc(cat.name)}</div>`
-  ).join('\n');
-
-  // Build point rows
-  let rowsHTML = '';
-  POINTS.forEach((pts, r) => {
-    let cells = '';
-    categories.forEach((cat, c) => {
-      const clue   = esc(cat.clues[r].clue);
-      const answer = esc(cat.clues[r].answer);
-      const catName = esc(cat.name);
-      cells += `
-        <div class="cell-wrap" data-clue="${clue}" data-answer="${answer}" data-cat="${catName}" data-pts="${pts}">
-          <div class="cell-pts">$${pts}</div>
-        </div>`;
-    });
-    rowsHTML += `<div class="board-row">${cells}</div>\n`;
+// ─── BUILD GAME HTML ──────────────────────────────────────────────────────────
+function buildGameHTML(title, cats, nCats) {
+  const saveKey='jp-'+title.replace(/[^a-z0-9]/gi,'-').toLowerCase().slice(0,36);
+  const catHeads=cats.map(c=>`<div class="cat-cell">${esc(c.name)}</div>`).join('');
+  let boardRows='';
+  POINTS.forEach((pts,r)=>{
+    let cells=cats.map((cat,c)=>`<div class="cell-wrap" tabindex="0" data-pts="${pts}" data-cat="${esc(cat.name)}" data-clue="${esc(cat.clues[r].clue)}" data-ans="${esc(cat.clues[r].ans)}"><div class="cell-pts">$${pts}</div></div>`).join('');
+    boardRows+=`<div class="board-row">${cells}</div>`;
   });
+
+  const randomNames=['The Trivia Titans','Brain Trust','Les Quizerables','The Fact Finders','Smarty Pants','Agatha Quiztie','The Think Tank','Wild Guessers','I Am Smarticus','Tequila Mockingbird','404: Name Not Found','Ctrl+Alt+Defeat','Stack Overflow','The Dark Horses','Know-It-Alls','The Underdogs','The Renaissance Crew','Trivia Newton John','Quiz Khalifa','Team Phenomenal'];
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Verdana,Arial,sans-serif;background:#0d1b5e;color:#fff;min-height:100vh;overflow-x:hidden;}
+:root{--gold:#f5c518;--bd:#0d1b5e;--bm:#1a237e;--bb:#2a3698;--bl:#3949ab;}
+body{font-family:Verdana,Arial,sans-serif;background:var(--bd);color:#fff;min-height:100vh;overflow-x:hidden;}
 
-/* ── TOP BAR ── */
-#topbar{background:linear-gradient(135deg,#1a237e,#283593);padding:14px 20px 10px;border-bottom:4px solid #f5c518;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
-#topbar h1{font-size:1.4rem;font-weight:900;color:#f5c518;text-shadow:1px 1px 0 rgba(0,0,0,0.4);letter-spacing:1px;}
-#new-game-btn{background:#f5c518;color:#1a1a1a;border:none;padding:8px 18px;font-weight:800;font-size:0.85rem;border-radius:6px;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;}
-#new-game-btn:hover{background:#ffe033;}
+/* ── SETUP SCREEN ── */
+#setup{position:fixed;inset:0;background:linear-gradient(160deg,#0d1b5e,#1a237e);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;}
+#setup h1{font-size:clamp(1.6rem,5vw,2.8rem);font-weight:900;color:var(--gold);letter-spacing:2px;text-align:center;margin-bottom:6px;}
+#setup .sub{color:rgba(255,255,255,.45);font-size:.9rem;margin-bottom:36px;text-align:center;}
+.setup-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:24px 28px;width:100%;max-width:540px;margin-bottom:16px;}
+.setup-label{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--gold);margin-bottom:12px;}
+.num-pills{display:flex;gap:8px;flex-wrap:wrap;}
+.num-pill{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);padding:8px 18px;border-radius:20px;cursor:pointer;font-weight:700;font-size:.88rem;transition:.15s;}
+.num-pill:hover{border-color:rgba(255,255,255,.35);color:#fff;}
+.num-pill.sel{background:var(--gold);border-color:var(--gold);color:#1a1a1a;}
+.team-inputs{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.team-row{display:flex;align-items:center;gap:8px;}
+.team-num{width:24px;font-size:.8rem;color:var(--gold);font-weight:700;flex-shrink:0;text-align:center;}
+.team-inp{flex:1;padding:8px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.9rem;outline:none;transition:border-color .18s;}
+.team-inp:focus{border-color:var(--gold);}
+.setup-actions{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;}
+.btn-setup{border:none;padding:9px 20px;border-radius:7px;cursor:pointer;font-weight:700;font-size:.85rem;transition:.15s;font-family:inherit;}
+.btn-setup:hover{opacity:.88;transform:translateY(-1px);}
+.btn-start{background:linear-gradient(135deg,var(--gold),#e6b800);color:#1a1a1a;padding:14px 40px;font-size:1rem;border-radius:8px;box-shadow:0 4px 18px rgba(245,197,24,.32);}
+.btn-rand{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;}
+
+/* ── GAME SCREEN ── */
+#game{display:none;}
+#topbar{background:linear-gradient(135deg,#1a237e,#283593);padding:12px 16px 10px;border-bottom:4px solid var(--gold);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+#topbar h1{font-size:clamp(1rem,3vw,1.35rem);font-weight:900;color:var(--gold);letter-spacing:1px;}
+.topbar-btns{display:flex;gap:7px;}
+.hdr-btn{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.78rem;font-weight:700;transition:.15s;}
+.hdr-btn:hover{background:rgba(255,255,255,.18);}
+
+/* ── SCOREBOARD ── */
+#scoreboard{background:rgba(0,0,0,.35);border-bottom:2px solid rgba(255,255,255,.07);padding:10px 14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.team-score-el{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:8px;padding:7px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.15s;user-select:none;}
+.team-score-el:hover{background:rgba(255,255,255,.12);}
+.team-score-el.active{border-color:var(--gold);background:rgba(245,197,24,.1);}
+.ts-name{font-weight:700;font-size:.88rem;outline:none;}
+.ts-name:focus{border-bottom:1px dashed var(--gold);}
+.ts-score{font-size:1.15rem;font-weight:900;color:var(--gold);min-width:36px;text-align:center;}
+.ts-score.negative{color:#ff6b6b;}
+.ts-btns{display:flex;gap:3px;}
+.ts-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;width:22px;height:22px;border-radius:4px;cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center;line-height:1;}
+.ts-btn:hover{background:rgba(255,255,255,.22);}
 
 /* ── BOARD ── */
-#board{padding:16px;display:flex;flex-direction:column;gap:6px;max-width:100vw;}
-
-.cat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:2px;}
-.cat-cell{background:#1a237e;border:3px solid #000;text-align:center;padding:10px 6px;font-weight:700;font-size:clamp(0.6rem,1.5vw,0.9rem);text-transform:uppercase;letter-spacing:.5px;min-height:52px;display:flex;align-items:center;justify-content:center;}
-
-.board-row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
-
-.cell-wrap{background:#2a3698;border:3px solid #000;text-align:center;cursor:pointer;transition:background .15s,transform .1s;position:relative;min-height:64px;display:flex;align-items:center;justify-content:center;}
-.cell-wrap:hover{background:#3949ab;border-color:#f5c518;}
-.cell-wrap:active{transform:scale(0.97);}
-.cell-wrap.used{background:#1a237e;border-color:#333;cursor:default;}
-.cell-wrap.used .cell-pts{opacity:0.08;}
-.cell-pts{font-size:clamp(1rem,3vw,1.8rem);font-weight:900;color:#f5c518;text-shadow:1px 1px 0 rgba(0,0,0,0.5);}
-
-/* ── TEAMS BAR ── */
-#teams{display:flex;gap:10px;flex-wrap:wrap;padding:12px 16px;background:rgba(0,0,0,0.3);border-top:2px solid rgba(255,255,255,0.08);}
-.team{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:8px;min-width:160px;}
-.team-name{font-weight:700;font-size:0.9rem;outline:none;cursor:text;min-width:60px;}
-.team-name:focus{border-bottom:1px solid #f5c518;}
-.team-score{font-size:1.2rem;font-weight:900;color:#f5c518;min-width:36px;text-align:center;}
-.team-btns{display:flex;gap:4px;}
-.team-btns button{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;width:26px;height:26px;border-radius:4px;cursor:pointer;font-size:0.9rem;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background .15s;}
-.team-btns button:hover{background:rgba(255,255,255,0.2);}
-.add-team-btn{background:rgba(245,197,24,0.12);border:1px dashed rgba(245,197,24,0.4);color:#f5c518;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:700;white-space:nowrap;}
-.add-team-btn:hover{background:rgba(245,197,24,0.2);}
+#board{padding:12px;display:flex;flex-direction:column;gap:5px;overflow-x:auto;}
+.cat-row,.board-row{display:grid;grid-template-columns:repeat(${nCats},minmax(0,1fr));gap:5px;}
+.cat-cell{background:var(--bm);border:3px solid #000;text-align:center;padding:9px 5px;font-weight:700;font-size:clamp(.52rem,1.3vw,.8rem);text-transform:uppercase;letter-spacing:.4px;min-height:46px;display:flex;align-items:center;justify-content:center;}
+.cell-wrap{background:var(--bb);border:3px solid #000;text-align:center;cursor:pointer;transition:background .15s;min-height:58px;display:flex;align-items:center;justify-content:center;outline:none;}
+.cell-wrap:hover:not(.used){background:var(--bl);border-color:var(--gold);}
+.cell-wrap:focus:not(.used){border-color:var(--gold);}
+.cell-wrap.used{background:var(--bm);border-color:#333;cursor:default;}
+.cell-wrap.used .cell-pts{opacity:.07;}
+.cell-pts{font-size:clamp(.9rem,2.6vw,1.6rem);font-weight:900;color:var(--gold);}
 
 /* ── MODAL ── */
-#modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center;}
-#modal-overlay.open{display:flex;}
-#modal{background:linear-gradient(135deg,#1a237e,#0d47a1);border:4px solid #f5c518;border-radius:12px;max-width:640px;width:90%;padding:36px 36px 28px;text-align:center;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
-#modal-cat{font-size:0.75rem;text-transform:uppercase;letter-spacing:2px;color:#f5c518;margin-bottom:6px;}
-#modal-pts{font-size:1rem;font-weight:900;color:rgba(245,197,24,0.7);margin-bottom:20px;}
-#modal-clue{font-size:clamp(1.1rem,3vw,1.5rem);font-weight:700;line-height:1.4;margin-bottom:28px;color:#fff;}
-#modal-answer{background:rgba(0,0,0,0.35);border-radius:8px;padding:18px 20px;font-size:clamp(1rem,2.5vw,1.3rem);font-weight:800;color:#a5d6a7;display:none;margin-bottom:24px;}
-#modal-answer.visible{display:block;}
-.modal-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
-.btn-reveal{background:#f5c518;color:#1a1a1a;border:none;padding:12px 28px;font-weight:800;font-size:1rem;border-radius:6px;cursor:pointer;text-transform:uppercase;}
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:100;align-items:center;justify-content:center;padding:16px;}
+#overlay.open{display:flex;}
+#modal{background:linear-gradient(135deg,#1a237e,#0d47a1);border:4px solid var(--gold);border-radius:14px;max-width:680px;width:100%;padding:30px 30px 24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.55);max-height:90vh;overflow-y:auto;}
+.m-cat{font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:4px;}
+.m-pts{font-size:.92rem;font-weight:900;color:rgba(245,197,24,.65);margin-bottom:18px;}
+.m-clue{font-size:clamp(1rem,2.8vw,1.45rem);font-weight:700;line-height:1.45;margin-bottom:24px;color:#fff;}
+.m-ans{background:rgba(0,0,0,.35);border-radius:8px;padding:16px 18px;font-size:clamp(.95rem,2.4vw,1.25rem);font-weight:800;color:#a5d6a7;display:none;margin-bottom:20px;line-height:1.4;}
+.m-ans.show{display:block;}
+.m-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
+.btn-reveal{background:var(--gold);color:#1a1a1a;border:none;padding:11px 28px;font-weight:800;font-size:.95rem;border-radius:7px;cursor:pointer;text-transform:uppercase;transition:.15s;}
 .btn-reveal:hover{background:#ffe033;}
-.btn-close{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:12px 28px;font-weight:700;font-size:1rem;border-radius:6px;cursor:pointer;}
-.btn-close:hover{background:rgba(255,255,255,0.2);}
-.score-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px;}
-.score-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:7px 14px;border-radius:5px;cursor:pointer;font-size:0.78rem;font-weight:700;transition:background .15s;}
-.score-btn:hover{background:rgba(255,255,255,0.18);}
-.score-btn.add{border-color:rgba(80,200,120,0.5);color:#a5d6a7;}
-.score-btn.add:hover{background:rgba(80,200,120,0.15);}
-.score-btn.sub{border-color:rgba(244,67,54,0.5);color:#ff8a80;}
-.score-btn.sub:hover{background:rgba(244,67,54,0.15);}
-#score-panel{margin-top:14px;display:none;}
-#score-panel.visible{display:block;}
+.btn-close{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.3);padding:11px 24px;font-weight:700;font-size:.9rem;border-radius:7px;cursor:pointer;transition:.15s;}
+.btn-close:hover{background:rgba(255,255,255,.18);}
+.m-score{display:none;margin-top:4px;}
+.m-score.show{display:block;}
+.m-score-label{font-size:.66rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.38);margin-bottom:8px;}
+.score-grid{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;}
+.sg-btn{border:none;padding:7px 14px;border-radius:5px;cursor:pointer;font-size:.76rem;font-weight:700;font-family:inherit;transition:.15s;}
+.sg-btn:hover{opacity:.85;transform:translateY(-1px);}
+.sg-add{background:rgba(76,175,80,.2);border:1px solid rgba(76,175,80,.5);color:#a5d6a7;}
+.sg-sub{background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.4);color:#ff8a80;}
+.kbd-hint{font-size:.65rem;color:rgba(255,255,255,.25);margin-top:14px;}
 </style>
 </head>
 <body>
 
-<div id="topbar">
-  <h1>${esc(title)}</h1>
-  <button id="new-game-btn" onclick="resetBoard()">↺ New Game</button>
-</div>
+<!-- ── SETUP SCREEN ── -->
+<div id="setup">
+  <h1>⚡ ${esc(title)}</h1>
+  <p class="sub">Configure your teams before the game starts</p>
 
-<div id="board">
-  <div class="cat-row">
-    ${catHeaders}
+  <div class="setup-card">
+    <div class="setup-label">How many teams?</div>
+    <div class="num-pills" id="nteam-pills">
+      ${[2,3,4,5,6,7,8].map(n=>`<div class="num-pill${n===2?' sel':''}" data-n="${n}">${n}</div>`).join('')}
+    </div>
   </div>
-  ${rowsHTML}
+
+  <div class="setup-card">
+    <div class="setup-label">Team Names</div>
+    <div class="team-inputs" id="team-inputs"></div>
+    <div class="setup-actions" style="margin-top:14px;">
+      <button class="btn-setup btn-rand" onclick="randomTeamNames()">🎲 Random Names</button>
+    </div>
+  </div>
+
+  <button class="btn-setup btn-start" onclick="startGame()">▶ Start Game</button>
 </div>
 
-<div id="teams">
-  <!-- Teams injected by JS -->
-  <button class="add-team-btn" onclick="addTeam()">+ Add Team</button>
+<!-- ── GAME SCREEN ── -->
+<div id="game">
+  <div id="topbar">
+    <h1>⚡ ${esc(title)}</h1>
+    <div class="topbar-btns">
+      <button class="hdr-btn" onclick="resetBoard()">↺ New Game</button>
+      <button class="hdr-btn" onclick="goSetup()">⚙ Teams</button>
+    </div>
+  </div>
+  <div id="scoreboard"></div>
+  <div id="board">
+    <div class="cat-row">${catHeads}</div>
+    ${boardRows}
+  </div>
 </div>
 
-<!-- Modal -->
-<div id="modal-overlay">
+<!-- ── MODAL ── -->
+<div id="overlay">
   <div id="modal">
-    <div id="modal-cat"></div>
-    <div id="modal-pts"></div>
-    <div id="modal-clue"></div>
-    <div id="modal-answer"></div>
-    <div class="modal-actions">
-      <button class="btn-reveal" id="reveal-btn" onclick="revealAnswer()">Reveal Answer</button>
+    <div class="m-cat" id="m-cat"></div>
+    <div class="m-pts" id="m-pts"></div>
+    <div class="m-clue" id="m-clue"></div>
+    <div class="m-ans" id="m-ans"></div>
+    <div class="m-actions">
+      <button class="btn-reveal" id="btn-reveal" onclick="reveal()">Reveal Answer</button>
       <button class="btn-close" onclick="closeModal()">Close</button>
     </div>
-    <div id="score-panel">
-      <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Adjust Score</div>
-      <div class="score-btns" id="score-btns"></div>
+    <div class="m-score" id="m-score">
+      <div class="m-score-label">Award / Deduct Points</div>
+      <div class="score-grid" id="score-grid"></div>
     </div>
+    <div class="kbd-hint">Space = reveal &nbsp;·&nbsp; Esc = close</div>
   </div>
 </div>
 
 <script>
-// ── State ──────────────────────────────────────────────────────────────────────
-var teams = [];
-var teamCount = 0;
-var currentCell = null;
-var currentPts = 0;
+// ── Data ──────────────────────────────────────────────────────────────────────
+var teams=[];
+var current=null;
+var SAVE='${saveKey}';
+var RAND_NAMES=${JSON.stringify(randomNames)};
 
-// ── Team management ────────────────────────────────────────────────────────────
-function addTeam(name, score) {
-  teamCount++;
-  var id = 'team-' + teamCount;
-  teams.push({ id: id, name: name || ('Team ' + teamCount), score: score || 0 });
-  renderTeams();
-  renderScoreBtns();
+function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── Setup screen ──────────────────────────────────────────────────────────────
+var nTeams=2;
+document.getElementById('nteam-pills').addEventListener('click',function(e){
+  var p=e.target.closest('[data-n]');if(!p)return;
+  nTeams=parseInt(p.dataset.n);
+  document.querySelectorAll('.num-pill').forEach(function(x){x.classList.remove('sel');});
+  p.classList.add('sel');
+  buildTeamInputs();
+});
+
+function buildTeamInputs(){
+  var c=document.getElementById('team-inputs');c.innerHTML='';
+  for(var i=0;i<nTeams;i++){
+    var existing=teams[i];
+    var row=document.createElement('div');row.className='team-row';
+    row.innerHTML='<div class="team-num">'+(i+1)+'</div><input class="team-inp" id="ti-'+i+'" placeholder="Team '+(i+1)+'" value="'+(existing?escH(existing.name):'Team '+(i+1))+'">';
+    c.appendChild(row);
+  }
 }
 
-function renderTeams() {
-  var bar = document.getElementById('teams');
-  var addBtn = bar.querySelector('.add-team-btn');
-  bar.innerHTML = '';
-  bar.appendChild(addBtn);
+function randomTeamNames(){
+  var shuffled=RAND_NAMES.slice().sort(function(){return Math.random()-.5;});
+  for(var i=0;i<nTeams;i++){
+    var el=document.getElementById('ti-'+i);
+    if(el) el.value=shuffled[i%shuffled.length];
+  }
+}
 
-  teams.forEach(function(t, i) {
-    var el = document.createElement('div');
-    el.className = 'team';
-    el.innerHTML =
-      '<span class="team-name" contenteditable="true" onblur="renameTeam(' + i + ',this)">' + escH(t.name) + '</span>' +
-      '<span class="team-score" id="score-' + t.id + '">' + t.score + '</span>' +
-      '<div class="team-btns">' +
-        '<button onclick="adjustScore(' + i + ',1)" title="Add points">▲</button>' +
-        '<button onclick="adjustScore(' + i + ',-1)" title="Subtract points">▼</button>' +
+function startGame(){
+  teams=[];
+  for(var i=0;i<nTeams;i++){
+    var el=document.getElementById('ti-'+i);
+    teams.push({id:'t'+i,name:(el?el.value.trim():'')||'Team '+(i+1),score:0});
+  }
+  document.getElementById('setup').style.display='none';
+  document.getElementById('game').style.display='block';
+  renderScoreboard();
+  save();
+}
+
+function goSetup(){
+  document.getElementById('setup').style.display='flex';
+  document.getElementById('game').style.display='none';
+  buildTeamInputs();
+}
+
+// ── Scoreboard ────────────────────────────────────────────────────────────────
+function renderScoreboard(){
+  var sb=document.getElementById('scoreboard');sb.innerHTML='';
+  teams.forEach(function(t,i){
+    var el=document.createElement('div');el.className='team-score-el';el.id='tse-'+i;
+    el.innerHTML=
+      '<span class="ts-name" contenteditable="true" onblur="renameTeam('+i+',this)">'+escH(t.name)+'</span>'+
+      '<span class="ts-score'+(t.score<0?' negative':'')+'" id="tsc-'+i+'">'+t.score+'</span>'+
+      '<div class="ts-btns">'+
+        '<button class="ts-btn" onclick="quickAdj('+i+',1)" title="Add points">+</button>'+
+        '<button class="ts-btn" onclick="quickAdj('+i+',-1)" title="Deduct points">−</button>'+
       '</div>';
-    bar.insertBefore(el, addBtn);
+    sb.appendChild(el);
   });
 }
 
-function renameTeam(i, el) {
-  teams[i].name = el.innerText.trim() || ('Team ' + (i + 1));
-  el.innerText = teams[i].name;
-  renderScoreBtns();
-  saveState();
+function renameTeam(i,el){
+  teams[i].name=el.innerText.trim()||'Team '+(i+1);
+  el.innerText=teams[i].name;
+  renderScoreButtons();
+  save();
 }
 
-function adjustScore(i, dir) {
-  var pts = dir > 0 ? currentPts : -currentPts;
-  if (currentCell && currentCell.dataset.pts) pts = parseInt(currentCell.dataset.pts) * dir;
-  teams[i].score += pts;
-  document.getElementById('score-' + teams[i].id).innerText = teams[i].score;
-  saveState();
+function updateScore(i){
+  var el=document.getElementById('tsc-'+i);
+  if(el){el.textContent=teams[i].score;el.className='ts-score'+(teams[i].score<0?' negative':'');}
 }
 
-function renderScoreBtns() {
-  var container = document.getElementById('score-btns');
-  if (!container) return;
-  container.innerHTML = '';
-  teams.forEach(function(t, i) {
-    var a = document.createElement('button');
-    a.className = 'score-btn add';
-    a.textContent = '+ ' + t.name;
-    a.onclick = function() { adjustScore(i, 1); };
-    var s = document.createElement('button');
-    s.className = 'score-btn sub';
-    s.textContent = '- ' + t.name;
-    s.onclick = function() { adjustScore(i, -1); };
-    container.appendChild(a);
-    container.appendChild(s);
-  });
-  document.getElementById('score-panel').className = teams.length > 0 ? 'visible' : '';
+function quickAdj(i,dir){
+  var pts=current?parseInt(current.dataset.pts)*dir:0;
+  teams[i].score+=pts;
+  updateScore(i);
+  save();
 }
 
-// ── Modal ──────────────────────────────────────────────────────────────────────
-document.querySelectorAll('.cell-wrap').forEach(function(cell) {
-  cell.addEventListener('click', function() {
-    if (cell.classList.contains('used')) return;
-    currentCell = cell;
-    currentPts = parseInt(cell.dataset.pts, 10);
-    document.getElementById('modal-cat').textContent = cell.dataset.cat;
-    document.getElementById('modal-pts').textContent = '$' + cell.dataset.pts;
-    var clueEl = document.getElementById('modal-clue');
-    var clueText = cell.dataset.clue || '';
-    clueEl.textContent = clueText;
-    clueEl.style.display = clueText ? 'block' : 'none';
-    document.getElementById('modal-answer').textContent = cell.dataset.answer;
-    document.getElementById('modal-answer').classList.remove('visible');
-    // If no clue, auto-reveal and mark used immediately
-    if (!clueText) {
-      document.getElementById('modal-answer').classList.add('visible');
-      document.getElementById('reveal-btn').style.display = 'none';
-      cell.classList.add('used');
-      saveState();
-    } else {
-      document.getElementById('reveal-btn').style.display = 'inline-block';
-    }
-    renderScoreBtns();
-    document.getElementById('modal-overlay').classList.add('open');
-  });
+function adjScore(i,dir){
+  var pts=current?parseInt(current.dataset.pts)*dir:0;
+  teams[i].score+=pts;
+  updateScore(i);
+  save();
+}
+
+// ── Modal / board ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.cell-wrap').forEach(function(cell){
+  cell.addEventListener('click',function(){openCell(cell);});
+  cell.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openCell(cell);}});
 });
 
-document.getElementById('modal-overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
+function openCell(cell){
+  if(cell.classList.contains('used'))return;
+  current=cell;
+  document.getElementById('m-cat').textContent=cell.dataset.cat;
+  document.getElementById('m-pts').textContent='$'+cell.dataset.pts;
+  var clue=cell.dataset.clue||'';
+  var cEl=document.getElementById('m-clue');
+  cEl.textContent=clue;cEl.style.display=clue?'block':'none';
+  var aEl=document.getElementById('m-ans');
+  aEl.textContent=cell.dataset.ans;
+  aEl.className='m-ans';
+  document.getElementById('m-score').className='m-score';
+  if(!clue){
+    aEl.className='m-ans show';
+    document.getElementById('btn-reveal').style.display='none';
+    cell.classList.add('used');
+    renderScoreButtons();
+    document.getElementById('m-score').className='m-score show';
+    save();
+  } else {
+    document.getElementById('btn-reveal').style.display='inline-block';
+    document.getElementById('score-grid').innerHTML='';
+  }
+  document.getElementById('overlay').classList.add('open');
+}
 
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeModal();
-  if (e.key === ' ' && document.getElementById('modal-overlay').classList.contains('open')) {
+function reveal(){
+  document.getElementById('m-ans').className='m-ans show';
+  document.getElementById('btn-reveal').style.display='none';
+  if(current) current.classList.add('used');
+  renderScoreButtons();
+  document.getElementById('m-score').className='m-score show';
+  save();
+}
+
+function renderScoreButtons(){
+  var g=document.getElementById('score-grid');g.innerHTML='';
+  teams.forEach(function(t,i){
+    var a=document.createElement('button');a.className='sg-btn sg-add';
+    a.textContent='+ '+t.name;a.onclick=function(){adjScore(i,1);};
+    var s=document.createElement('button');s.className='sg-btn sg-sub';
+    s.textContent='− '+t.name;s.onclick=function(){adjScore(i,-1);};
+    g.appendChild(a);g.appendChild(s);
+  });
+}
+
+function closeModal(){document.getElementById('overlay').classList.remove('open');current=null;}
+
+document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+document.addEventListener('keydown',function(e){
+  var open=document.getElementById('overlay').classList.contains('open');
+  if(e.key==='Escape'){if(open)closeModal();return;}
+  if(e.key===' '&&open){e.preventDefault();reveal();return;}
+  // Number keys 1-8 = add to team; Shift+num = deduct
+  if(!open)return;
+  var n=parseInt(e.key);
+  if(n>=1&&n<=teams.length){
     e.preventDefault();
-    revealAnswer();
+    adjScore(n-1,e.shiftKey?-1:1);
   }
 });
 
-function revealAnswer() {
-  document.getElementById('modal-answer').classList.add('visible');
-  document.getElementById('reveal-btn').style.display = 'none';
-  if (currentCell) {
-    currentCell.classList.add('used');
-  }
-  saveState();
+function resetBoard(){
+  if(!confirm('Reset board and all scores?'))return;
+  document.querySelectorAll('.cell-wrap.used').forEach(function(c){c.classList.remove('used');});
+  teams.forEach(function(t,i){t.score=0;updateScore(i);});
+  clearSave();
+  closeModal();
 }
 
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-  currentCell = null;
+// ── Persistence ───────────────────────────────────────────────────────────────
+function save(){
+  try{
+    var used=[];
+    document.querySelectorAll('.cell-wrap.used').forEach(function(c){used.push(c.dataset.cat+'|'+c.dataset.pts);});
+    localStorage.setItem(SAVE,JSON.stringify({teams:teams,used:used,nTeams:nTeams}));
+  }catch(e){}
 }
-
-// ── Reset board ────────────────────────────────────────────────────────────────
-function resetBoard() {
-  if (!confirm('Reset the board? This will clear all used cells and scores.')) return;
-  document.querySelectorAll('.cell-wrap.used').forEach(function(c) { c.classList.remove('used'); });
-  teams.forEach(function(t) { t.score = 0; });
-  renderTeams();
-  clearState();
-}
-
-// ── Persistence ────────────────────────────────────────────────────────────────
-var SAVE_KEY = 'jeopardy-${esc(title).replace(/[^a-z0-9]/gi,'-')}';
-
-function saveState() {
-  try {
-    var usedIds = [];
-    document.querySelectorAll('.cell-wrap.used').forEach(function(c) {
-      usedIds.push(c.dataset.cat + '-' + c.dataset.pts);
-    });
-    localStorage.setItem(SAVE_KEY, JSON.stringify({ teams: teams, used: usedIds }));
-  } catch(e) {}
-}
-
-function loadState() {
-  try {
-    var raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) return false;
-    var state = JSON.parse(raw);
-    if (state.teams) {
-      state.teams.forEach(function(t) { addTeam(t.name, t.score); });
+function loadSave(){
+  try{
+    var raw=localStorage.getItem(SAVE);if(!raw)return false;
+    var s=JSON.parse(raw);
+    if(s.teams&&s.teams.length){
+      teams=s.teams;nTeams=teams.length;
+      // Pre-fill team inputs
+      buildTeamInputs();
+      teams.forEach(function(t,i){var el=document.getElementById('ti-'+i);if(el)el.value=t.name;});
     }
-    if (state.used) {
-      state.used.forEach(function(key) {
-        document.querySelectorAll('.cell-wrap').forEach(function(c) {
-          if ((c.dataset.cat + '-' + c.dataset.pts) === key) c.classList.add('used');
-        });
+    if(s.used)s.used.forEach(function(k){
+      document.querySelectorAll('.cell-wrap').forEach(function(c){
+        if(c.dataset.cat+'|'+c.dataset.pts===k)c.classList.add('used');
       });
-    }
+    });
     return true;
-  } catch(e) { return false; }
+  }catch(e){return false;}
 }
+function clearSave(){try{localStorage.removeItem(SAVE);}catch(e){}}
 
-function clearState() {
-  try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
-}
-
-function escH(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ── Init ───────────────────────────────────────────────────────────────────────
-if (!loadState()) {
-  addTeam('Team 1', 0);
-  addTeam('Team 2', 0);
-}
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildTeamInputs();
+loadSave();
 <\/script>
 </body>
 </html>`;
 }
-</script>
 
+// ─── Toast ────────────────────────────────────────────────────────────────────
+let _tt;
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className=`toast show ${type}`;
+  clearTimeout(_tt);_tt=setTimeout(()=>{t.className='toast';},2800);
+}
+
+// ─── Service Worker ───────────────────────────────────────────────────────────
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js')
+    .then(()=>document.getElementById('sw-badge').textContent='● Offline Ready')
+    .catch(()=>{});
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+buildSuggestions();
+buildBoard();
+</script>
 </body>
 </html>

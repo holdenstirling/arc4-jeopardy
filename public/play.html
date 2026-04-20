@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1a237e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Arc4 Jeopardy">
 <link rel="manifest" href="/manifest.json">
 <title>Arc4 Trivia Challenge</title>
 <style>
@@ -164,9 +167,112 @@ body{font-family:Verdana,Arial,sans-serif;background:var(--bd);color:#fff;min-he
   from{transform:scale(.82) translateY(20px);opacity:0;}
   to{transform:scale(1) translateY(0);opacity:1;}
 }
+@keyframes sheetUp{
+  from{transform:translateY(100%);}
+  to{transform:translateY(0);}
+}
+@keyframes rotateHint{
+  from{transform:rotate(0deg);}
+  to{transform:rotate(90deg);}
+}
+
+/* ── SAFE-AREA (notch / Dynamic Island / home bar) ── */
+body{padding-bottom:env(safe-area-inset-bottom,0);}
+#topbar{padding-left:max(16px,env(safe-area-inset-left,0));padding-right:max(16px,env(safe-area-inset-right,0));}
+#setup{padding-left:max(20px,env(safe-area-inset-left,0));padding-right:max(20px,env(safe-area-inset-right,0));}
+
+/* ── PORTRAIT ROTATE HINT ── */
+#portrait-hint{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:18px;text-align:center;padding:32px;}
+#portrait-hint .ph-icon{font-size:4rem;animation:rotateHint 1.4s ease-in-out infinite alternate;}
+#portrait-hint h3{font-size:1.2rem;font-weight:800;color:#f5c518;}
+#portrait-hint p{color:rgba(255,255,255,.5);font-size:.88rem;line-height:1.5;}
+#portrait-hint button{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;padding:12px 28px;border-radius:8px;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px;}
+
+/* ── TABLET / MOBILE: topbar & scoreboard horizontal scroll ── */
+@media (max-width:1024px){
+  #topbar{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  #topbar::-webkit-scrollbar{display:none;}
+  #topbar h1{white-space:nowrap;flex-shrink:0;}
+  .topbar-right{flex-shrink:0;}
+  #scoreboard{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:8px 12px;}
+  #scoreboard::-webkit-scrollbar{display:none;}
+  .team-score-el{flex-shrink:0;min-width:120px;}
+}
+
+/* ── PHONE (<600px) ── */
+@media (max-width:600px){
+  /* Topbar */
+  #topbar{padding:10px 12px 8px;gap:6px;}
+  #topbar h1{font-size:.88rem;}
+  .hdr-btn{padding:8px 10px;font-size:.72rem;white-space:nowrap;min-height:44px;}
+
+  /* Scoreboard */
+  .team-score-el{min-width:108px;padding:7px 10px;}
+  .ts-score{font-size:1.05rem;}
+  .ts-btn{width:28px;height:28px;font-size:.88rem;}
+
+  /* Board */
+  #board{padding:6px;gap:3px;}
+  .cat-row,.board-row{gap:3px;}
+  .cat-cell{font-size:.44rem;padding:6px 2px;min-height:34px;letter-spacing:0;}
+  .cell-wrap{min-height:52px;}
+  .cell-pts{font-size:clamp(.75rem,2.2vw,1.1rem);}
+
+  /* Modal → bottom sheet */
+  #overlay{align-items:flex-end;padding:0;}
+  #modal{
+    border-radius:18px 18px 0 0;
+    max-height:88vh;
+    max-width:100%;
+    border-left:none;border-right:none;border-bottom:none;
+    animation:sheetUp .28s cubic-bezier(.22,1,.36,1);
+    padding:22px 18px max(28px,calc(16px + env(safe-area-inset-bottom,0)));
+  }
+  .m-clue{font-size:clamp(.92rem,3.8vw,1.2rem);}
+  .m-ans{font-size:clamp(.88rem,3.4vw,1.1rem);padding:14px 14px;}
+  .m-actions{gap:8px;}
+  .btn-reveal{padding:14px 24px;font-size:.92rem;min-height:48px;flex:1;}
+  .btn-close{padding:14px 18px;font-size:.88rem;min-height:48px;}
+  .sg-btn{padding:12px 10px;font-size:.75rem;min-height:44px;}
+  .score-grid{gap:5px;}
+  .kbd-hint{display:none;}
+
+  /* Setup */
+  #setup{padding:20px 14px 36px;}
+  .setup-card{padding:16px 14px;}
+  .num-pill{padding:10px 14px;min-height:44px;font-size:.84rem;}
+  .team-name-inp{height:44px;}
+  .add-player-btn,.player-chip{min-height:34px;}
+  .btn-start{width:100%;padding:16px 20px;font-size:1rem;}
+  .btn-setup.btn-rand{min-height:44px;}
+
+  /* Winner / FJ cards */
+  #winner-card{padding:28px 20px;}
+  #fj-card{padding:24px 16px;}
+}
+
+/* ── TINY PHONES (<380px) ── */
+@media (max-width:380px){
+  .cat-cell{font-size:.4rem;min-height:30px;}
+  .cell-wrap{min-height:44px;}
+  .cell-pts{font-size:.7rem;}
+}
+
+/* ── PORTRAIT hint (phones, game running) ── */
+@media (max-width:640px) and (orientation:portrait){
+  #portrait-hint{display:flex;}
+}
 </style>
 </head>
 <body>
+
+<!-- ── PORTRAIT ROTATE HINT ── -->
+<div id="portrait-hint">
+  <div class="ph-icon">📱</div>
+  <h3>Rotate for best experience</h3>
+  <p>Arc4 Jeopardy is designed for landscape mode — turn your device sideways for the full board view.</p>
+  <button onclick="document.getElementById('portrait-hint').style.display='none'">Continue in portrait →</button>
+</div>
 
 <!-- ── SETUP ── -->
 <div id="setup">

@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1a237e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Arc4 Jeopardy">
 <link rel="manifest" href="/manifest.json">
 <title>Arc4 Jeopardy</title>
 <style>
@@ -22,6 +25,13 @@ h1{font-size:clamp(2.2rem,6vw,3.8rem);font-weight:900;color:#f5c518;text-shadow:
 #install-btn{display:none;margin-top:28px;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.4);color:#f5c518;padding:10px 24px;border-radius:8px;font-size:.88rem;font-weight:700;cursor:pointer;}
 #install-btn:hover{background:rgba(245,197,24,.2);}
 footer{margin-top:60px;color:rgba(255,255,255,0.18);font-size:0.75rem;}
+.install-guide{margin-top:44px;max-width:680px;width:100%;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:24px 26px;}
+.install-guide h3{font-size:.95rem;font-weight:800;color:#f5c518;margin-bottom:14px;letter-spacing:.5px;}
+.install-steps{display:flex;gap:20px;flex-wrap:wrap;}
+.install-col{flex:1;min-width:220px;}
+.install-col h4{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4);margin-bottom:8px;}
+.install-col ol{padding-left:18px;}
+.install-col li{font-size:.8rem;color:rgba(255,255,255,.6);line-height:1.7;}
 </style>
 </head>
 <body>
@@ -45,6 +55,31 @@ footer{margin-top:60px;color:rgba(255,255,255,0.18);font-size:0.75rem;}
   </a>
 </div>
 <button id="install-btn" onclick="installApp()">⊕ Install App for Offline Use</button>
+
+<div class="install-guide">
+  <h3>📲 Install to Your Home Screen</h3>
+  <div class="install-steps">
+    <div class="install-col">
+      <h4>iPhone / iPad (Safari)</h4>
+      <ol>
+        <li>Open this page in <strong>Safari</strong></li>
+        <li>Tap the <strong>Share</strong> button (box with ↑)</li>
+        <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+        <li>Tap <strong>Add</strong> — done!</li>
+      </ol>
+    </div>
+    <div class="install-col">
+      <h4>Android / Chrome</h4>
+      <ol>
+        <li>Open this page in <strong>Chrome</strong></li>
+        <li>Tap the <strong>⋮ menu</strong> (top right)</li>
+        <li>Tap <strong>"Add to Home Screen"</strong> or <strong>"Install App"</strong></li>
+        <li>Tap <strong>Add</strong> — done!</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
 <footer>Arc4 · Internal Tools</footer>
 <script>
 var deferredInstall = null;

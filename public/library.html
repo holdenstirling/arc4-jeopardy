@@ -52,6 +52,12 @@ header h1{font-size:1.5rem;font-weight:900;color:var(--gold);letter-spacing:1px;
 .gc-dl{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);color:#fff;}
 .gc-del{background:rgba(239,83,80,.09);border:1px solid rgba(239,83,80,.22);color:#ff8a80;flex:0;padding:8px 11px;}
 
+/* STORAGE BAR */
+.storage-bar-wrap{margin-top:10px;}
+.storage-bar-label{font-size:.68rem;color:rgba(255,255,255,.35);margin-bottom:4px;}
+.storage-bar-track{height:5px;background:rgba(255,255,255,.09);border-radius:3px;overflow:hidden;}
+.storage-bar-fill{height:100%;border-radius:3px;transition:width .4s ease;}
+
 /* EMPTY STATE */
 #empty-state{display:none;text-align:center;padding:80px 20px;}
 .empty-icon{font-size:4rem;margin-bottom:18px;}
@@ -95,6 +101,10 @@ header h1{font-size:1.5rem;font-weight:900;color:var(--gold);letter-spacing:1px;
     <div class="lib-header-left">
       <h2>Saved Games</h2>
       <div class="lib-stats" id="lib-stats">Loading…</div>
+    <div class="storage-bar-wrap" id="storage-bar-wrap" style="display:none">
+      <div class="storage-bar-label" id="storage-bar-label"></div>
+      <div class="storage-bar-track"><div class="storage-bar-fill" id="storage-bar-fill"></div></div>
+    </div>
     </div>
     <div class="lib-actions">
       <button class="btn-sm btn-danger" onclick="clearLibrary()">🗑 Clear All</button>
@@ -133,6 +143,16 @@ function installPWA() {
   });
 }
 
+function getStorageUsage() {
+  try {
+    var total = 0;
+    for (var k in localStorage) {
+      if (localStorage.hasOwnProperty(k)) total += (localStorage[k].length + k.length) * 2;
+    }
+    return total;
+  } catch(e) { return 0; }
+}
+
 function getLibrary() {
   try { return JSON.parse(localStorage.getItem(LIB_KEY) || '[]'); } catch(e) { return []; }
 }
@@ -159,6 +179,22 @@ function render() {
   var totalSize = 0;
   lib.forEach(function(e){ totalSize += (e.html||'').length; });
   stats.textContent = lib.length + ' game' + (lib.length!==1?'s':'') + ' · ~' + Math.round(totalSize/1024) + ' KB stored';
+
+  // Storage usage gauge
+  var usedBytes = getStorageUsage();
+  var maxBytes = 5 * 1024 * 1024;
+  var pct = Math.min(100, Math.round(usedBytes / maxBytes * 100));
+  var barColor = pct >= 80 ? '#ff6b6b' : pct >= 55 ? '#ffa726' : '#66bb6a';
+  var barWrap = document.getElementById('storage-bar-wrap');
+  var barLabel = document.getElementById('storage-bar-label');
+  var barFill = document.getElementById('storage-bar-fill');
+  if (barWrap && barLabel && barFill) {
+    barWrap.style.display = 'block';
+    barLabel.textContent = 'Browser storage: ~' + Math.round(usedBytes/1024) + ' KB of ~5 MB used (' + pct + '%)' + (pct >= 80 ? ' — consider clearing old games' : '');
+    barLabel.style.color = pct >= 80 ? '#ff8a80' : 'rgba(255,255,255,.35)';
+    barFill.style.width = pct + '%';
+    barFill.style.background = barColor;
+  }
 
   grid.innerHTML = '';
   lib.forEach(function(entry, idx) {

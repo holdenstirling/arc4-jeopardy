@@ -12,7 +12,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--gold:#f5c518;--bd:#0d1b5e;--bm:#1a237e;--bb:#2a3698;--bl:#3949ab;}
-body{font-family:Verdana,Arial,sans-serif;background:var(--bd);color:#fff;min-height:100vh;overflow-x:hidden;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bd);color:#fff;min-height:100vh;overflow-x:hidden;}
 
 /* ── SETUP ── */
 #setup{position:fixed;inset:0;background:linear-gradient(160deg,#0d1b5e,#1a237e 60%,#0d47a1);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:30px 20px 40px;overflow-y:auto;}
@@ -113,6 +113,11 @@ body{font-family:Verdana,Arial,sans-serif;background:var(--bd);color:#fff;min-he
 .sg-add{background:rgba(76,175,80,.2);border:1px solid rgba(76,175,80,.5);color:#a5d6a7;}
 .sg-sub{background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.4);color:#ff8a80;}
 .kbd-hint{font-size:.62rem;color:rgba(255,255,255,.2);margin-top:14px;}
+/* ── TIMER ── */
+.timer-wrap{height:6px;background:rgba(255,255,255,.1);border-radius:3px;margin:-10px 0 18px;overflow:hidden;display:none;}
+.timer-bar{height:100%;background:var(--gold);border-radius:3px;transition:width .95s linear,background .25s;}
+.timer-bar.warning{background:#ff8a00;}
+.timer-bar.danger{background:#ff4444;}
 
 /* ── WINNER OVERLAY ── */
 #winner-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:300;align-items:center;justify-content:center;padding:20px;}
@@ -310,6 +315,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0);}
     <h1>⚡ Arc4 Trivia Challenge</h1>
     <div class="topbar-right">
       <button class="hdr-btn" id="mute-btn" onclick="toggleMute()" title="Toggle sound">🔊</button>
+      <button class="hdr-btn" id="timer-btn" onclick="toggleTimer()" title="Toggle 30s countdown timer">⏱</button>
       <button class="hdr-btn" onclick="triggerFinalJeopardy()" title="Final Jeopardy">🏁 Final</button>
       <button class="hdr-btn" onclick="resetBoard()">↺ Reset</button>
       <button class="hdr-btn" onclick="goSetup()">⚙ Teams</button>
@@ -370,6 +376,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0);}
     <div class="m-cat" id="m-cat"></div>
     <div class="m-pts" id="m-pts"></div>
     <div class="m-clue" id="m-clue"></div>
+    <div class="timer-wrap" id="timer-wrap"><div class="timer-bar" id="timer-bar"></div></div>
     <div class="m-ans" id="m-ans"></div>
     <div class="m-actions">
       <button class="btn-reveal" id="btn-reveal" onclick="reveal()">Reveal Answer</button>
@@ -497,6 +504,37 @@ function toggleMute() {
   muted = !muted;
   document.getElementById('mute-btn').textContent = muted ? '🔇' : '🔊';
 }
+
+// ── TIMER ─────────────────────────────────────────────────────────────────────
+var timerEnabled = false, _timerInterval = null;
+function toggleTimer() {
+  timerEnabled = !timerEnabled;
+  var btn = document.getElementById('timer-btn');
+  btn.style.background = timerEnabled ? 'rgba(245,197,24,.2)' : '';
+  btn.style.borderColor = timerEnabled ? 'rgba(245,197,24,.5)' : '';
+  btn.style.color = timerEnabled ? '#f5c518' : '';
+  btn.textContent = timerEnabled ? '⏱ ON' : '⏱';
+}
+function startTimer() {
+  if (!timerEnabled) return;
+  clearInterval(_timerInterval);
+  var secs = 30;
+  var wrap = document.getElementById('timer-wrap');
+  var bar = document.getElementById('timer-bar');
+  wrap.style.display = 'block';
+  bar.style.width = '100%'; bar.className = 'timer-bar';
+  _timerInterval = setInterval(function() {
+    secs--;
+    bar.style.width = (secs / 30 * 100) + '%';
+    if (secs <= 10) bar.className = 'timer-bar warning';
+    if (secs <= 5)  bar.className = 'timer-bar danger';
+    if (secs <= 0) {
+      clearInterval(_timerInterval);
+      if (!muted) { try { var c=getAC(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='square';o.frequency.setValueAtTime(880,c.currentTime);o.frequency.setValueAtTime(440,c.currentTime+.1);o.frequency.setValueAtTime(880,c.currentTime+.2);g.gain.setValueAtTime(.15,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.35);o.start();o.stop(c.currentTime+.36); } catch(e) {} }
+    }
+  }, 1000);
+}
+function stopTimer() { clearInterval(_timerInterval); document.getElementById('timer-wrap').style.display = 'none'; }
 
 // ── DATA ──────────────────────────────────────────────────────────────────────
 var RAND_NAMES=['The Trivia Titans','Brain Trust','Les Quizerables','The Fact Finders','Smarty Pants','Agatha Quiztie','The Think Tank','Wild Guessers','I Am Smarticus','Tequila Mockingbird','404: Name Not Found','Ctrl+Alt+Defeat','Stack Overflow','The Dark Horses','Know-It-Alls','The Underdogs','The Renaissance Crew','Trivia Newton John','Quiz Khalifa','Team Phenomenal'];
@@ -672,8 +710,8 @@ function animateScore(i, delta) {
 }
 
 function quickAdj(i, dir) {
-  if (!current) return;
-  var delta = parseInt(current.dataset.pts) * dir;
+  // When a clue is open use its value; otherwise adjust by 100 for manual corrections
+  var delta = current ? parseInt(current.dataset.pts) * dir : 100 * dir;
   teams[i].score += delta;
   updateScore(i);
   animateScore(i, delta);
@@ -722,12 +760,13 @@ function openCell(cell) {
     save();
   } else {
     document.getElementById('btn-reveal').style.display = 'inline-block';
+    startTimer();
   }
   document.getElementById('overlay').classList.add('open');
 }
 
 function reveal() {
-  sndReveal();
+  sndReveal(); stopTimer();
   document.getElementById('m-ans').className = 'm-ans show';
   document.getElementById('btn-reveal').style.display = 'none';
   if (current) current.classList.add('used');
@@ -747,7 +786,7 @@ function renderScoreButtons() {
   });
 }
 
-function closeModal() { document.getElementById('overlay').classList.remove('open'); current = null; }
+function closeModal() { stopTimer(); document.getElementById('overlay').classList.remove('open'); current = null; }
 
 document.getElementById('overlay').addEventListener('click', function(e){ if (e.target === this) closeModal(); });
 

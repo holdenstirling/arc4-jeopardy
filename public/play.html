@@ -11,92 +11,167 @@
 :root{--gold:#f5c518;--bd:#0d1b5e;--bm:#1a237e;--bb:#2a3698;--bl:#3949ab;}
 body{font-family:Verdana,Arial,sans-serif;background:var(--bd);color:#fff;min-height:100vh;overflow-x:hidden;}
 
-/* ── SETUP SCREEN ── */
-#setup{position:fixed;inset:0;background:linear-gradient(160deg,#0d1b5e,#1a237e);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;overflow-y:auto;}
-#setup h1{font-size:clamp(1.6rem,5vw,2.8rem);font-weight:900;color:var(--gold);letter-spacing:2px;text-align:center;margin-bottom:6px;}
-#setup .sub{color:rgba(255,255,255,.45);font-size:.9rem;margin-bottom:36px;text-align:center;}
-.setup-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:24px 28px;width:100%;max-width:540px;margin-bottom:16px;}
-.setup-label{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--gold);margin-bottom:12px;}
+/* ── SETUP ── */
+#setup{position:fixed;inset:0;background:linear-gradient(160deg,#0d1b5e,#1a237e 60%,#0d47a1);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:30px 20px 40px;overflow-y:auto;}
+#setup h1{font-size:clamp(1.6rem,5vw,2.8rem);font-weight:900;color:var(--gold);letter-spacing:2px;text-align:center;margin-bottom:6px;text-shadow:0 2px 20px rgba(245,197,24,.35);}
+#setup .sub{color:rgba(255,255,255,.45);font-size:.9rem;margin-bottom:28px;text-align:center;}
+.setup-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:22px 26px;width:100%;max-width:560px;margin-bottom:14px;}
+.setup-label{font-size:.63rem;font-weight:800;text-transform:uppercase;letter-spacing:1.4px;color:var(--gold);margin-bottom:12px;}
 .num-pills{display:flex;gap:8px;flex-wrap:wrap;}
-.num-pill{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);padding:8px 18px;border-radius:20px;cursor:pointer;font-weight:700;font-size:.88rem;transition:.15s;user-select:none;}
+.num-pill{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.14);color:rgba(255,255,255,.6);padding:8px 18px;border-radius:20px;cursor:pointer;font-weight:700;font-size:.88rem;transition:.15s;user-select:none;}
 .num-pill:hover{border-color:rgba(255,255,255,.35);color:#fff;}
 .num-pill.sel{background:var(--gold);border-color:var(--gold);color:#1a1a1a;}
-.team-inputs{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
-.team-row{display:flex;align-items:center;gap:8px;}
-.team-num{width:24px;font-size:.8rem;color:var(--gold);font-weight:700;flex-shrink:0;text-align:center;}
-.team-inp{flex:1;padding:8px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.9rem;outline:none;transition:border-color .18s;font-family:inherit;}
-.team-inp:focus{border-color:var(--gold);}
-.setup-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+
+/* Team rows in setup */
+.team-block{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+.team-block-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.team-num-badge{background:rgba(245,197,24,.18);color:var(--gold);border-radius:50%;width:22px;height:22px;font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.team-name-inp{flex:1;padding:7px 11px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.92rem;outline:none;transition:border-color .18s;font-family:inherit;}
+.team-name-inp:focus{border-color:var(--gold);}
+.players-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;align-items:center;}
+.player-chip{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:3px 8px 3px 10px;font-size:.74rem;color:rgba(255,255,255,.8);}
+.player-chip button{background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:.72rem;padding:0;line-height:1;margin-top:1px;}
+.player-chip button:hover{color:#ff8a80;}
+.add-player-btn{background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.2);color:rgba(255,255,255,.45);border-radius:14px;padding:3px 10px;font-size:.73rem;cursor:pointer;font-family:inherit;transition:.15s;}
+.add-player-btn:hover{border-color:var(--gold);color:var(--gold);}
+.player-inp-wrap{display:flex;gap:5px;align-items:center;margin-top:4px;}
+.player-inp{flex:1;padding:5px 10px;border-radius:6px;border:2px solid rgba(245,197,24,.4);background:rgba(255,255,255,.07);color:#fff;font-size:.8rem;outline:none;font-family:inherit;}
+.player-inp-ok{background:var(--gold);border:none;border-radius:5px;color:#1a1a1a;padding:5px 10px;font-weight:700;cursor:pointer;font-size:.78rem;font-family:inherit;}
+
+.setup-actions{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;align-items:center;}
 .btn-setup{border:none;padding:9px 20px;border-radius:7px;cursor:pointer;font-weight:700;font-size:.85rem;transition:.15s;font-family:inherit;}
 .btn-setup:hover{opacity:.88;transform:translateY(-1px);}
-.btn-start{background:linear-gradient(135deg,var(--gold),#e6b800);color:#1a1a1a;padding:14px 40px;font-size:1rem;border-radius:8px;box-shadow:0 4px 18px rgba(245,197,24,.32);}
+.btn-start{background:linear-gradient(135deg,var(--gold),#e6b800);color:#1a1a1a;padding:14px 44px;font-size:1.05rem;border-radius:8px;box-shadow:0 4px 22px rgba(245,197,24,.35);}
 .btn-rand{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;}
+.build-link{color:rgba(255,255,255,.28);font-size:.72rem;margin-top:10px;text-decoration:none;display:block;text-align:center;}
+.build-link:hover{color:rgba(255,255,255,.6);}
 
-/* ── GAME SCREEN ── */
+/* ── GAME ── */
 #game{display:none;}
 #topbar{background:linear-gradient(135deg,#1a237e,#283593);padding:12px 16px 10px;border-bottom:4px solid var(--gold);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
-#topbar h1{font-size:clamp(1rem,3vw,1.35rem);font-weight:900;color:var(--gold);letter-spacing:1px;}
-.topbar-btns{display:flex;gap:7px;}
+#topbar h1{font-size:clamp(.95rem,3vw,1.35rem);font-weight:900;color:var(--gold);letter-spacing:1px;}
+.topbar-right{display:flex;gap:7px;align-items:center;}
 .hdr-btn{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.78rem;font-weight:700;transition:.15s;font-family:inherit;}
 .hdr-btn:hover{background:rgba(255,255,255,.18);}
+#mute-btn{font-size:1rem;padding:5px 10px;}
 
 /* ── SCOREBOARD ── */
-#scoreboard{background:rgba(0,0,0,.35);border-bottom:2px solid rgba(255,255,255,.07);padding:10px 14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-.team-score-el{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:8px;padding:7px 14px;display:flex;align-items:center;gap:10px;transition:.15s;}
-.ts-name{font-weight:700;font-size:.88rem;outline:none;cursor:text;}
+#scoreboard{background:rgba(0,0,0,.35);border-bottom:2px solid rgba(255,255,255,.07);padding:10px 14px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;}
+.team-score-el{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:10px;padding:8px 14px;display:flex;flex-direction:column;gap:3px;position:relative;transition:border-color .2s,background .2s;min-width:130px;}
+.team-score-el.flash-add{animation:flashAdd .5s ease-out;}
+.team-score-el.flash-sub{animation:flashSub .5s ease-out;}
+.ts-top{display:flex;align-items:center;gap:8px;}
+.ts-name{font-weight:800;font-size:.88rem;outline:none;cursor:text;flex:1;}
 .ts-name:focus{border-bottom:1px dashed var(--gold);}
-.ts-score{font-size:1.15rem;font-weight:900;color:var(--gold);min-width:36px;text-align:center;}
+.ts-score{font-size:1.2rem;font-weight:900;color:var(--gold);min-width:40px;text-align:right;transition:transform .25s;}
 .ts-score.negative{color:#ff6b6b;}
-.ts-btns{display:flex;gap:3px;}
-.ts-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;width:22px;height:22px;border-radius:4px;cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center;line-height:1;font-family:inherit;}
-.ts-btn:hover{background:rgba(255,255,255,.22);}
+.ts-score.pop{animation:scorePop .35s cubic-bezier(.34,1.56,.64,1);}
+.ts-players{font-size:.67rem;color:rgba(255,255,255,.4);line-height:1.4;padding-left:2px;}
+.ts-btns{display:flex;gap:3px;margin-top:2px;}
+.ts-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;width:22px;height:22px;border-radius:4px;cursor:pointer;font-size:.82rem;display:flex;align-items:center;justify-content:center;transition:.15s;font-family:inherit;}
+.ts-btn:hover{background:rgba(255,255,255,.24);}
+.score-delta{position:absolute;top:-4px;right:10px;font-weight:900;font-size:.95rem;pointer-events:none;animation:deltaFloat .85s ease-out forwards;z-index:10;}
+.score-delta.pos{color:#69f0ae;}
+.score-delta.neg{color:#ff5252;}
 
 /* ── BOARD ── */
 #board{padding:12px;display:flex;flex-direction:column;gap:5px;overflow-x:auto;}
 .cat-row,.board-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;}
 .cat-cell{background:var(--bm);border:3px solid #000;text-align:center;padding:9px 5px;font-weight:700;font-size:clamp(.52rem,1.3vw,.8rem);text-transform:uppercase;letter-spacing:.4px;min-height:46px;display:flex;align-items:center;justify-content:center;}
-.cell-wrap{background:var(--bb);border:3px solid #000;text-align:center;cursor:pointer;transition:background .15s;min-height:58px;display:flex;align-items:center;justify-content:center;outline:none;}
-.cell-wrap:hover:not(.used){background:var(--bl);border-color:var(--gold);}
+.cell-wrap{background:var(--bb);border:3px solid #000;text-align:center;cursor:pointer;transition:background .15s,border-color .15s,box-shadow .15s,transform .12s;min-height:60px;display:flex;align-items:center;justify-content:center;outline:none;position:relative;}
+.cell-wrap:hover:not(.used){background:var(--bl);border-color:var(--gold);box-shadow:0 0 18px rgba(245,197,24,.35);transform:scale(1.03);}
 .cell-wrap:focus:not(.used){border-color:var(--gold);}
-.cell-wrap.used{background:var(--bm);border-color:#333;cursor:default;}
-.cell-wrap.used .cell-pts{opacity:.07;}
-.cell-pts{font-size:clamp(.9rem,2.6vw,1.6rem);font-weight:900;color:var(--gold);}
+.cell-wrap:active:not(.used){transform:scale(0.97);}
+.cell-wrap.used{background:var(--bm);border-color:#2a2a2a;cursor:default;transform:none !important;}
+.cell-wrap.used .cell-pts{opacity:.06;}
+.cell-wrap.flip{animation:cellFlip .32s ease-in-out;}
+.cell-pts{font-size:clamp(.9rem,2.6vw,1.6rem);font-weight:900;color:var(--gold);text-shadow:0 2px 8px rgba(245,197,24,.3);}
 
 /* ── MODAL ── */
-#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:100;align-items:center;justify-content:center;padding:16px;}
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;align-items:center;justify-content:center;padding:16px;}
 #overlay.open{display:flex;}
-#modal{background:linear-gradient(135deg,#1a237e,#0d47a1);border:4px solid var(--gold);border-radius:14px;max-width:680px;width:100%;padding:30px 30px 24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.55);max-height:90vh;overflow-y:auto;}
+#modal{background:linear-gradient(135deg,#1a237e,#0d47a1);border:4px solid var(--gold);border-radius:14px;max-width:700px;width:100%;padding:30px 30px 24px;text-align:center;box-shadow:0 20px 70px rgba(0,0,0,.6);max-height:90vh;overflow-y:auto;animation:modalIn .22s cubic-bezier(.34,1.56,.64,1);}
 .m-cat{font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:4px;}
 .m-pts{font-size:.92rem;font-weight:900;color:rgba(245,197,24,.65);margin-bottom:18px;}
-.m-clue{font-size:clamp(1rem,2.8vw,1.45rem);font-weight:700;line-height:1.45;margin-bottom:24px;color:#fff;}
-.m-ans{background:rgba(0,0,0,.35);border-radius:8px;padding:16px 18px;font-size:clamp(.95rem,2.4vw,1.25rem);font-weight:800;color:#a5d6a7;display:none;margin-bottom:20px;line-height:1.4;}
-.m-ans.show{display:block;}
+.m-clue{font-size:clamp(1rem,2.8vw,1.45rem);font-weight:700;line-height:1.5;margin-bottom:24px;color:#fff;}
+.m-ans{background:rgba(0,0,0,.35);border-radius:10px;padding:18px 20px;font-size:clamp(.95rem,2.4vw,1.25rem);font-weight:800;color:#a5d6a7;display:none;margin-bottom:20px;line-height:1.45;}
+.m-ans.show{display:block;animation:answerReveal .28s ease-out;}
 .m-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
-.btn-reveal{background:var(--gold);color:#1a1a1a;border:none;padding:11px 28px;font-weight:800;font-size:.95rem;border-radius:7px;cursor:pointer;text-transform:uppercase;transition:.15s;}
-.btn-reveal:hover{background:#ffe033;}
-.btn-close{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.3);padding:11px 24px;font-weight:700;font-size:.9rem;border-radius:7px;cursor:pointer;transition:.15s;}
+.btn-reveal{background:var(--gold);color:#1a1a1a;border:none;padding:12px 32px;font-weight:800;font-size:1rem;border-radius:8px;cursor:pointer;text-transform:uppercase;transition:.15s;box-shadow:0 4px 16px rgba(245,197,24,.3);}
+.btn-reveal:hover{background:#ffe033;transform:translateY(-1px);}
+.btn-close{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28);padding:12px 24px;font-weight:700;font-size:.9rem;border-radius:8px;cursor:pointer;transition:.15s;}
 .btn-close:hover{background:rgba(255,255,255,.18);}
 .m-score{display:none;margin-top:4px;}
 .m-score.show{display:block;}
-.m-score-label{font-size:.66rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.38);margin-bottom:8px;}
+.m-score-label{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);margin-bottom:8px;}
 .score-grid{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;}
-.sg-btn{border:none;padding:7px 14px;border-radius:5px;cursor:pointer;font-size:.76rem;font-weight:700;font-family:inherit;transition:.15s;}
+.sg-btn{border:none;padding:8px 15px;border-radius:6px;cursor:pointer;font-size:.78rem;font-weight:700;font-family:inherit;transition:.15s;}
 .sg-btn:hover{opacity:.85;transform:translateY(-1px);}
 .sg-add{background:rgba(76,175,80,.2);border:1px solid rgba(76,175,80,.5);color:#a5d6a7;}
 .sg-sub{background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.4);color:#ff8a80;}
-.kbd-hint{font-size:.65rem;color:rgba(255,255,255,.25);margin-top:14px;}
+.kbd-hint{font-size:.62rem;color:rgba(255,255,255,.2);margin-top:14px;}
 
-/* ── BUILD LINK ── */
-.build-link{color:rgba(255,255,255,.3);font-size:.72rem;margin-top:8px;text-decoration:none;display:block;text-align:center;}
-.build-link:hover{color:rgba(255,255,255,.6);}
+/* ── WINNER OVERLAY ── */
+#winner-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:300;align-items:center;justify-content:center;padding:20px;}
+#winner-overlay.open{display:flex;}
+#winner-card{background:linear-gradient(160deg,#0d1b5e,#1a237e);border:4px solid var(--gold);border-radius:20px;max-width:540px;width:100%;padding:40px 36px;text-align:center;animation:winnerIn .45s cubic-bezier(.34,1.56,.64,1);box-shadow:0 30px 80px rgba(0,0,0,.6);}
+#winner-card h2{font-size:clamp(1.4rem,4vw,2.2rem);font-weight:900;color:var(--gold);letter-spacing:1px;margin-bottom:6px;}
+#winner-card .sub{color:rgba(255,255,255,.45);font-size:.85rem;margin-bottom:28px;}
+.podium{display:flex;flex-direction:column;gap:8px;margin-bottom:28px;}
+.podium-row{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:10px 16px;}
+.podium-rank{font-size:1.5rem;width:38px;text-align:center;flex-shrink:0;}
+.podium-name{font-weight:800;font-size:.95rem;flex:1;text-align:left;}
+.podium-score{font-weight:900;font-size:1.1rem;color:var(--gold);}
+.podium-row:first-child{background:rgba(245,197,24,.1);border-color:rgba(245,197,24,.3);}
+.btn-play-again{background:linear-gradient(135deg,var(--gold),#e6b800);color:#1a1a1a;border:none;padding:14px 36px;font-size:1rem;font-weight:800;border-radius:8px;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(245,197,24,.35);}
+.btn-play-again:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(245,197,24,.45);}
+
+/* ── CONFETTI CANVAS ── */
+#confetti-canvas{position:fixed;inset:0;pointer-events:none;z-index:299;}
+
+/* ── ANIMATIONS ── */
+@keyframes modalIn{
+  from{transform:translateY(28px) scale(.96);opacity:0;}
+  to{transform:translateY(0) scale(1);opacity:1;}
+}
+@keyframes answerReveal{
+  from{opacity:0;transform:translateY(-10px) scale(.97);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+@keyframes scorePop{
+  0%{transform:scale(1);}
+  55%{transform:scale(1.55);}
+  100%{transform:scale(1);}
+}
+@keyframes deltaFloat{
+  0%{opacity:1;transform:translateY(0) scale(1);}
+  100%{opacity:0;transform:translateY(-34px) scale(1.15);}
+}
+@keyframes flashAdd{
+  0%,100%{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.13);}
+  50%{background:rgba(76,175,80,.25);border-color:rgba(76,175,80,.6);}
+}
+@keyframes flashSub{
+  0%,100%{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.13);}
+  50%{background:rgba(239,83,80,.22);border-color:rgba(239,83,80,.5);}
+}
+@keyframes cellFlip{
+  0%{transform:scale(1) rotateY(0deg);}
+  50%{transform:scale(.9) rotateY(90deg);}
+  100%{transform:scale(1) rotateY(0deg);}
+}
+@keyframes winnerIn{
+  from{transform:scale(.82) translateY(20px);opacity:0;}
+  to{transform:scale(1) translateY(0);opacity:1;}
+}
 </style>
 </head>
 <body>
 
-<!-- ── SETUP SCREEN ── -->
+<!-- ── SETUP ── -->
 <div id="setup">
   <h1>⚡ Arc4 Trivia Challenge</h1>
-  <p class="sub">Set up your teams before the game starts</p>
+  <p class="sub">Set up your teams, then play</p>
 
   <div class="setup-card">
     <div class="setup-label">How many teams?</div>
@@ -112,10 +187,10 @@ body{font-family:Verdana,Arial,sans-serif;background:var(--bd);color:#fff;min-he
   </div>
 
   <div class="setup-card">
-    <div class="setup-label">Team Names</div>
-    <div class="team-inputs" id="team-inputs"></div>
+    <div class="setup-label">Team Names &amp; Players</div>
+    <div id="team-blocks"></div>
     <div class="setup-actions">
-      <button class="btn-setup btn-rand" onclick="randomTeamNames()">🎲 Random Names</button>
+      <button class="btn-setup btn-rand" onclick="randomTeamNames()">🎲 Random Team Names</button>
     </div>
   </div>
 
@@ -123,11 +198,12 @@ body{font-family:Verdana,Arial,sans-serif;background:var(--bd);color:#fff;min-he
   <a href="/builder.html" class="build-link">🛠 Build a custom game instead</a>
 </div>
 
-<!-- ── GAME SCREEN ── -->
+<!-- ── GAME ── -->
 <div id="game">
   <div id="topbar">
     <h1>⚡ Arc4 Trivia Challenge</h1>
-    <div class="topbar-btns">
+    <div class="topbar-right">
+      <button class="hdr-btn" id="mute-btn" onclick="toggleMute()" title="Toggle sound">🔊</button>
       <button class="hdr-btn" onclick="resetBoard()">↺ Reset</button>
       <button class="hdr-btn" onclick="goSetup()">⚙ Teams</button>
       <button class="hdr-btn" onclick="location.href='/index.html'">⌂ Home</button>
@@ -142,100 +218,40 @@ body{font-family:Verdana,Arial,sans-serif;background:var(--bd);color:#fff;min-he
       <div class="cat-cell">Tech &amp; Innovation</div>
       <div class="cat-cell">Arts &amp; Culture</div>
     </div>
-
-    <!-- $100 -->
     <div class="board-row">
-      <div class="cell-wrap" tabindex="0" data-pts="100" data-cat="Science &amp; Nature"
-        data-clue="The word 'muscle' comes from the Latin 'musculus,' meaning this small animal — because of the way muscles appear to move under skin."
-        data-ans="Mouse (Latin: musculus)"><div class="cell-pts">$100</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="100" data-cat="History &amp; Leaders"
-        data-clue="This ancient Greek philosopher wrote 'The Republic' and proposed a society governed by philosopher-kings."
-        data-ans="Plato"><div class="cell-pts">$100</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="100" data-cat="Words &amp; Language"
-        data-clue="A word that reads the same forwards and backwards — like 'racecar,' 'level,' or 'civic' — is called this."
-        data-ans="A palindrome"><div class="cell-pts">$100</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="100" data-cat="Tech &amp; Innovation"
-        data-clue="This distributed version-control system, created by Linus Torvalds in April 2005, is the most widely used tool for tracking changes in source code."
-        data-ans="Git"><div class="cell-pts">$100</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="100" data-cat="Arts &amp; Culture"
-        data-clue="This British author wrote both '1984' and 'Animal Farm,' two of the most influential critiques of totalitarianism ever published."
-        data-ans="George Orwell"><div class="cell-pts">$100</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="100" data-cat="Science & Nature" data-clue="The word 'muscle' comes from the Latin 'musculus,' meaning this small animal — because of the way muscles appear to move under skin." data-ans="Mouse (Latin: musculus)"><div class="cell-pts">$100</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="100" data-cat="History & Leaders" data-clue="This ancient Greek philosopher wrote 'The Republic' and proposed a society governed by philosopher-kings." data-ans="Plato"><div class="cell-pts">$100</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="100" data-cat="Words & Language" data-clue="A word that reads the same forwards and backwards — like 'racecar,' 'level,' or 'civic' — is called this." data-ans="A palindrome"><div class="cell-pts">$100</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="100" data-cat="Tech & Innovation" data-clue="This distributed version-control system, created by Linus Torvalds in April 2005, is the most widely used tool for tracking changes in source code." data-ans="Git"><div class="cell-pts">$100</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="100" data-cat="Arts & Culture" data-clue="This British author wrote both '1984' and 'Animal Farm,' two of the most influential critiques of totalitarianism ever published." data-ans="George Orwell"><div class="cell-pts">$100</div></div>
     </div>
-
-    <!-- $200 -->
     <div class="board-row">
-      <div class="cell-wrap" tabindex="0" data-pts="200" data-cat="Science &amp; Nature"
-        data-clue="This principle in quantum mechanics states that the more precisely you know a particle's position, the less precisely you can know its momentum — and vice versa."
-        data-ans="The Heisenberg Uncertainty Principle"><div class="cell-pts">$200</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="200" data-cat="History &amp; Leaders"
-        data-clue="This ancient Carthaginian general famously crossed the Alps with war elephants in 218 BC to invade the Roman Republic during the Second Punic War."
-        data-ans="Hannibal Barca"><div class="cell-pts">$200</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="200" data-cat="Words &amp; Language"
-        data-clue="This rhetorical device places seemingly contradictory terms side by side — examples include 'deafening silence,' 'bittersweet,' and 'living death.'"
-        data-ans="Oxymoron"><div class="cell-pts">$200</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="200" data-cat="Tech &amp; Innovation"
-        data-clue="This wireless standard, named after a 10th-century Danish king who united warring tribes, connects devices over short distances using radio waves."
-        data-ans="Bluetooth (named after Harald Bluetooth)"><div class="cell-pts">$200</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="200" data-cat="Arts &amp; Culture"
-        data-clue="The 'Mona Lisa' is believed to depict this woman — the wife of a Florentine merchant, confirmed by a 2005 document discovery."
-        data-ans="Lisa Gherardini (Lisa del Giocondo)"><div class="cell-pts">$200</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="200" data-cat="Science & Nature" data-clue="This principle in quantum mechanics states that the more precisely you know a particle's position, the less precisely you can know its momentum." data-ans="The Heisenberg Uncertainty Principle"><div class="cell-pts">$200</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="200" data-cat="History & Leaders" data-clue="This ancient Carthaginian general famously crossed the Alps with war elephants in 218 BC to invade the Roman Republic during the Second Punic War." data-ans="Hannibal Barca"><div class="cell-pts">$200</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="200" data-cat="Words & Language" data-clue="This rhetorical device places seemingly contradictory terms side by side — examples include 'deafening silence,' 'bittersweet,' and 'living death.'" data-ans="Oxymoron"><div class="cell-pts">$200</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="200" data-cat="Tech & Innovation" data-clue="This wireless standard, named after a 10th-century Danish king who united warring tribes, connects devices over short distances using radio waves." data-ans="Bluetooth (named after Harald Bluetooth)"><div class="cell-pts">$200</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="200" data-cat="Arts & Culture" data-clue="The 'Mona Lisa' is believed to depict this woman — the wife of a Florentine merchant, confirmed by a 2005 document discovery." data-ans="Lisa Gherardini (Lisa del Giocondo)"><div class="cell-pts">$200</div></div>
     </div>
-
-    <!-- $300 -->
     <div class="board-row">
-      <div class="cell-wrap" tabindex="0" data-pts="300" data-cat="Science &amp; Nature"
-        data-clue="This plant-cell organelle contains chlorophyll, captures sunlight, and is the site of photosynthesis. Animal cells lack it entirely."
-        data-ans="The chloroplast"><div class="cell-pts">$300</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="300" data-cat="History &amp; Leaders"
-        data-clue="This pandemic of 1347–1351, caused by the bacterium Yersinia pestis, killed an estimated 30–60% of Europe's population in under five years."
-        data-ans="The Black Death (Bubonic Plague)"><div class="cell-pts">$300</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="300" data-cat="Words &amp; Language"
-        data-clue="The word 'salary' traces back to the Latin 'salarium,' because Roman soldiers were partly paid in — or to buy — this essential commodity."
-        data-ans="Salt"><div class="cell-pts">$300</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="300" data-cat="Tech &amp; Innovation"
-        data-clue="This sorting algorithm, developed by Tony Hoare in 1959, uses a pivot-based 'divide and conquer' strategy and averages O(n log n) performance."
-        data-ans="Quicksort"><div class="cell-pts">$300</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="300" data-cat="Arts &amp; Culture"
-        data-clue="This Czech composer wrote his famous 'New World Symphony' (1893) while serving as director of the National Conservatory of Music in New York, weaving in themes inspired by African-American spirituals."
-        data-ans="Antonín Dvořák"><div class="cell-pts">$300</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="300" data-cat="Science & Nature" data-clue="This plant-cell organelle contains chlorophyll, captures sunlight, and is the site of photosynthesis. Animal cells lack it entirely." data-ans="The chloroplast"><div class="cell-pts">$300</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="300" data-cat="History & Leaders" data-clue="This pandemic of 1347–1351, caused by the bacterium Yersinia pestis, killed an estimated 30–60% of Europe's population in under five years." data-ans="The Black Death (Bubonic Plague)"><div class="cell-pts">$300</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="300" data-cat="Words & Language" data-clue="The word 'salary' traces back to the Latin 'salarium,' because Roman soldiers were partly paid in — or to buy — this essential commodity." data-ans="Salt"><div class="cell-pts">$300</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="300" data-cat="Tech & Innovation" data-clue="This sorting algorithm, developed by Tony Hoare in 1959, uses a pivot-based 'divide and conquer' strategy and averages O(n log n) performance." data-ans="Quicksort"><div class="cell-pts">$300</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="300" data-cat="Arts & Culture" data-clue="This Czech composer wrote his famous 'New World Symphony' (1893) while serving as director of the National Conservatory of Music in New York." data-ans="Antonín Dvořák"><div class="cell-pts">$300</div></div>
     </div>
-
-    <!-- $400 -->
     <div class="board-row">
-      <div class="cell-wrap" tabindex="0" data-pts="400" data-cat="Science &amp; Nature"
-        data-clue="This element — atomic number 43 — was the first to be artificially synthesized (1937, by Segrè and Perrier) and has no stable isotopes, making it essentially absent from nature."
-        data-ans="Technetium (Tc)"><div class="cell-pts">$400</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="400" data-cat="History &amp; Leaders"
-        data-clue="In 1905, Albert Einstein published four landmark papers in a single year, revolutionizing physics. This German phrase — translating to 'miracle year' — describes it."
-        data-ans="Annus Mirabilis"><div class="cell-pts">$400</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="400" data-cat="Words &amp; Language"
-        data-clue="The word 'serendipity' was coined by Horace Walpole in 1754, based on a Persian fairy tale set in the ancient name for this island nation."
-        data-ans="Sri Lanka (ancient name: Serendip)"><div class="cell-pts">$400</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="400" data-cat="Tech &amp; Innovation"
-        data-clue="Alan Turing's 1936 paper 'On Computable Numbers' introduced this theoretical model of computation, defining the fundamental limits of what any algorithm can compute."
-        data-ans="The Turing Machine"><div class="cell-pts">$400</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="400" data-cat="Arts &amp; Culture"
-        data-clue="This 1605 Spanish novel — widely considered the first modern novel — follows an aging nobleman who reads so many chivalric romances that he loses his mind and sets off as a knight-errant."
-        data-ans="Don Quixote (by Miguel de Cervantes)"><div class="cell-pts">$400</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="400" data-cat="Science & Nature" data-clue="This element — atomic number 43 — was the first to be artificially synthesized (1937) and has no stable isotopes, making it essentially absent from nature." data-ans="Technetium (Tc)"><div class="cell-pts">$400</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="400" data-cat="History & Leaders" data-clue="In 1905, Albert Einstein published four landmark papers in a single year, revolutionizing physics. This German phrase — meaning 'miracle year' — describes it." data-ans="Annus Mirabilis"><div class="cell-pts">$400</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="400" data-cat="Words & Language" data-clue="The word 'serendipity' was coined by Horace Walpole in 1754, based on a Persian fairy tale set in the ancient name for this island nation." data-ans="Sri Lanka (ancient name: Serendip)"><div class="cell-pts">$400</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="400" data-cat="Tech & Innovation" data-clue="Alan Turing's 1936 paper introduced this theoretical model of computation, defining the fundamental limits of what any algorithm can compute." data-ans="The Turing Machine"><div class="cell-pts">$400</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="400" data-cat="Arts & Culture" data-clue="This 1605 Spanish novel — widely considered the first modern novel — follows an aging nobleman who loses his mind reading chivalric romances and sets off as a knight-errant." data-ans="Don Quixote (by Miguel de Cervantes)"><div class="cell-pts">$400</div></div>
     </div>
-
-    <!-- $500 -->
     <div class="board-row">
-      <div class="cell-wrap" tabindex="0" data-pts="500" data-cat="Science &amp; Nature"
-        data-clue="This unproven mathematical conjecture, posed in a 1742 letter by Christian Goldbach to Euler, states that every even integer greater than 2 can be expressed as the sum of two prime numbers."
-        data-ans="Goldbach's Conjecture"><div class="cell-pts">$500</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="500" data-cat="History &amp; Leaders"
-        data-clue="This 3rd-century BC Greek polymath, working in Alexandria, calculated the Earth's circumference to within ~2% accuracy using the angle of shadows at noon in two cities — without leaving Egypt."
-        data-ans="Eratosthenes"><div class="cell-pts">$500</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="500" data-cat="Words &amp; Language"
-        data-clue="In linguistics, this term describes words whose pronunciation imitates the sound they describe — 'buzz,' 'sizzle,' 'murmur,' and 'crackle' are classic examples."
-        data-ans="Onomatopoeia"><div class="cell-pts">$500</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="500" data-cat="Tech &amp; Innovation"
-        data-clue="E.F. Codd's landmark 1970 paper in Communications of the ACM introduced this model, which became the foundation for all SQL databases."
-        data-ans="The relational model (relational database)"><div class="cell-pts">$500</div></div>
-      <div class="cell-wrap" tabindex="0" data-pts="500" data-cat="Arts &amp; Culture"
-        data-clue="This early-20th-century movement, launched by André Breton's 1924 manifesto in Paris, sought to unlock the unconscious mind through automatic writing, dream imagery, and irrational juxtaposition."
-        data-ans="Surrealism"><div class="cell-pts">$500</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="500" data-cat="Science & Nature" data-clue="This unproven conjecture, posed in a 1742 letter by Christian Goldbach to Euler, states that every even integer greater than 2 can be expressed as the sum of two prime numbers." data-ans="Goldbach's Conjecture"><div class="cell-pts">$500</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="500" data-cat="History & Leaders" data-clue="This 3rd-century BC Greek polymath, working in Alexandria, calculated the Earth's circumference to within ~2% accuracy using shadow angles at noon in two cities." data-ans="Eratosthenes"><div class="cell-pts">$500</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="500" data-cat="Words & Language" data-clue="In linguistics, this term describes words whose pronunciation imitates the sound they describe — 'buzz,' 'sizzle,' 'murmur,' and 'crackle' are classic examples." data-ans="Onomatopoeia"><div class="cell-pts">$500</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="500" data-cat="Tech & Innovation" data-clue="E.F. Codd's landmark 1970 paper in Communications of the ACM introduced this model, which became the foundation for all SQL databases." data-ans="The relational model (relational database)"><div class="cell-pts">$500</div></div>
+      <div class="cell-wrap" tabindex="0" data-pts="500" data-cat="Arts & Culture" data-clue="This early-20th-century movement, launched by André Breton's 1924 manifesto in Paris, sought to unlock the unconscious through automatic writing, dream imagery, and irrational juxtaposition." data-ans="Surrealism"><div class="cell-pts">$500</div></div>
     </div>
   </div>
 </div>
@@ -255,224 +271,453 @@ body{font-family:Verdana,Arial,sans-serif;background:var(--bd);color:#fff;min-he
       <div class="m-score-label">Award / Deduct Points</div>
       <div class="score-grid" id="score-grid"></div>
     </div>
-    <div class="kbd-hint">Space = reveal &nbsp;·&nbsp; Esc = close &nbsp;·&nbsp; 1–8 = add to team &nbsp;·&nbsp; Shift+1–8 = deduct</div>
+    <div class="kbd-hint">Space = reveal &nbsp;·&nbsp; Esc = close &nbsp;·&nbsp; 1–8 = award team &nbsp;·&nbsp; Shift+1–8 = deduct</div>
   </div>
 </div>
 
+<!-- ── WINNER OVERLAY ── -->
+<div id="winner-overlay">
+  <div id="winner-card">
+    <h2>🏆 Game Over!</h2>
+    <p class="sub" id="winner-sub"></p>
+    <div class="podium" id="podium"></div>
+    <button class="btn-play-again" onclick="resetBoard()">↺ Play Again</button>
+  </div>
+</div>
+
+<canvas id="confetti-canvas"></canvas>
+
 <script>
+// ── SOUND ENGINE (Web Audio API — no external files) ──────────────────────────
+var _ac = null;
+var muted = false;
+
+function getAC() {
+  if (!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)();
+  return _ac;
+}
+function beep(freq, type, dur, vol, startDelay) {
+  if (muted) return;
+  try {
+    var c = getAC(), o = c.createOscillator(), g = c.createGain();
+    o.connect(g); g.connect(c.destination);
+    o.type = type; o.frequency.value = freq;
+    var t = c.currentTime + (startDelay || 0);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.start(t); o.stop(t + dur + 0.01);
+  } catch(e) {}
+}
+function sndOpen()   { beep(140,'sine',.45,.22); beep(190,'sine',.38,.12); }
+function sndReveal() { [440,554,659].forEach(function(f,i){ beep(f,'triangle',.22,.18,i*.07); }); }
+function sndAdd()    { beep(880,'sine',.14,.18); beep(1109,'sine',.14,.18,.09); }
+function sndDeduct() {
+  if (muted) return;
+  try {
+    var c=getAC(), o=c.createOscillator(), g=c.createGain();
+    o.connect(g); g.connect(c.destination);
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(260,c.currentTime);
+    o.frequency.exponentialRampToValueAtTime(70,c.currentTime+.32);
+    g.gain.setValueAtTime(.14,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.32);
+    o.start(); o.stop(c.currentTime+.33);
+  } catch(e) {}
+}
+function sndWinner() {
+  var notes=[523,659,784,1047,1319];
+  notes.forEach(function(f,i){
+    beep(f,'triangle',.28,.2,i*.1);
+    beep(f/2,'sine',.28,.1,i*.1);
+  });
+}
+function toggleMute() {
+  muted = !muted;
+  document.getElementById('mute-btn').textContent = muted ? '🔇' : '🔊';
+}
+
+// ── DATA ──────────────────────────────────────────────────────────────────────
 var RAND_NAMES=['The Trivia Titans','Brain Trust','Les Quizerables','The Fact Finders','Smarty Pants','Agatha Quiztie','The Think Tank','Wild Guessers','I Am Smarticus','Tequila Mockingbird','404: Name Not Found','Ctrl+Alt+Defeat','Stack Overflow','The Dark Horses','Know-It-Alls','The Underdogs','The Renaissance Crew','Trivia Newton John','Quiz Khalifa','Team Phenomenal'];
-var SAVE='arc4-trivia-v2';
-var teams=[];
-var nTeams=2;
-var current=null;
+var SAVE = 'arc4-trivia-v3';
+var teams = [];
+var nTeams = 2;
+var current = null;
+// teamPlayers[i] = array of player name strings
+var teamPlayers = [];
 
-function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escH(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-// ── Setup screen ──────────────────────────────────────────────────────────────
-document.getElementById('nteam-pills').addEventListener('click',function(e){
-  var p=e.target.closest('[data-n]');if(!p)return;
-  nTeams=parseInt(p.dataset.n);
-  document.querySelectorAll('.num-pill').forEach(function(x){x.classList.remove('sel');});
+// ── SETUP ─────────────────────────────────────────────────────────────────────
+document.getElementById('nteam-pills').addEventListener('click', function(e){
+  var p = e.target.closest('[data-n]'); if (!p) return;
+  nTeams = parseInt(p.dataset.n);
+  document.querySelectorAll('.num-pill').forEach(function(x){ x.classList.remove('sel'); });
   p.classList.add('sel');
-  buildTeamInputs();
+  buildTeamBlocks();
 });
 
-function buildTeamInputs(){
-  var c=document.getElementById('team-inputs');c.innerHTML='';
-  for(var i=0;i<nTeams;i++){
-    var existing=teams[i];
-    var row=document.createElement('div');row.className='team-row';
-    row.innerHTML='<div class="team-num">'+(i+1)+'</div><input class="team-inp" id="ti-'+i+'" placeholder="Team '+(i+1)+'" value="'+(existing?escH(existing.name):'Team '+(i+1))+'">';
-    c.appendChild(row);
+function buildTeamBlocks() {
+  var container = document.getElementById('team-blocks');
+  container.innerHTML = '';
+  for (var i = 0; i < nTeams; i++) {
+    if (!teamPlayers[i]) teamPlayers[i] = [];
+    var block = document.createElement('div');
+    block.className = 'team-block';
+    block.dataset.ti = i;
+    var existingName = teams[i] ? teams[i].name : 'Team ' + (i+1);
+    block.innerHTML =
+      '<div class="team-block-header">' +
+        '<div class="team-num-badge">' + (i+1) + '</div>' +
+        '<input class="team-name-inp" id="ti-' + i + '" placeholder="Team ' + (i+1) + '" value="' + escH(existingName) + '">' +
+      '</div>' +
+      '<div class="players-wrap" id="pw-' + i + '"></div>';
+    container.appendChild(block);
+    renderPlayerChips(i);
   }
 }
 
-function randomTeamNames(){
-  var shuffled=RAND_NAMES.slice().sort(function(){return Math.random()-.5;});
-  for(var i=0;i<nTeams;i++){
-    var el=document.getElementById('ti-'+i);
-    if(el) el.value=shuffled[i%shuffled.length];
+function renderPlayerChips(ti) {
+  var wrap = document.getElementById('pw-' + ti);
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  teamPlayers[ti].forEach(function(name, pi) {
+    var chip = document.createElement('div');
+    chip.className = 'player-chip';
+    chip.innerHTML = escH(name) + '<button onclick="removePlayer(' + ti + ',' + pi + ')">×</button>';
+    wrap.appendChild(chip);
+  });
+  // Add player button
+  var addBtn = document.createElement('button');
+  addBtn.className = 'add-player-btn';
+  addBtn.textContent = '+ Add Player';
+  addBtn.onclick = function(){ showPlayerInput(ti); };
+  wrap.appendChild(addBtn);
+}
+
+function showPlayerInput(ti) {
+  var wrap = document.getElementById('pw-' + ti);
+  if (!wrap) return;
+  // Remove existing input if any
+  var existing = wrap.querySelector('.player-inp-wrap');
+  if (existing) { existing.remove(); return; }
+  var row = document.createElement('div');
+  row.className = 'player-inp-wrap';
+  row.innerHTML = '<input class="player-inp" placeholder="Player name" maxlength="24"> <button class="player-inp-ok">Add</button>';
+  wrap.appendChild(row);
+  var inp = row.querySelector('.player-inp');
+  var btn = row.querySelector('.player-inp-ok');
+  inp.focus();
+  function doAdd() {
+    var v = inp.value.trim();
+    if (v) { teamPlayers[ti].push(v); renderPlayerChips(ti); }
+    else row.remove();
+  }
+  btn.onclick = doAdd;
+  inp.addEventListener('keydown', function(e){
+    if (e.key === 'Enter') doAdd();
+    if (e.key === 'Escape') row.remove();
+  });
+}
+
+function removePlayer(ti, pi) {
+  teamPlayers[ti].splice(pi, 1);
+  renderPlayerChips(ti);
+}
+
+function randomTeamNames() {
+  var shuffled = RAND_NAMES.slice().sort(function(){ return Math.random() - .5; });
+  for (var i = 0; i < nTeams; i++) {
+    var el = document.getElementById('ti-' + i);
+    if (el) el.value = shuffled[i % shuffled.length];
   }
 }
 
-function startGame(){
-  teams=[];
-  for(var i=0;i<nTeams;i++){
-    var el=document.getElementById('ti-'+i);
-    teams.push({id:'t'+i,name:(el?el.value.trim():'')||'Team '+(i+1),score:0});
+function startGame() {
+  teams = [];
+  for (var i = 0; i < nTeams; i++) {
+    var el = document.getElementById('ti-' + i);
+    var score = (teams[i] ? teams[i].score : 0) || 0;
+    teams.push({ id: 't'+i, name: (el ? el.value.trim() : '') || 'Team '+(i+1), score: score, players: teamPlayers[i] || [] });
   }
-  document.getElementById('setup').style.display='none';
-  document.getElementById('game').style.display='block';
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('game').style.display = 'block';
   renderScoreboard();
   save();
 }
 
-function goSetup(){
-  document.getElementById('setup').style.display='flex';
-  document.getElementById('game').style.display='none';
-  buildTeamInputs();
+function goSetup() {
+  document.getElementById('setup').style.display = 'flex';
+  document.getElementById('game').style.display = 'none';
+  buildTeamBlocks();
 }
 
-// ── Scoreboard ────────────────────────────────────────────────────────────────
-function renderScoreboard(){
-  var sb=document.getElementById('scoreboard');sb.innerHTML='';
-  teams.forEach(function(t,i){
-    var el=document.createElement('div');el.className='team-score-el';el.id='tse-'+i;
-    el.innerHTML=
-      '<span class="ts-name" contenteditable="true" onblur="renameTeam('+i+',this)">'+escH(t.name)+'</span>'+
-      '<span class="ts-score'+(t.score<0?' negative':'')+'" id="tsc-'+i+'">'+t.score+'</span>'+
-      '<div class="ts-btns">'+
-        '<button class="ts-btn" onclick="quickAdj('+i+',1)" title="Add question points">+</button>'+
-        '<button class="ts-btn" onclick="quickAdj('+i+',-1)" title="Deduct question points">−</button>'+
+// ── SCOREBOARD ────────────────────────────────────────────────────────────────
+function renderScoreboard() {
+  var sb = document.getElementById('scoreboard'); sb.innerHTML = '';
+  teams.forEach(function(t, i) {
+    var el = document.createElement('div');
+    el.className = 'team-score-el'; el.id = 'tse-' + i;
+    var playersText = (t.players && t.players.length) ? t.players.join(', ') : '';
+    el.innerHTML =
+      '<div class="ts-top">' +
+        '<span class="ts-name" contenteditable="true" onblur="renameTeam(' + i + ',this)">' + escH(t.name) + '</span>' +
+        '<span class="ts-score' + (t.score < 0 ? ' negative' : '') + '" id="tsc-' + i + '">' + t.score + '</span>' +
+      '</div>' +
+      (playersText ? '<div class="ts-players">' + escH(playersText) + '</div>' : '') +
+      '<div class="ts-btns">' +
+        '<button class="ts-btn" onclick="quickAdj(' + i + ',1)" title="Add points">+</button>' +
+        '<button class="ts-btn" onclick="quickAdj(' + i + ',-1)" title="Deduct points">−</button>' +
       '</div>';
     sb.appendChild(el);
   });
 }
 
-function renameTeam(i,el){
-  teams[i].name=el.innerText.trim()||'Team '+(i+1);
-  el.innerText=teams[i].name;
-  renderScoreButtons();
-  save();
+function renameTeam(i, el) {
+  teams[i].name = el.innerText.trim() || 'Team ' + (i+1);
+  el.innerText = teams[i].name;
+  renderScoreButtons(); save();
 }
 
-function updateScore(i){
-  var el=document.getElementById('tsc-'+i);
-  if(el){el.textContent=teams[i].score;el.className='ts-score'+(teams[i].score<0?' negative':'');}
+function updateScore(i) {
+  var el = document.getElementById('tsc-' + i);
+  if (el) { el.textContent = teams[i].score; el.className = 'ts-score' + (teams[i].score < 0 ? ' negative' : ''); }
 }
 
-function quickAdj(i,dir){
-  var pts=current?parseInt(current.dataset.pts)*dir:0;
-  if(!pts)return;
-  teams[i].score+=pts;
+function animateScore(i, delta) {
+  var scoreEl = document.getElementById('tsc-' + i);
+  var teamEl  = document.getElementById('tse-' + i);
+  if (scoreEl) {
+    scoreEl.classList.remove('pop');
+    void scoreEl.offsetWidth; // reflow
+    scoreEl.classList.add('pop');
+    setTimeout(function(){ scoreEl.classList.remove('pop'); }, 400);
+  }
+  if (teamEl) {
+    var cls = delta > 0 ? 'flash-add' : 'flash-sub';
+    teamEl.classList.remove('flash-add','flash-sub');
+    void teamEl.offsetWidth;
+    teamEl.classList.add(cls);
+    setTimeout(function(){ teamEl.classList.remove(cls); }, 550);
+    // floating delta label
+    var d = document.createElement('span');
+    d.className = 'score-delta ' + (delta > 0 ? 'pos' : 'neg');
+    d.textContent = (delta > 0 ? '+' : '') + delta;
+    teamEl.appendChild(d);
+    setTimeout(function(){ d.remove(); }, 900);
+  }
+  if (delta > 0) sndAdd(); else sndDeduct();
+}
+
+function quickAdj(i, dir) {
+  if (!current) return;
+  var delta = parseInt(current.dataset.pts) * dir;
+  teams[i].score += delta;
   updateScore(i);
+  animateScore(i, delta);
   save();
 }
 
-function adjScore(i,dir){
-  var pts=current?parseInt(current.dataset.pts)*dir:0;
-  teams[i].score+=pts;
+function adjScore(i, dir) {
+  if (!current) return;
+  var delta = parseInt(current.dataset.pts) * dir;
+  teams[i].score += delta;
   updateScore(i);
+  animateScore(i, delta);
   save();
 }
 
-// ── Modal / board ─────────────────────────────────────────────────────────────
-document.querySelectorAll('.cell-wrap').forEach(function(cell){
-  cell.addEventListener('click',function(){openCell(cell);});
-  cell.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openCell(cell);}});
+// ── BOARD / MODAL ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.cell-wrap').forEach(function(cell) {
+  cell.addEventListener('click', function(){ openCell(cell); });
+  cell.addEventListener('keydown', function(e){ if (e.key==='Enter'||e.key===' '){ e.preventDefault(); openCell(cell); } });
 });
 
-function openCell(cell){
-  if(cell.classList.contains('used'))return;
-  current=cell;
-  document.getElementById('m-cat').textContent=cell.dataset.cat;
-  document.getElementById('m-pts').textContent='$'+cell.dataset.pts;
-  var clue=cell.dataset.clue||'';
-  var cEl=document.getElementById('m-clue');
-  cEl.textContent=clue;cEl.style.display=clue?'block':'none';
-  var aEl=document.getElementById('m-ans');
-  aEl.textContent=cell.dataset.ans;
-  aEl.className='m-ans';
-  document.getElementById('m-score').className='m-score';
-  document.getElementById('score-grid').innerHTML='';
-  if(!clue){
-    aEl.className='m-ans show';
-    document.getElementById('btn-reveal').style.display='none';
+function openCell(cell) {
+  if (cell.classList.contains('used')) return;
+  sndOpen();
+  // Flip animation
+  cell.classList.add('flip');
+  setTimeout(function(){ cell.classList.remove('flip'); }, 340);
+  current = cell;
+  document.getElementById('m-cat').textContent = cell.dataset.cat;
+  document.getElementById('m-pts').textContent = '$' + cell.dataset.pts;
+  var clue = cell.dataset.clue || '';
+  var cEl = document.getElementById('m-clue');
+  cEl.textContent = clue; cEl.style.display = clue ? 'block' : 'none';
+  var aEl = document.getElementById('m-ans');
+  aEl.textContent = cell.dataset.ans;
+  aEl.className = 'm-ans';
+  document.getElementById('m-score').className = 'm-score';
+  document.getElementById('score-grid').innerHTML = '';
+  if (!clue) {
+    sndReveal();
+    aEl.className = 'm-ans show';
+    document.getElementById('btn-reveal').style.display = 'none';
     cell.classList.add('used');
     renderScoreButtons();
-    document.getElementById('m-score').className='m-score show';
+    document.getElementById('m-score').className = 'm-score show';
     save();
   } else {
-    document.getElementById('btn-reveal').style.display='inline-block';
+    document.getElementById('btn-reveal').style.display = 'inline-block';
   }
   document.getElementById('overlay').classList.add('open');
 }
 
-function reveal(){
-  document.getElementById('m-ans').className='m-ans show';
-  document.getElementById('btn-reveal').style.display='none';
-  if(current) current.classList.add('used');
+function reveal() {
+  sndReveal();
+  document.getElementById('m-ans').className = 'm-ans show';
+  document.getElementById('btn-reveal').style.display = 'none';
+  if (current) current.classList.add('used');
   renderScoreButtons();
-  document.getElementById('m-score').className='m-score show';
+  document.getElementById('m-score').className = 'm-score show';
   save();
 }
 
-function renderScoreButtons(){
-  var g=document.getElementById('score-grid');g.innerHTML='';
-  teams.forEach(function(t,i){
-    var a=document.createElement('button');a.className='sg-btn sg-add';
-    a.textContent='+ '+t.name;a.onclick=function(){adjScore(i,1);};
-    var s=document.createElement('button');s.className='sg-btn sg-sub';
-    s.textContent='− '+t.name;s.onclick=function(){adjScore(i,-1);};
-    g.appendChild(a);g.appendChild(s);
+function renderScoreButtons() {
+  var g = document.getElementById('score-grid'); g.innerHTML = '';
+  teams.forEach(function(t, i) {
+    var a = document.createElement('button'); a.className = 'sg-btn sg-add';
+    a.textContent = '+ ' + t.name; a.onclick = function(){ adjScore(i, 1); };
+    var s = document.createElement('button'); s.className = 'sg-btn sg-sub';
+    s.textContent = '− ' + t.name; s.onclick = function(){ adjScore(i, -1); };
+    g.appendChild(a); g.appendChild(s);
   });
 }
 
-function closeModal(){document.getElementById('overlay').classList.remove('open');current=null;}
+function closeModal() { document.getElementById('overlay').classList.remove('open'); current = null; }
 
-document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.getElementById('overlay').addEventListener('click', function(e){ if (e.target === this) closeModal(); });
 
-document.addEventListener('keydown',function(e){
-  var open=document.getElementById('overlay').classList.contains('open');
-  if(e.key==='Escape'){if(open)closeModal();return;}
-  if(e.key===' '&&open){e.preventDefault();reveal();return;}
-  if(!open)return;
-  var n=parseInt(e.key);
-  if(n>=1&&n<=teams.length){
-    e.preventDefault();
-    adjScore(n-1,e.shiftKey?-1:1);
-  }
+document.addEventListener('keydown', function(e) {
+  var open = document.getElementById('overlay').classList.contains('open');
+  if (e.key === 'Escape') { if (open) closeModal(); return; }
+  if (e.key === ' ' && open) { e.preventDefault(); reveal(); return; }
+  if (!open) return;
+  var n = parseInt(e.key);
+  if (n >= 1 && n <= teams.length) { e.preventDefault(); adjScore(n-1, e.shiftKey ? -1 : 1); }
 });
 
-function resetBoard(){
-  if(!confirm('Reset the board and all scores? This cannot be undone.'))return;
-  document.querySelectorAll('.cell-wrap.used').forEach(function(c){c.classList.remove('used');});
-  teams.forEach(function(t,i){t.score=0;updateScore(i);});
-  clearSave();
-  closeModal();
+// ── WINNER DETECTION ──────────────────────────────────────────────────────────
+function checkWinner() {
+  var cells = document.querySelectorAll('.cell-wrap');
+  var allUsed = Array.from(cells).every(function(c){ return c.classList.contains('used'); });
+  if (!allUsed) return;
+  setTimeout(showWinner, 800);
 }
 
-// ── Persistence ───────────────────────────────────────────────────────────────
-function save(){
-  try{
-    var used=[];
-    document.querySelectorAll('.cell-wrap.used').forEach(function(c){used.push(c.dataset.cat+'|'+c.dataset.pts);});
-    localStorage.setItem(SAVE,JSON.stringify({teams:teams,used:used,nTeams:nTeams}));
-  }catch(e){}
+function showWinner() {
+  sndWinner();
+  var sorted = teams.slice().sort(function(a, b){ return b.score - a.score; });
+  var medals = ['🥇','🥈','🥉'];
+  var podium = document.getElementById('podium');
+  podium.innerHTML = '';
+  sorted.forEach(function(t, i) {
+    var row = document.createElement('div');
+    row.className = 'podium-row';
+    row.innerHTML =
+      '<div class="podium-rank">' + (medals[i] || (i+1)+'.') + '</div>' +
+      '<div class="podium-name">' + escH(t.name) + (t.players && t.players.length ? '<br><small style="font-weight:400;color:rgba(255,255,255,.4);font-size:.72rem">' + escH(t.players.join(', ')) + '</small>' : '') + '</div>' +
+      '<div class="podium-score">' + t.score.toLocaleString() + '</div>';
+    podium.appendChild(row);
+  });
+  document.getElementById('winner-sub').textContent = sorted[0].name + ' wins with ' + sorted[0].score.toLocaleString() + ' points!';
+  document.getElementById('winner-overlay').classList.add('open');
+  launchConfetti();
 }
-function loadSave(){
-  try{
-    var raw=localStorage.getItem(SAVE);if(!raw)return false;
-    var s=JSON.parse(raw);
-    if(s.teams&&s.teams.length){
-      teams=s.teams;nTeams=teams.length;
-      // Update pill selection
+
+// ── CONFETTI ──────────────────────────────────────────────────────────────────
+function launchConfetti() {
+  var canvas = document.getElementById('confetti-canvas');
+  var ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  var colors = ['#f5c518','#ff6b6b','#4ecdc4','#45b7d1','#a29bfe','#fd79a8','#55efc4','#fdcb6e'];
+  var particles = [];
+  for (var i = 0; i < 180; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: -10 - Math.random() * 200,
+      w: Math.random() * 9 + 4,
+      h: Math.random() * 5 + 3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rot: Math.random() * 360,
+      vx: (Math.random() - .5) * 5,
+      vy: Math.random() * 3.5 + 1.5,
+      vr: (Math.random() - .5) * 8
+    });
+  }
+  var frame;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    var alive = false;
+    particles.forEach(function(p) {
+      if (p.y > canvas.height + 20) return;
+      alive = true;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = Math.max(0, 1 - p.y / canvas.height);
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.vy += .04;
+    });
+    if (alive) { frame = requestAnimationFrame(draw); }
+    else { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+  }
+  if (frame) cancelAnimationFrame(frame);
+  draw();
+}
+
+function resetBoard() {
+  if (!confirm('Reset the board and all scores?')) return;
+  document.querySelectorAll('.cell-wrap.used').forEach(function(c){ c.classList.remove('used'); });
+  teams.forEach(function(t, i){ t.score = 0; updateScore(i); });
+  document.getElementById('winner-overlay').classList.remove('open');
+  clearSave(); closeModal();
+}
+
+// ── PERSISTENCE ───────────────────────────────────────────────────────────────
+function save() {
+  try {
+    var used = [];
+    document.querySelectorAll('.cell-wrap.used').forEach(function(c){ used.push(c.dataset.cat+'|'+c.dataset.pts); });
+    localStorage.setItem(SAVE, JSON.stringify({ teams: teams, used: used, nTeams: nTeams, teamPlayers: teamPlayers }));
+  } catch(e) {}
+  checkWinner();
+}
+function loadSave() {
+  try {
+    var raw = localStorage.getItem(SAVE); if (!raw) return false;
+    var s = JSON.parse(raw);
+    if (s.teams && s.teams.length) {
+      teams = s.teams; nTeams = teams.length;
+      teamPlayers = s.teamPlayers || teams.map(function(t){ return t.players || []; });
       document.querySelectorAll('.num-pill').forEach(function(p){
-        p.classList.toggle('sel',parseInt(p.dataset.n)===nTeams);
+        p.classList.toggle('sel', parseInt(p.dataset.n) === nTeams);
       });
-      buildTeamInputs();
-      teams.forEach(function(t,i){var el=document.getElementById('ti-'+i);if(el)el.value=t.name;});
+      buildTeamBlocks();
     }
-    if(s.used)s.used.forEach(function(k){
+    if (s.used) s.used.forEach(function(k){
       document.querySelectorAll('.cell-wrap').forEach(function(c){
-        if(c.dataset.cat+'|'+c.dataset.pts===k)c.classList.add('used');
+        if (c.dataset.cat+'|'+c.dataset.pts === k) c.classList.add('used');
       });
     });
     return true;
-  }catch(e){return false;}
+  } catch(e) { return false; }
 }
-function clearSave(){try{localStorage.removeItem(SAVE);}catch(e){}}
+function clearSave() { try { localStorage.removeItem(SAVE); } catch(e) {} }
 
-// ── Service Worker ────────────────────────────────────────────────────────────
-if('serviceWorker' in navigator){
+// ── SERVICE WORKER ────────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(function(){});
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
-buildTeamInputs();
-if(loadSave()&&teams.length){
-  document.getElementById('setup').style.display='none';
-  document.getElementById('game').style.display='block';
+// ── INIT ──────────────────────────────────────────────────────────────────────
+buildTeamBlocks();
+if (loadSave() && teams.length) {
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('game').style.display = 'block';
   renderScoreboard();
 }
 </script>

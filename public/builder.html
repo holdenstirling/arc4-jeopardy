@@ -132,7 +132,7 @@ label.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba
       <input type="text" id="game-title" placeholder="e.g. Arc4 April 2026 Jeopardy" maxlength="80">
     </div>
     <div style="flex:1;min-width:140px;">
-      <label class="fl">Number of Categories</label>
+      <label class="fl">Columns (Categories)</label>
       <div class="pills" id="num-pills">
         <div class="pill" data-n="3">3</div>
         <div class="pill" data-n="4">4</div>
@@ -140,6 +140,16 @@ label.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba
         <div class="pill" data-n="6">6</div>
         <div class="pill" data-n="7">7</div>
         <div class="pill" data-n="8">8</div>
+      </div>
+    </div>
+    <div style="flex:1;min-width:140px;">
+      <label class="fl">Rows (Questions per Category)</label>
+      <div class="pills" id="row-pills">
+        <div class="pill" data-r="3">3</div>
+        <div class="pill" data-r="4">4</div>
+        <div class="pill active-num" data-r="5">5</div>
+        <div class="pill" data-r="6">6</div>
+        <div class="pill" data-r="7">7</div>
       </div>
     </div>
   </div>
@@ -154,13 +164,16 @@ label.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba
 <!-- ── AUTO-GENERATE ── -->
 <div class="card">
   <div class="card-title">Auto-Generate Questions</div>
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
-    <span style="font-size:.8rem;color:rgba(255,255,255,.55);">Difficulty:</span>
-    <div class="pills" id="diff-pills">
-      <div class="pill" data-diff="easy">Easy</div>
-      <div class="pill active-medium" data-diff="medium">Medium</div>
-      <div class="pill" data-diff="hard">Hard</div>
-      <div class="pill" data-diff="mixed">Mixed ↑</div>
+  <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;margin-bottom:14px;">
+    <div>
+      <div style="font-size:.63rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--gold);margin-bottom:8px;">🎯 Question Difficulty</div>
+      <div class="pills" id="diff-pills">
+        <div class="pill" data-diff="easy">🟢 Easy</div>
+        <div class="pill active-medium" data-diff="medium">🟡 Medium</div>
+        <div class="pill" data-diff="hard">🔴 Hard</div>
+        <div class="pill" data-diff="mixed">🌈 Mixed</div>
+      </div>
+      <div style="margin-top:6px;font-size:.68rem;color:rgba(255,255,255,.3);">Mixed = easier rows first, harder rows last</div>
     </div>
   </div>
   <div class="controls-row">
@@ -170,8 +183,7 @@ label.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba
     <button class="btn btn-ghost" onclick="clearAll()">✕ Clear All</button>
   </div>
   <div style="margin-top:10px;font-size:.72rem;color:rgba(255,255,255,.3);line-height:1.6;">
-    Picks categories &amp; fills all cells from a verified bank of 225 questions across 15 topics.<br>
-    <strong style="color:rgba(255,255,255,.45);">Mixed</strong> = Easy $100–$200 · Medium $300–$400 · Hard $500 &nbsp;|&nbsp; Each ↺ button regenerates an individual cell.
+    Fills all cells from a verified bank of 225 questions across 15 topics. Each ↺ button regenerates an individual cell.
   </div>
 </div>
 
@@ -531,9 +543,11 @@ const QB = {
 };
 
 // ─── Available categories (all 15) ────────────────────────────────────────────
-const ALL_CATS = Object.keys(QB.easy);
-const POINTS   = [100,200,300,400,500];
+const ALL_CATS   = Object.keys(QB.easy);
+const ALL_POINTS = [100,200,300,400,500,600,700];
 let numCats    = 5;
+let numRows    = 5;
+let POINTS     = ALL_POINTS.slice(0, numRows);
 let difficulty = 'medium';
 let usedQ      = {};
 
@@ -586,6 +600,17 @@ document.getElementById('num-pills').addEventListener('click', e => {
   buildBoard();
 });
 
+// ─── Number of rows pills ─────────────────────────────────────────────────────
+document.getElementById('row-pills').addEventListener('click', e => {
+  const p = e.target.closest('[data-r]');
+  if (!p) return;
+  numRows = parseInt(p.dataset.r);
+  POINTS = ALL_POINTS.slice(0, numRows);
+  document.querySelectorAll('#row-pills .pill').forEach(x => x.classList.remove('active-num'));
+  p.classList.add('active-num');
+  buildBoard();
+});
+
 // ─── Difficulty pills ─────────────────────────────────────────────────────────
 document.getElementById('diff-pills').addEventListener('click', e => {
   const p = e.target.closest('[data-diff]');
@@ -599,7 +624,10 @@ document.getElementById('diff-pills').addEventListener('click', e => {
 });
 
 function cellDiff(r) {
-  if (difficulty === 'mixed') return r<=1?'easy':r<=3?'medium':'hard';
+  if (difficulty === 'mixed') {
+    const pct = numRows > 1 ? r / (numRows - 1) : 0;
+    return pct < 0.4 ? 'easy' : pct < 0.75 ? 'medium' : 'hard';
+  }
   return difficulty;
 }
 

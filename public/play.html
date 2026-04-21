@@ -470,6 +470,8 @@ body.spectator::after{content:'📺 Spectator Mode';position:fixed;bottom:10px;r
           <button onclick="undoLastAction();closeOverflowMenu()">↩ Undo</button>
           <button onclick="shareGame();closeOverflowMenu()">🔗 Share</button>
           <button id="overflow-host-btn" onclick="toggleHostMode();closeOverflowMenu()">🎙 Host Mode: OFF</button>
+          <button onclick="copyShareLink('player');closeOverflowMenu()">📺 Copy Player Link</button>
+          <button onclick="copyShareLink('host');closeOverflowMenu()">🎙 Copy Host Link</button>
           <button id="overflow-install" style="display:none" onclick="installPWA();closeOverflowMenu()">⊕ Install</button>
         </div>
       </div>
@@ -1215,6 +1217,7 @@ function adjScore(i, dir) {
   updateLeader();
   save();
   renderScoreButtons();
+  if (!_bcReceiving) bcSend({type:'scores', scores: teams.map(function(t){ return t.score; })});
 }
 
 function updateCellOwner(cell, teamIdx, isSteal) {
@@ -1312,6 +1315,7 @@ function openCell(cell) {
     startTimer();
   }
   document.getElementById('overlay').classList.add('open');
+  if (!_bcReceiving) bcSend({type:'cell-open', cat: cell.dataset.cat, pts: cell.dataset.pts});
 }
 
 function reveal() {
@@ -1323,6 +1327,7 @@ function reveal() {
   document.getElementById('m-score').className = 'm-score show';
   updateProgress();
   save();
+  if (!_bcReceiving) bcSend({type:'reveal'});
 }
 
 function renderScoreButtons() {
@@ -1356,7 +1361,7 @@ function renderScoreButtons() {
   });
 }
 
-function closeModal() { stopTimer(); ddWager = null; document.getElementById('overlay').classList.remove('open'); current = null; var hat = document.getElementById('host-ans-text'); if (hat) hat.textContent = ''; }
+function closeModal() { stopTimer(); ddWager = null; document.getElementById('overlay').classList.remove('open'); current = null; var hat = document.getElementById('host-ans-text'); if (hat) hat.textContent = ''; if (!_bcReceiving) bcSend({type:'cell-close'}); }
 
 document.getElementById('overlay').addEventListener('click', function(e){ if (e.target === this) closeModal(); });
 
@@ -1997,6 +2002,64 @@ document.addEventListener('click', function(e) {
 
 // ── HOST MODE ─────────────────────────────────────────────────────────────────
 var _hostMode = false;
+
+// ── SESSION URL + BROADCAST CHANNEL ──────────────────────────────────────
+var _sessionId = (function() {
+  var params = new URLSearchParams(location.search);
+  var s = params.get('s');
+  if (!s) {
+    s = Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 10);
+    var url = new URL(location.href);
+    url.searchParams.set('s', s);
+    history.replaceState(null, '', url.toString());
+  }
+  return s;
+})();
+
+var _bcReceiving = false;
+var _bc = (function() {
+  if (typeof BroadcastChannel === 'undefined') return null;
+  var ch = new BroadcastChannel('arc4-jeopardy-' + _sessionId);
+  ch.onmessage = function(e) {
+    var d = e.data;
+    _bcReceiving = true;
+    try {
+      if (d.type === 'cell-open') {
+        var el = document.querySelector(
+          '.cell-wrap[data-cat="' + d.cat.replace(/"/g, '\"') + '"][data-pts="' + d.pts + '"]'
+        );
+        if (el) openCell(el);
+      } else if (d.type === 'cell-close') {
+        closeModal();
+      } else if (d.type === 'reveal') {
+        reveal();
+      } else if (d.type === 'scores') {
+        d.scores.forEach(function(sc, i) {
+          if (teams[i]) { teams[i].score = sc; updateScore(i); }
+        });
+        updateLeader();
+      }
+    } finally {
+      _bcReceiving = false;
+    }
+  };
+  return ch;
+})();
+
+function bcSend(msg) {
+  if (_bc && !_bcReceiving) { try { _bc.postMessage(msg); } catch(ex) {} }
+}
+
+function copyShareLink(mode) {
+  var url = new URL(location.href);
+  url.searchParams.delete('host');
+  if (mode === 'host') url.searchParams.set('host', '1');
+  navigator.clipboard.writeText(url.toString()).then(function() {
+    showToast(mode === 'host' ? '🎙 Host link copied — open privately!' : '📺 Player link copied — share your screen!');
+  }).catch(function() {
+    prompt('Copy this link:', url.toString());
+  });
+}
 function toggleHostMode() {
   _hostMode = !_hostMode;
   document.body.classList.toggle('host-mode', _hostMode);
@@ -2010,9 +2073,10 @@ function toggleHostMode() {
     document.getElementById('m-score').className = 'm-score show';
   }
 }
-// Restore saved host mode
+// Restore saved host mode (also activate from ?host=1 URL param)
 (function() {
-  if (localStorage.getItem('arc4-host-mode') === '1') {
+  var params = new URLSearchParams(location.search);
+  if (localStorage.getItem('arc4-host-mode') === '1' || params.get('host') === '1') {
     _hostMode = true;
     document.body.classList.add('host-mode');
     var btn = document.getElementById('overflow-host-btn');

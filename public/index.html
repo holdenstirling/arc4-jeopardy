@@ -78,31 +78,35 @@ footer{margin-top:60px;color:rgba(255,255,255,0.18);font-size:0.75rem;}
   </a>
 </div>
 <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:28px;">
-  <button id="install-btn" onclick="installApp()" style="display:none;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.4);color:#f5c518;padding:10px 24px;border-radius:8px;font-size:.88rem;font-weight:700;cursor:pointer;">⊕ Install App for Offline Use</button>
+  <button id="install-btn" onclick="installApp()" style="background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.4);color:#f5c518;padding:10px 24px;border-radius:8px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;">⊕ Install App</button>
   <button class="share-btn" onclick="shareApp()">🔗 Share This App</button>
 </div>
 <div id="toast-idx"></div>
 
-<div class="install-guide">
-  <h3>📲 Install to Your Home Screen</h3>
-  <div class="install-steps">
-    <div class="install-col">
-      <h4>iPhone / iPad (Safari)</h4>
-      <ol>
-        <li>Open this page in <strong>Safari</strong></li>
-        <li>Tap the <strong>Share</strong> button (box with ↑)</li>
-        <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
-        <li>Tap <strong>Add</strong> — done!</li>
-      </ol>
-    </div>
-    <div class="install-col">
-      <h4>Android / Chrome</h4>
-      <ol>
-        <li>Open this page in <strong>Chrome</strong></li>
-        <li>Tap the <strong>⋮ menu</strong> (top right)</li>
-        <li>Tap <strong>"Add to Home Screen"</strong> or <strong>"Install App"</strong></li>
-        <li>Tap <strong>Add</strong> — done!</li>
-      </ol>
+<\!-- Install instructions modal -->
+<div id="install-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:8000;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#0d1b5e;border:1px solid rgba(245,197,24,.35);border-radius:16px;padding:28px 26px;max-width:560px;width:100%;position:relative;">
+    <button onclick="closeInstallModal()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:rgba(255,255,255,.4);font-size:1.3rem;cursor:pointer;line-height:1;">&#x2715;</button>
+    <h3 style="font-size:1rem;font-weight:800;color:#f5c518;margin-bottom:18px;">&#x1F4F2; Add to Home Screen</h3>
+    <div style="display:flex;gap:22px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);margin-bottom:8px;">iPhone / iPad (Safari)</div>
+        <ol style="padding-left:18px;">
+          <li style="font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.8;">Open in <strong>Safari</strong></li>
+          <li style="font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.8;">Tap <strong>Share</strong> (box with arrow &#x2191;)</li>
+          <li style="font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.8;">Tap <strong>"Add to Home Screen"</strong></li>
+          <li style="font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.8;">Tap <strong>Add</strong></li>
+        </ol>
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);margin-bottom:8px;">Android / Chrome</div>
+        <ol style="padding-left:18px;">
+          <li style="font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.8;">Open in <strong>Chrome</strong></li>
+          <li style="font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.8;">Tap the <strong>&#x22EE; menu</strong> (top right)</li>
+          <li style="font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.8;">Tap <strong>"Add to Home Screen"</strong></li>
+          <li style="font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.8;">Tap <strong>Add</strong></li>
+        </ol>
+      </div>
     </div>
   </div>
 </div>
@@ -112,14 +116,29 @@ footer{margin-top:60px;color:rgba(255,255,255,0.18);font-size:0.75rem;}
 <script>
 var deferredInstall = null;
 window.addEventListener('beforeinstallprompt', function(e) {
-  e.preventDefault(); deferredInstall = e;
-  document.getElementById('install-btn').style.display = 'block';
+  e.preventDefault();
+  deferredInstall = e;
+});
+window.addEventListener('appinstalled', function() {
+  deferredInstall = null;
+  var btn = document.getElementById('install-btn');
+  if (btn) { btn.textContent = 'Installed'; btn.style.opacity = '.45'; btn.style.cursor = 'default'; }
 });
 function installApp() {
-  if (!deferredInstall) return;
-  deferredInstall.prompt();
-  deferredInstall.userChoice.then(function(){ deferredInstall = null; document.getElementById('install-btn').style.display = 'none'; });
+  if (deferredInstall) {
+    deferredInstall.prompt();
+    deferredInstall.userChoice.then(function(r) { if (r.outcome === 'accepted') deferredInstall = null; });
+  } else {
+    var m = document.getElementById('install-modal');
+    if (m) { m.style.display = 'flex'; }
+  }
 }
+function closeInstallModal() {
+  var m = document.getElementById('install-modal');
+  if (m) m.style.display = 'none';
+}
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeInstallModal(); });
+document.addEventListener('click', function(e) { if (e.target && e.target.id === 'install-modal') closeInstallModal(); });
 function showToastIdx(msg) {
   var t = document.getElementById('toast-idx');
   if (!t) return;

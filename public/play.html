@@ -125,10 +125,16 @@ body.host-mode .host-ans-box{display:block;}
 body.host-mode #host-indicator{display:inline-flex;align-items:center;gap:3px;}
 body.host-mode .m-score{display:block !important;}
 /* ── TIMER ── */
-.timer-wrap{height:6px;background:rgba(255,255,255,.1);border-radius:3px;margin:-10px 0 18px;overflow:hidden;display:none;}
-.timer-bar{height:100%;background:var(--gold);border-radius:3px;transition:width .95s linear,background .25s;}
-.timer-bar.warning{background:#ff8a00;}
-.timer-bar.danger{background:#ff4444;}
+.timer-wrap{background:rgba(255,255,255,.06);border-radius:8px;margin:-10px 0 18px;display:none;padding:8px 12px 6px;}
+.timer-count-row{display:flex;align-items:baseline;justify-content:center;gap:5px;margin-bottom:6px;}
+.timer-count{font-size:2rem;font-weight:900;color:var(--gold);line-height:1;transition:color .25s;font-variant-numeric:tabular-nums;}
+.timer-count.warning{color:#ff8a00;}
+.timer-count.danger{color:#ff4444;}
+.timer-bar{height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;}
+.timer-bar-fill{height:100%;background:var(--gold);border-radius:3px;transition:width .95s linear,background .25s;}
+.timer-bar-fill.warning{background:#ff8a00;}
+.timer-bar-fill.danger{background:#ff4444;}
+
 
 /* ── STEAL / CELL OWNERSHIP ── */
 .cell-owner-badge{position:absolute;top:3px;right:3px;width:10px;height:10px;border-radius:50%;border:2px solid rgba(0,0,0,.5);z-index:2;pointer-events:none;}
@@ -540,7 +546,7 @@ body.spectator::after{content:'📺 Spectator Mode';position:fixed;bottom:10px;r
       <div class="host-ans-label">🔐 Judge’s Answer — visible to host only</div>
       <div class="host-ans-text" id="host-ans-text"></div>
     </div>
-    <div class="timer-wrap" id="timer-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+    <div class="timer-wrap" id="timer-wrap"><div class="timer-count-row"><span id="timer-count" class="timer-count"></span></div><div class="timer-bar"><div class="timer-bar-fill" id="timer-bar-fill"></div></div></div>
     <div class="m-ans" id="m-ans"></div>
     <div class="m-actions">
       <button class="btn-reveal" id="btn-reveal" onclick="reveal()">Reveal Answer</button>
@@ -737,16 +743,19 @@ function startTimer() {
   if (!timerIdx) return;
   clearInterval(_timerInterval);
   var total = TIMER_OPTS[timerIdx];
-  var secs = total;
-  var wrap = document.getElementById('timer-wrap');
-  var bar  = document.getElementById('timer-bar');
+  var secs  = total;
+  var wrap  = document.getElementById('timer-wrap');
+  var fill  = document.getElementById('timer-bar-fill');
+  var count = document.getElementById('timer-count');
   wrap.style.display = 'block';
-  bar.style.width = '100%'; bar.className = 'timer-bar';
+  if (fill)  { fill.style.width = '100%'; fill.className = 'timer-bar-fill'; }
+  if (count) { count.textContent = secs; count.className = 'timer-count'; }
   _timerInterval = setInterval(function() {
     secs--;
-    bar.style.width = (secs / total * 100) + '%';
-    if (secs / total <= 0.33) bar.className = 'timer-bar warning';
-    if (secs / total <= 0.15) bar.className = 'timer-bar danger';
+    var pct = secs / total;
+    var cls = pct <= 0.15 ? ' danger' : pct <= 0.33 ? ' warning' : '';
+    if (fill)  { fill.style.width = (pct * 100) + '%'; fill.className = 'timer-bar-fill' + cls; }
+    if (count) { count.textContent = secs; count.className = 'timer-count' + cls; }
     if (secs <= 0) {
       clearInterval(_timerInterval);
       if (!muted) { try { var c=getAC(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='square';o.frequency.setValueAtTime(880,c.currentTime);o.frequency.setValueAtTime(440,c.currentTime+.1);o.frequency.setValueAtTime(880,c.currentTime+.2);g.gain.setValueAtTime(.15,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.35);o.start();o.stop(c.currentTime+.36); } catch(e) {} }

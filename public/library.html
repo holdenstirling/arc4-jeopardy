@@ -13,11 +13,14 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--gold:#f5c518;--bd:#0d1b5e;--bm:#1a237e;--bb:#2a3698;}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bd);color:#fff;min-height:100vh;}
-header{background:linear-gradient(135deg,var(--bm),#283593);padding:16px 24px;border-bottom:4px solid var(--gold);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:50;}
-header h1{font-size:1.5rem;font-weight:900;color:var(--gold);letter-spacing:1px;}
-.header-nav{display:flex;gap:8px;align-items:center;}
-.nav-link{color:rgba(255,255,255,.5);text-decoration:none;font-size:.82rem;padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.1);transition:.15s;}
-.nav-link:hover{color:#fff;border-color:rgba(255,255,255,.3);}
+header{background:linear-gradient(135deg,var(--bm),#283593);padding:14px 24px;border-bottom:4px solid var(--gold);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:50;}
+header h1{font-size:1.35rem;font-weight:900;color:var(--gold);letter-spacing:1px;}
+.header-nav{display:flex;gap:6px;align-items:center;}
+.nav-link{color:rgba(255,255,255,.5);text-decoration:none;font-size:.8rem;padding:6px 13px;border-radius:6px;border:1px solid rgba(255,255,255,.12);transition:.15s;font-weight:600;}
+.nav-link:hover{color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.06);}
+.nav-link:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.nav-link.active{color:var(--gold);border-color:rgba(245,197,24,.4);background:rgba(245,197,24,.07);}
+.gc-btn:focus-visible,.btn-sm:focus-visible,.btn-build:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 .wrapper{max-width:1200px;margin:0 auto;padding:28px 18px 60px;}
 .lib-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:28px;}
 .lib-header-left h2{font-size:1.4rem;font-weight:800;color:var(--gold);margin-bottom:4px;}
@@ -77,8 +80,9 @@ header h1{font-size:1.5rem;font-weight:900;color:var(--gold);letter-spacing:1px;
   <h1>📚 Game Library</h1>
   <nav class="header-nav">
     <a href="/index.html" class="nav-link">⌂ Home</a>
+    <a href="/play.html" class="nav-link">🎮 Play</a>
     <a href="/builder.html" class="nav-link">🛠 Builder</a>
-    <a href="/play.html" class="nav-link">▶ Play</a>
+    <a href="/library.html" class="nav-link active">📚 Library</a>
   </nav>
 </header>
 

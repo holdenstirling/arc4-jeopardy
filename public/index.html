@@ -11,7 +11,15 @@
 <title>Holden's Jeopardy</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(160deg,#0d1b5e 0%,#1a237e 60%,#0d47a1 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;padding:40px 24px;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(160deg,#0d1b5e 0%,#1a237e 60%,#0d47a1 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;color:#fff;padding:0 24px 40px;}
+.site-header{width:100%;max-width:1060px;display:flex;align-items:center;justify-content:space-between;padding:14px 0;margin-bottom:32px;border-bottom:1px solid rgba(255,255,255,.07);}
+.site-header-brand{font-size:1rem;font-weight:900;color:#f5c518;letter-spacing:1px;}
+.site-nav{display:flex;gap:6px;align-items:center;}
+.site-nav a{color:rgba(255,255,255,.5);text-decoration:none;font-size:.8rem;padding:6px 13px;border-radius:6px;border:1px solid rgba(255,255,255,.12);transition:.15s;font-weight:600;}
+.site-nav a:hover{color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.06);}
+.site-nav a:focus-visible{outline:2px solid #f5c518;outline-offset:2px;}
+.site-nav a.active{color:#f5c518;border-color:rgba(245,197,24,.4);background:rgba(245,197,24,.07);}
+.main-content{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;width:100%;padding-top:20px;}
 h1{font-size:clamp(2.2rem,6vw,3.8rem);font-weight:900;color:#f5c518;text-shadow:2px 3px 0 rgba(0,0,0,0.35);letter-spacing:2px;text-align:center;margin-bottom:8px;}
 .sub{color:rgba(255,255,255,0.45);font-size:1rem;text-align:center;margin-bottom:52px;}
 .cards{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;max-width:1060px;}
@@ -22,6 +30,8 @@ h1{font-size:clamp(2.2rem,6vw,3.8rem);font-weight:900;color:#f5c518;text-shadow:
 .card p{font-size:0.84rem;color:rgba(255,255,255,0.5);line-height:1.55;}
 .card.primary{border-color:rgba(245,197,24,0.3);background:rgba(245,197,24,0.07);}
 .card.primary:hover{background:rgba(245,197,24,0.13);}
+.card:focus-visible{outline:2px solid #f5c518;outline-offset:3px;}
+.share-btn:focus-visible,#install-btn:focus-visible{outline:2px solid #f5c518;outline-offset:2px;}
 footer{margin-top:60px;color:rgba(255,255,255,0.18);font-size:0.75rem;}
 .share-btn{margin-top:20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);padding:9px 22px;border-radius:8px;font-size:.84rem;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
 .share-btn:hover{background:rgba(255,255,255,.12);color:#fff;}
@@ -37,6 +47,16 @@ footer{margin-top:60px;color:rgba(255,255,255,0.18);font-size:0.75rem;}
 </style>
 </head>
 <body>
+<div class="site-header">
+  <span class="site-header-brand">⚡ Holden's Jeopardy</span>
+  <nav class="site-nav">
+    <a href="/index.html" class="active">⌂ Home</a>
+    <a href="/play.html">🎮 Play</a>
+    <a href="/builder.html">🛠 Builder</a>
+    <a href="/library.html">📚 Library</a>
+  </nav>
+</div>
+<div class="main-content">
 <h1>⚡ Holden's Jeopardy</h1>
 <p class="sub">Team trivia for smart people</p>
 <div class="cards">
@@ -86,6 +106,7 @@ footer{margin-top:60px;color:rgba(255,255,255,0.18);font-size:0.75rem;}
   </div>
 </div>
 
+</div><!-- /.main-content -->
 <footer>Holden's Jeopardy · Internal Tools</footer>
 <script>
 var deferredInstall = null;

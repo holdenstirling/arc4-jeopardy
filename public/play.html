@@ -185,6 +185,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
   to{transform:rotate(90deg);}
 }
 
+/* ── SETUP NAV LINKS ── */
+.setup-nav{display:flex;gap:6px;align-items:center;margin-bottom:18px;align-self:flex-start;width:100%;max-width:560px;}
+.setup-nav a{color:rgba(255,255,255,.45);text-decoration:none;font-size:.8rem;padding:6px 13px;border-radius:6px;border:1px solid rgba(255,255,255,.12);transition:.15s;font-weight:600;}
+.setup-nav a:hover{color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.06);}
+.setup-nav a:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
 /* ── SAFE-AREA (notch / Dynamic Island / home bar) ── */
 body{padding-bottom:env(safe-area-inset-bottom,0);}
 #topbar{padding-left:max(16px,env(safe-area-inset-left,0));padding-right:max(16px,env(safe-area-inset-right,0));}
@@ -272,6 +278,34 @@ body{padding-bottom:env(safe-area-inset-bottom,0);}
   #portrait-hint{display:flex;}
 }
 
+/* ── PROGRESS STRIP ── */
+#progress-strip{background:rgba(0,0,0,.22);border-bottom:1px solid rgba(255,255,255,.06);padding:5px 14px;display:flex;align-items:center;gap:10px;}
+#progress-track{flex:1;height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;}
+#progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),#ffab00);border-radius:3px;transition:width .5s cubic-bezier(.34,1.56,.64,1);width:0%;}
+#progress-label{font-size:.65rem;font-weight:700;color:rgba(255,255,255,.32);white-space:nowrap;letter-spacing:.5px;}
+
+/* ── STREAK BADGE ── */
+.streak-badge{font-size:.62rem;font-weight:800;letter-spacing:.3px;padding:2px 7px;border-radius:10px;margin-top:3px;display:inline-block;animation:streakPop .3s cubic-bezier(.34,1.56,.64,1);}
+.streak-warm{background:rgba(255,171,0,.12);color:#ffab00;border:1px solid rgba(255,171,0,.3);}
+.streak-hot{background:rgba(255,107,107,.12);color:#ff6b6b;border:1px solid rgba(255,107,107,.3);}
+.streak-fire{background:rgba(245,197,24,.18);color:#f5c518;border:1px solid rgba(245,197,24,.45);}
+@keyframes streakPop{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+/* ── LEADER GLOW ── */
+.team-score-el.leader{border-color:rgba(245,197,24,.6) !important;box-shadow:0 0 16px rgba(245,197,24,.2),inset 0 0 10px rgba(245,197,24,.05);}
+
+/* ── DD WAGER SECTION ── */
+#dd-wager-section{margin-top:18px;animation:fadeInUp .35s ease-out;}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── FOCUS VISIBLE ── */
+.hdr-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.btn-reveal:focus-visible,.btn-close:focus-visible,.sg-btn:focus-visible,.ts-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.cell-wrap:focus-visible:not(.used){outline:3px solid var(--gold);outline-offset:-3px;}
+.num-pill:focus-visible,.add-player-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.btn-setup:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+a:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4px;}
+
 /* ── TOAST ── */
 #toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0));left:50%;transform:translateX(-50%) translateY(20px);background:rgba(20,30,90,.97);border:1px solid rgba(245,197,24,.45);border-radius:8px;padding:11px 22px;font-size:.82rem;font-weight:700;color:#fff;opacity:0;pointer-events:none;z-index:9000;transition:opacity .22s,transform .22s;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.4);}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -289,11 +323,11 @@ body{padding-bottom:env(safe-area-inset-bottom,0);}
 
 <!-- ── SETUP ── -->
 <div id="setup">
-  <div style="display:flex;gap:8px;align-items:center;margin-bottom:18px;align-self:flex-start;width:100%;max-width:560px;">
-    <a href="/index.html" style="color:rgba(255,255,255,.45);text-decoration:none;font-size:.8rem;padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.12);transition:.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.45)'">⌂ Home</a>
-    <a href="/builder.html" style="color:rgba(255,255,255,.45);text-decoration:none;font-size:.8rem;padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.12);transition:.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.45)'">🛠 Builder</a>
-    <a href="/library.html" style="color:rgba(255,255,255,.45);text-decoration:none;font-size:.8rem;padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.12);transition:.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.45)'">📚 Library</a>
-  </div>
+  <nav class="setup-nav">
+    <a href="/index.html">⌂ Home</a>
+    <a href="/builder.html">🛠 Builder</a>
+    <a href="/library.html">📚 Library</a>
+  </nav>
   <h1>⚡ Holden's Jeopardy</h1>
   <p class="sub">Set up your teams, then play</p>
 
@@ -338,13 +372,17 @@ body{padding-bottom:env(safe-area-inset-bottom,0);}
     </div>
   </div>
   <div id="scoreboard"></div>
+  <div id="progress-strip">
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <div id="progress-label">0 / 25</div>
+  </div>
   <div id="board">
     <div class="cat-row">
-      <div class="cat-cell">Science &amp; Nature</div>
-      <div class="cat-cell">History &amp; Leaders</div>
-      <div class="cat-cell">Words &amp; Language</div>
-      <div class="cat-cell">Tech &amp; Innovation</div>
-      <div class="cat-cell">Arts &amp; Culture</div>
+      <div class="cat-cell">🔬 Science &amp; Nature</div>
+      <div class="cat-cell">📜 History &amp; Leaders</div>
+      <div class="cat-cell">📝 Words &amp; Language</div>
+      <div class="cat-cell">💻 Tech &amp; Innovation</div>
+      <div class="cat-cell">🎨 Arts &amp; Culture</div>
     </div>
     <div class="board-row">
       <div class="cell-wrap" tabindex="0" data-pts="100" data-cat="Science & Nature" data-clue="The English word 'muscle' comes from the Latin word for this small rodent. Ancient Romans thought a contracting muscle looked like one moving beneath the skin." data-ans="A mouse"><div class="cell-pts">$100</div></div>
@@ -418,11 +456,11 @@ body{padding-bottom:env(safe-area-inset-bottom,0);}
 </div>
 
 <!-- ── DAILY DOUBLE OVERLAY ── -->
-<div id="dd-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:500;align-items:center;justify-content:center;flex-direction:column;">
-  <div style="text-align:center;animation:winnerIn .4s cubic-bezier(.34,1.56,.64,1);">
-    <div style="font-size:5rem;margin-bottom:16px;">🎰</div>
-    <div style="font-size:clamp(2rem,8vw,4rem);font-weight:900;color:#f5c518;letter-spacing:3px;text-shadow:0 0 40px rgba(245,197,24,.6);">DAILY DOUBLE!</div>
-    <div style="color:rgba(255,255,255,.5);font-size:1rem;margin-top:12px;">Place your wagers…</div>
+<div id="dd-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:500;align-items:center;justify-content:center;flex-direction:column;padding:20px;">
+  <div style="text-align:center;animation:winnerIn .4s cubic-bezier(.34,1.56,.64,1);max-width:400px;width:100%;">
+    <div style="font-size:5rem;margin-bottom:10px;">🎰</div>
+    <div style="font-size:clamp(2rem,8vw,3.5rem);font-weight:900;color:#f5c518;letter-spacing:3px;text-shadow:0 0 40px rgba(245,197,24,.6);">DAILY DOUBLE!</div>
+    <div id="dd-wager-section"></div>
   </div>
 </div>
 
@@ -583,6 +621,82 @@ function manualSave() { save(); showToast('💾 Game saved!'); }
 
 var _currentGameData = null; // set when a custom game is loaded
 
+// ── STREAKS ───────────────────────────────────────────────────────────────────
+var streaks = [];
+function initStreaks() { streaks = teams.map(function(){ return 0; }); }
+function updateStreak(i, correct) {
+  if (!streaks) streaks = [];
+  while (streaks.length <= i) streaks.push(0);
+  streaks[i] = correct ? (streaks[i] + 1) : 0;
+  renderStreakBadge(i);
+}
+function renderStreakBadge(i) {
+  var el = document.getElementById('tse-' + i);
+  if (!el) return;
+  var old = el.querySelector('.streak-badge');
+  if (old) old.remove();
+  var n = streaks[i] || 0;
+  if (n < 3) return;
+  var badge = document.createElement('div');
+  var cls = n >= 7 ? 'streak-fire' : n >= 5 ? 'streak-hot' : 'streak-warm';
+  badge.className = 'streak-badge ' + cls;
+  badge.textContent = n >= 7 ? '🔥 ' + n + ' streak!!' : n >= 5 ? '🔥 ' + n + ' in a row!' : '🌟 ' + n + ' streak';
+  el.appendChild(badge);
+}
+function clearStreakBadge(i) {
+  var el = document.getElementById('tse-' + i);
+  if (el) { var old = el.querySelector('.streak-badge'); if (old) old.remove(); }
+}
+
+// ── LEADER HIGHLIGHT ──────────────────────────────────────────────────────────
+function updateLeader() {
+  if (!teams.length) return;
+  var maxScore = Math.max.apply(null, teams.map(function(t){ return t.score; }));
+  teams.forEach(function(t, i) {
+    var el = document.getElementById('tse-' + i);
+    if (el) el.classList.toggle('leader', maxScore > 0 && t.score === maxScore);
+  });
+}
+
+// ── BOARD PROGRESS ────────────────────────────────────────────────────────────
+function updateProgress() {
+  var cells = document.querySelectorAll('.cell-wrap');
+  var used = document.querySelectorAll('.cell-wrap.used').length;
+  var total = cells.length;
+  var fill  = document.getElementById('progress-fill');
+  var label = document.getElementById('progress-label');
+  if (fill)  fill.style.width = (total > 0 ? (used / total * 100) : 0) + '%';
+  if (label) label.textContent = used + ' / ' + total + ' answered';
+}
+
+// ── CATEGORY EMOJI AUTO-TAG ───────────────────────────────────────────────────
+var CAT_EMOJI_MAP = [
+  ['science','🔬'],['biology','🧬'],['chemistry','⚗️'],['physics','⚛️'],
+  ['nature','🌿'],['animal','🐾'],['space','🚀'],['astronomy','🌌'],
+  ['history','📜'],['leader','👑'],['politic','🏛️'],['war','⚔️'],['ancient','🏺'],
+  ['geography','🗺️'],['country','🌍'],['world','🌐'],['city','🏙️'],
+  ['word','📝'],['language','🔤'],['literature','📚'],['book','📖'],['poem','✍️'],
+  ['tech','💻'],['computer','🖥️'],['innovat','⚡'],['inventor','💡'],['math','🔢'],
+  ['art','🎨'],['music','🎵'],['film','🎬'],['movie','🎬'],['sport','⚽'],
+  ['food','🍕'],['cultur','🎭'],['tv','📺'],['pop','⭐'],['celeb','🌟'],
+  ['game','🎮'],['myth','🐉'],['religion','✝️'],['money','💰'],['fashion','👗']
+];
+function catEmoji(name) {
+  var n = (name || '').toLowerCase();
+  for (var i = 0; i < CAT_EMOJI_MAP.length; i++) {
+    if (n.indexOf(CAT_EMOJI_MAP[i][0]) >= 0) return CAT_EMOJI_MAP[i][1] + ' ';
+  }
+  return '🎯 '; // default
+}
+
+// ── BIG WIN SOUND ─────────────────────────────────────────────────────────────
+function sndBigWin() {
+  if (muted) return;
+  var notes = [523,659,784,1047];
+  notes.forEach(function(f,i){ beep(f,'triangle',.22,.22,i*.06); beep(f*1.5,'sine',.15,.1,i*.06+.05); });
+  beep(1568,'triangle',.4,.25,.3);
+}
+
 function shareGame() {
   var url;
   var isDefault = !_currentGameData;
@@ -715,7 +829,10 @@ function startGame() {
   document.getElementById('setup').style.display = 'none';
   document.getElementById('game').style.display = 'block';
   renderScoreboard();
+  initStreaks();
   initDailyDoubles();
+  updateProgress();
+  updateLeader();
   save();
 }
 
@@ -793,7 +910,10 @@ function quickAdj(i, dir) {
 
 function adjScore(i, dir) {
   if (!current) return;
-  var delta = parseInt(current.dataset.pts) * dir;
+  // Use DD wager if this question is a Daily Double and wager was set
+  var facePts = parseInt(current.dataset.pts);
+  var pts = (ddWager !== null) ? ddWager : facePts;
+  var delta = pts * dir;
   var prevOwnerStr = current.dataset.owner;
   var prevOwner = (prevOwnerStr !== undefined && prevOwnerStr !== '') ? parseInt(prevOwnerStr) : -1;
   var isSteal = (dir > 0 && prevOwner >= 0 && prevOwner !== i);
@@ -803,24 +923,30 @@ function adjScore(i, dir) {
     teams[prevOwner].score -= delta;
     updateScore(prevOwner);
     animateScore(prevOwner, -delta);
+    updateStreak(prevOwner, false);
   }
 
   teams[i].score += delta;
   updateScore(i);
   animateScore(i, delta);
 
+  // Streak tracking
+  updateStreak(i, dir > 0);
+  // Big win sound for high-value correct answers
+  if (dir > 0 && pts >= 400) sndBigWin();
+
   // Update cell ownership
   if (dir > 0) {
     current.dataset.owner = i;
     updateCellOwner(current, i, isSteal);
   } else if (prevOwner === i) {
-    // Deducting from owner clears ownership
     delete current.dataset.owner;
     updateCellOwner(current, -1, false);
   }
 
+  updateLeader();
   save();
-  renderScoreButtons(); // refresh steal button labels
+  renderScoreButtons();
 }
 
 function updateCellOwner(cell, teamIdx, isSteal) {
@@ -896,6 +1022,7 @@ function reveal() {
   if (current) current.classList.add('used');
   renderScoreButtons();
   document.getElementById('m-score').className = 'm-score show';
+  updateProgress();
   save();
 }
 
@@ -929,7 +1056,7 @@ function renderScoreButtons() {
   });
 }
 
-function closeModal() { stopTimer(); document.getElementById('overlay').classList.remove('open'); current = null; }
+function closeModal() { stopTimer(); ddWager = null; document.getElementById('overlay').classList.remove('open'); current = null; }
 
 document.getElementById('overlay').addEventListener('click', function(e){ if (e.target === this) closeModal(); });
 
@@ -1025,6 +1152,11 @@ function resetBoard() {
   });
   teams.forEach(function(t, i){ t.score = 0; updateScore(i); });
   document.getElementById('winner-overlay').classList.remove('open');
+  initStreaks();
+  teams.forEach(function(_, i){ clearStreakBadge(i); });
+  document.querySelectorAll('.team-score-el').forEach(function(el){ el.classList.remove('leader'); });
+  updateProgress();
+  ddWager = null;
   clearSave(); closeModal();
 }
 
@@ -1043,7 +1175,7 @@ function buildBoardFromGame(entry) {
   cats.forEach(function(cat) {
     var cell = document.createElement('div');
     cell.className = 'cat-cell';
-    cell.textContent = cat.name;
+    cell.textContent = catEmoji(cat.name) + cat.name;
     catRow.appendChild(cell);
   });
   board.appendChild(catRow);
@@ -1139,18 +1271,58 @@ function sndDailyDouble() {
   beep(1000,'triangle',.4,.18,.65);
 }
 
+// ── DAILY DOUBLE WAGER ────────────────────────────────────────────────────────
+var ddWager = null;
+
+function showDDWagerInput(cell) {
+  var ddEl = document.getElementById('dd-overlay');
+  var section = document.getElementById('dd-wager-section');
+  var maxWager = teams.length ? Math.max.apply(null, teams.map(function(t){ return Math.max(t.score, 200); })) : 500;
+  section.innerHTML =
+    '<div style="background:rgba(0,0,0,.55);border:2px solid rgba(245,197,24,.4);border-radius:14px;padding:20px 22px;max-width:320px;margin:0 auto;">' +
+      '<div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.45);margin-bottom:10px;">Place your wager (0 – ' + maxWager + ')</div>' +
+      '<input id="dd-wager-inp" type="number" min="0" max="' + maxWager + '" placeholder="How much? 🎰" ' +
+        'style="width:100%;padding:10px;border-radius:7px;border:2px solid rgba(245,197,24,.5);background:rgba(0,0,0,.45);color:#f5c518;font-size:1.3rem;font-weight:900;text-align:center;outline:none;font-family:inherit;margin-bottom:12px;" ' +
+        'onkeydown="if(event.key===\'Enter\')confirmDDWager()">' +
+      '<button onclick="confirmDDWager()" style="width:100%;background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:13px;border-radius:8px;font-weight:900;font-size:1rem;cursor:pointer;font-family:inherit;letter-spacing:.5px;">🎰 Lock In &amp; See Clue</button>' +
+    '</div>';
+  ddEl._pendingCell = cell;
+  setTimeout(function(){
+    var inp = document.getElementById('dd-wager-inp');
+    if (inp) inp.focus();
+  }, 50);
+}
+
+function confirmDDWager() {
+  var inp = document.getElementById('dd-wager-inp');
+  var ddEl = document.getElementById('dd-overlay');
+  var cell = ddEl._pendingCell;
+  if (!cell) return;
+  var maxWager = teams.length ? Math.max.apply(null, teams.map(function(t){ return Math.max(t.score, 200); })) : 500;
+  var val = inp ? parseInt(inp.value) : 0;
+  if (isNaN(val) || val < 0) val = 0;
+  if (val > maxWager) val = maxWager;
+  ddWager = val;
+  // Clear section & close overlay
+  document.getElementById('dd-wager-section').innerHTML = '';
+  ddEl._pendingCell = null;
+  ddEl.style.display = 'none';
+  _origOpenCell(cell);
+}
+
 // Patch openCell to check for Daily Double
 var _origOpenCell = openCell;
 openCell = function(cell) {
   if (cell.classList.contains('used')) return;
   if (isDailyDouble(cell)) {
+    ddWager = null;
     sndDailyDouble();
     var ddEl = document.getElementById('dd-overlay');
+    document.getElementById('dd-wager-section').innerHTML =
+      '<div style="color:rgba(255,255,255,.4);font-size:.9rem;margin-top:14px;letter-spacing:.5px;">Get ready to wager…</div>';
     ddEl.style.display = 'flex';
-    setTimeout(function() {
-      ddEl.style.display = 'none';
-      _origOpenCell(cell);
-    }, 3000);
+    // Show wager input after fanfare settles
+    setTimeout(function(){ showDDWagerInput(cell); }, 1800);
     return;
   }
   _origOpenCell(cell);
@@ -1363,7 +1535,10 @@ if (loadSave() && teams.length) {
   document.getElementById('setup').style.display = 'none';
   document.getElementById('game').style.display = 'block';
   renderScoreboard();
+  initStreaks();
   initDailyDoubles();
+  updateProgress();
+  updateLeader();
 }
 </script>
 </body>

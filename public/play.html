@@ -338,6 +338,39 @@ a:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4
 #undo-btn{opacity:.35;cursor:not-allowed;}
 #undo-btn.active{opacity:1;cursor:pointer;}
 #undo-btn.active:hover{background:rgba(255,120,120,.18);border-color:rgba(255,120,120,.4);color:#ff8a80;}
+
+/* ── TEAM COLOR SWATCHES ── */
+.color-row{display:flex;gap:6px;align-items:center;margin-top:6px;}
+.color-swatch{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.15s;flex-shrink:0;}
+.color-swatch.sel{border-color:#fff;transform:scale(1.2);}
+.color-swatch:hover{transform:scale(1.15);}
+
+/* ── SPECTATOR MODE ── */
+body.spectator .topbar-right{display:none \!important;}
+body.spectator .ts-btns{display:none \!important;}
+body.spectator .progress-strip-wrap{pointer-events:none;}
+body.spectator #progress-strip{opacity:.6;}
+body.spectator::after{content:'📺 Spectator Mode';position:fixed;bottom:10px;right:14px;font-size:.62rem;color:rgba(255,255,255,.25);pointer-events:none;}
+
+/* ── KEYBOARD BAR ── */
+#kbd-bar{background:rgba(0,0,0,.2);border-bottom:1px solid rgba(255,255,255,.05);padding:4px 14px;font-size:.62rem;color:rgba(255,255,255,.22);letter-spacing:.3px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+@media(max-width:480px){#kbd-bar{display:none;}}
+
+/* ── SCORE HISTORY PANEL ── */
+#hist-panel{display:none;position:absolute;top:calc(100% + 4px);right:0;width:260px;background:#1a237e;border:2px solid rgba(245,197,24,.3);border-radius:10px;z-index:500;padding:8px;box-shadow:0 8px 32px rgba(0,0,0,.5);max-height:320px;overflow-y:auto;}
+#hist-panel.open{display:block;}
+.hist-row{display:flex;gap:8px;align-items:baseline;padding:5px 6px;border-radius:5px;font-size:.76rem;}
+.hist-row:hover{background:rgba(255,255,255,.06);}
+.hist-team{font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hist-delta{font-weight:800;min-width:50px;text-align:right;}
+.hist-delta.pos{color:#55efc4;}
+.hist-delta.neg{color:#ff7675;}
+.hist-time{color:rgba(255,255,255,.28);font-size:.65rem;white-space:nowrap;}
+.hist-empty{color:rgba(255,255,255,.3);font-size:.75rem;text-align:center;padding:12px;}
+.hist-wrap{position:relative;}
+
+/* ── MANUAL SCORE EDIT ── */
+.score-edit-inp{width:72px;font-size:1rem;font-weight:900;background:rgba(255,255,255,.12);border:2px solid var(--gold);border-radius:5px;color:#fff;text-align:center;padding:1px 4px;outline:none;font-family:inherit;}
 </style>
 </head>
 <body>
@@ -392,6 +425,10 @@ a:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4
     <div class="topbar-right">
       <button class="hdr-btn" onclick="location.href='/'" title="Home">⌂ Home</button>
       <button class="hdr-btn" id="mute-btn" onclick="toggleMute()" title="Toggle sound">🔊</button>
+      <div class="hist-wrap">
+      <button class="hdr-btn" id="hist-btn" onclick="toggleHistPanel()" title="Score history">📋</button>
+      <div id="hist-panel"></div>
+    </div>
       <button class="hdr-btn" id="undo-btn" onclick="undoLastAction()" title="Undo last score change" disabled>↩ Undo</button>
       <button class="hdr-btn" id="timer-btn" onclick="toggleTimer()" title="Cycle timer: OFF → 15s → 30s → 1m → 2m">⏱</button>
       <button class="hdr-btn" onclick="triggerFinalJeopardy()" title="Final Jeopardy">🏁 Final</button>
@@ -413,6 +450,7 @@ a:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4
     </div>
   </div>
   <div id="scoreboard"></div>
+  <div id="kbd-bar">Space = reveal &nbsp;·&nbsp; Esc = close &nbsp;·&nbsp; 1–8 = award team &nbsp;·&nbsp; Shift+1–8 = deduct &nbsp;·&nbsp; ↩ = undo last</div>
   <div id="progress-strip">
     <div id="progress-track"><div id="progress-fill"></div></div>
     <div id="progress-label">0 / 25</div>
@@ -731,6 +769,92 @@ function catEmoji(name) {
   return '🎯 '; // default
 }
 
+
+// ── DEFAULT BOARD POOL (randomly picked when no custom game is loaded) ─────────
+var DEFAULT_BOARDS = [
+null, // slot 0 = keep static HTML board
+{
+  title: "World Edition",
+  catData: [
+    { name: "Geography & Maps", clues: [
+      {c:"This country shares its name with the world's longest river and is home to the Great Pyramids of Giza.", a:"Egypt", pts:100},
+      {c:"The world's smallest independent country by area and population is entirely surrounded by the city of Rome.", a:"Vatican City", pts:200},
+      {c:"This narrow body of water between Denmark and Sweden connects the North Sea to the Baltic Sea.", a:"The Øresund Strait", pts:300},
+      {c:"More than half of the world's fresh surface water is contained in this country, which has more lakes than the rest of the world combined.", a:"Canada", pts:400},
+      {c:"This landlocked country in Central Asia is known as the 'Roof of the World' — its average elevation exceeds 14,000 feet above sea level.", a:"Tibet (or the Tibetan Plateau region of China)", pts:500}
+    ]},
+    { name: "Movies & Cinema", clues: [
+      {c:"This 1994 film starring Tom Hanks features the line 'Life is like a box of chocolates.'", a:"Forrest Gump", pts:100},
+      {c:"Director James Cameron holds both the first and second all-time worldwide box-office records with Avengers: Endgame being the only film between them. Name either of his two record-holders.", a:"Titanic or Avatar", pts:200},
+      {c:"This 1980 Stanley Kubrick film, based on a Stephen King novel, features the iconic line 'Here's Johnny\!'", a:"The Shining", pts:300},
+      {c:"In this 1999 film, two office workers discover a door behind a filing cabinet that leads directly into the mind of John Malkovich.", a:"Being John Malkovich", pts:400},
+      {c:"This Japanese director — whose films include Rashomon, Seven Samurai, and Yojimbo — is widely considered the most influential filmmaker in the history of cinema.", a:"Akira Kurosawa", pts:500}
+    ]},
+    { name: "Sports & Athletics", clues: [
+      {c:"In tennis, a score of 40-40 is called this, requiring one player to win two consecutive points to take the game.", a:"Deuce", pts:100},
+      {c:"This Olympic track event covers exactly 26.2 miles and is named after the Greek city from which a messenger ran to Athens to announce a military victory in 490 BC.", a:"The marathon", pts:200},
+      {c:"Used in cricket, baseball, and rounders, this batting statistic measures how many runs a player scores divided by the number of times they are dismissed.", a:"Batting average", pts:300},
+      {c:"The FIFA World Cup trophy is made of 18-karat gold and depicts two human figures holding up the Earth. It was designed by Italian sculptor Silvio Gazzaniga after this country won the 1970 tournament and kept the previous Jules Rimet trophy permanently.", a:"Brazil", pts:400},
+      {c:"In competitive weightlifting, this lift requires the barbell to be raised from the floor to overhead in a single explosive movement — unlike the clean and jerk, which uses two.", a:"The snatch", pts:500}
+    ]},
+    { name: "Food & Drink", clues: [
+      {c:"Mozzarella, provolone, and bocconcini are all varieties of this type of cheese originally from Italy.", a:"Italian cheese (accept any valid Italian cheese answer)", pts:100},
+      {c:"This Japanese dish of vinegared rice combined with raw fish, vegetables, or egg is often confused with the term 'sashimi,' which is just sliced raw fish without rice.", a:"Sushi", pts:200},
+      {c:"Named after a French city, this classic sauce made from egg yolks, mustard, vinegar, and oil was popularized globally as a sandwich spread.", a:"Mayonnaise (from Mahón or Bayonne)", pts:300},
+      {c:"The Scoville scale — invented by American pharmacist Wilbur Scoville in 1912 — measures the concentration of this compound, which gives chili peppers their heat.", a:"Capsaicin", pts:400},
+      {c:"In distilling, this term describes the portion of a whisky batch that evaporates through the cask walls during aging — typically 2% per year — considered the spirit's tribute to the atmosphere.", a:"The angel's share", pts:500}
+    ]},
+    { name: "Famous Firsts", clues: [
+      {c:"On July 20, 1969, this NASA mission made history when astronauts Neil Armstrong and Buzz Aldrin became the first humans to walk on the Moon.", a:"Apollo 11", pts:100},
+      {c:"In 1928, Scottish bacteriologist Alexander Fleming noticed that this common mold had killed bacteria in one of his petri dishes — accidentally discovering the world's first antibiotic.", a:"Penicillin (from Penicillium mold)", pts:200},
+      {c:"In 1869, the world's first transcontinental railroad was completed in the United States when two rail lines met at Promontory Summit, Utah. Name either of the two railroad companies involved.", a:"Union Pacific or Central Pacific", pts:300},
+      {c:"This New Zealand mountaineer and Tenzing Norgay made history on May 29, 1953, as the first confirmed climbers to reach the summit of Mount Everest.", a:"Edmund Hillary", pts:400},
+      {c:"In 1815, Ada Lovelace — daughter of poet Lord Byron — wrote what is widely considered the first computer algorithm while working with Charles Babbage on this machine, which he never finished building.", a:"The Analytical Engine", pts:500}
+    ]}
+  ]
+},
+{
+  title: "Brain Blast",
+  catData: [
+    { name: "Music & Bands", clues: [
+      {c:"This four-piece band from Liverpool released their debut album 'Please Please Me' in 1963 and went on to become the best-selling musical act of all time.", a:"The Beatles", pts:100},
+      {c:"This classical composer wrote nine symphonies, including his famous Ninth, despite being almost completely deaf by the time he composed it.", a:"Ludwig van Beethoven", pts:200},
+      {c:"In music theory, a chord built from a root, a major third, a fifth, and a minor seventh is called this — common in blues and jazz.", a:"A dominant seventh chord", pts:300},
+      {c:"This 1975 rock opera by The Who tells the story of a deaf, dumb, and blind boy who becomes a pinball champion.", a:"Tommy", pts:400},
+      {c:"The 'prepared piano' technique — inserting bolts, screws, and rubber between the strings — was developed by this American avant-garde composer, best known for his silent piece 4'33".", a:"John Cage", pts:500}
+    ]},
+    { name: "Animals & Wildlife", clues: [
+      {c:"The only mammal capable of true sustained flight, this nocturnal creature navigates using echolocation.", a:"A bat", pts:100},
+      {c:"A group of flamingos is called this — the same word used for a number of other impressive collective nouns including a group of ballerinas.", a:"A flamboyance", pts:200},
+      {c:"The blue whale is the largest animal ever known to have existed on Earth. Its heart is roughly the size of this common vehicle.", a:"A small car (or golf cart)", pts:300},
+      {c:"The mantis shrimp can see 16 different types of color receptors — compared to 3 in humans — and strikes prey with this part of its body at the same speed as a bullet.", a:"Its club-like appendage (dactyl club)", pts:400},
+      {c:"Unlike most fish, this slow-moving species is monogamous, the male carries the young to term in a specialized brood pouch, and it has no stomach — meaning food passes through its body in as little as 30 minutes.", a:"The seahorse", pts:500}
+    ]},
+    { name: "Math & Logic", clues: [
+      {c:"The sum of angles inside any triangle always equals this many degrees, regardless of the triangle's shape or size.", a:"180 degrees", pts:100},
+      {c:"In the Fibonacci sequence — 1, 1, 2, 3, 5, 8, 13 — each number is the sum of the two before it. What is the next number after 13?", a:"21", pts:200},
+      {c:"Euler's identity is often called the most beautiful equation in mathematics. It relates five fundamental constants: e, i, π, 1, and this number.", a:"Zero (0)", pts:300},
+      {c:"This mathematical concept, symbolized ∞, was first formally studied by German mathematician Georg Cantor, who proved there are actually different 'sizes' of it.", a:"Infinity", pts:400},
+      {c:"The Monty Hall Problem involves a game show with three doors. Behind one is a car; behind two are goats. After you pick door 1 and the host reveals a goat behind door 3, switching to door 2 gives you this probability of winning.", a:"2/3 (66.7%)", pts:500}
+    ]},
+    { name: "Myths & Legends", clues: [
+      {c:"In Greek mythology, this hero slew the Medusa and later rescued Andromeda from a sea monster using the severed head.", a:"Perseus", pts:100},
+      {c:"According to Norse mythology, the world will end in a cataclysmic battle called this — during which Odin, Thor, and most of the gods will be slain.", a:"Ragnarök", pts:200},
+      {c:"In Arthurian legend, this wizard and advisor to King Arthur was said to have been born walking backward through time — aging in reverse.", a:"Merlin", pts:300},
+      {c:"The Epic of Gilgamesh — widely considered one of the earliest works of literature — features a flood narrative strikingly similar to Noah's Ark. Gilgamesh was king of this ancient Mesopotamian city.", a:"Uruk", pts:400},
+      {c:"In Japanese mythology, this trickster fox spirit with shape-shifting powers gains additional tails — up to nine — as it grows in age, wisdom, and magical ability.", a:"The kitsune", pts:500}
+    ]},
+    { name: "Business & Money", clues: [
+      {c:"Founded in a garage in Cupertino in 1976 by Steve Jobs, Steve Wozniak, and Ronald Wayne, this company is the first publicly traded U.S. company to reach a $1 trillion market capitalization.", a:"Apple", pts:100},
+      {c:"This economic term describes the total monetary value of all goods and services produced within a country's borders in a given year.", a:"GDP (Gross Domestic Product)", pts:200},
+      {c:"Warren Buffett has run Berkshire Hathaway since 1965. His famous investing strategy — buying undervalued companies with strong fundamentals and holding them long-term — is called this.", a:"Value investing", pts:300},
+      {c:"This Dutch company, founded in 1602, is widely considered the world's first publicly traded company and the first to issue shares of stock and bonds to the general public.", a:"The Dutch East India Company (VOC)", pts:400},
+      {c:"The Black-Scholes model — which won its creators a Nobel Prize in Economics in 1997 — is used to calculate the theoretical price of this type of financial derivative, which gives the holder the right but not the obligation to buy or sell an asset at a specified price.", a:"Options (stock options / financial options)", pts:500}
+    ]}
+  ]
+}
+];
+
 // ── BIG WIN SOUND ─────────────────────────────────────────────────────────────
 function sndBigWin() {
   if (muted) return;
@@ -768,6 +892,7 @@ function shareGame() {
 var RAND_NAMES=['The Trivia Titans','Brain Trust','Les Quizerables','The Fact Finders','Smarty Pants','Agatha Quiztie','The Think Tank','Wild Guessers','I Am Smarticus','Tequila Mockingbird','404: Name Not Found','Ctrl+Alt+Defeat','Stack Overflow','The Dark Horses','Know-It-Alls','The Underdogs','The Renaissance Crew','Trivia Newton John','Quiz Khalifa','Team Phenomenal'];
 var SAVE = 'arc4-trivia-v3';
 var TEAM_COLORS = ['#4ecdc4','#ff6b6b','#a29bfe','#45b7d1','#fd79a8','#ffd32a','#55efc4','#badc58'];
+var teamColorIdxs = {}; // teamIdx → TEAM_COLORS index
 var teams = [];
 var nTeams = 2;
 var current = null;
@@ -799,9 +924,11 @@ function buildTeamBlocks() {
         '<div class="team-num-badge">' + (i+1) + '</div>' +
         '<input class="team-name-inp" id="ti-' + i + '" placeholder="Team ' + (i+1) + '" value="' + escH(existingName) + '">' +
       '</div>' +
+      '<div class="color-row" id="cr-' + i + '"></div>' +
       '<div class="players-wrap" id="pw-' + i + '"></div>';
     container.appendChild(block);
     renderPlayerChips(i);
+    renderColorSwatches(i);
   }
 }
 
@@ -866,7 +993,8 @@ function startGame() {
   for (var i = 0; i < nTeams; i++) {
     var el = document.getElementById('ti-' + i);
     var score = (teams[i] ? teams[i].score : 0) || 0;
-    teams.push({ id: 't'+i, name: (el ? el.value.trim() : '') || 'Team '+(i+1), score: score, players: teamPlayers[i] || [] });
+    var tcolor = TEAM_COLORS[teamColorIdxs[i] \!== undefined ? teamColorIdxs[i] : i] || TEAM_COLORS[i % TEAM_COLORS.length];
+    teams.push({ id: 't'+i, name: (el ? el.value.trim() : '') || 'Team '+(i+1), score: score, players: teamPlayers[i] || [], teamColor: tcolor });
   }
   document.getElementById('setup').style.display = 'none';
   document.getElementById('game').style.display = 'block';
@@ -890,11 +1018,12 @@ function renderScoreboard() {
   teams.forEach(function(t, i) {
     var el = document.createElement('div');
     el.className = 'team-score-el'; el.id = 'tse-' + i;
+    if (t.teamColor) el.style.borderLeftColor = t.teamColor;
     var playersText = (t.players && t.players.length) ? t.players.join(', ') : '';
     el.innerHTML =
       '<div class="ts-top">' +
         '<span class="ts-name" contenteditable="true" onblur="renameTeam(' + i + ',this)">' + escH(t.name) + '</span>' +
-        '<span class="ts-score' + (t.score < 0 ? ' negative' : '') + '" id="tsc-' + i + '">' + t.score + '</span>' +
+        '<span class="ts-score' + (t.score < 0 ? ' negative' : '') + '" id="tsc-' + i + '" title="Click to edit score" onclick="editScore(' + i + ')" style="cursor:pointer;">' + t.score + '</span>' +
       '</div>' +
       (playersText ? '<div class="ts-players">' + escH(playersText) + '</div>' : '') +
       '<div class="ts-btns">' +
@@ -996,6 +1125,7 @@ function adjScore(i, dir) {
     updateCellOwner(current, -1, false);
   }
 
+  logScore(i, delta);
   updateLeader();
   save();
   renderScoreButtons();
@@ -1012,7 +1142,7 @@ function updateCellOwner(cell, teamIdx, isSteal) {
   if (teamIdx >= 0 && teamIdx < teams.length) {
     var b = document.createElement('div');
     b.className = 'cell-owner-badge';
-    b.style.background = TEAM_COLORS[teamIdx % TEAM_COLORS.length];
+    b.style.background = (teams[teamIdx] && teams[teamIdx].teamColor) ? teams[teamIdx].teamColor : TEAM_COLORS[teamIdx % TEAM_COLORS.length];
     cell.appendChild(b);
   }
 
@@ -1589,6 +1719,102 @@ function installPWA() {
 }
 
 
+
+// ── TEAM COLOR SWATCHES ──────────────────────────────────────────────────────
+function renderColorSwatches(ti) {
+  var row = document.getElementById('cr-' + ti);
+  if (\!row) return;
+  row.innerHTML = '';
+  TEAM_COLORS.forEach(function(color, ci) {
+    var sw = document.createElement('div');
+    sw.className = 'color-swatch' + ((teamColorIdxs[ti] === undefined ? ti : teamColorIdxs[ti]) === ci ? ' sel' : '');
+    sw.style.background = color;
+    sw.title = 'Pick team color';
+    sw.onclick = (function(c){ return function() {
+      teamColorIdxs[ti] = c;
+      renderColorSwatches(ti);
+    }; })(ci);
+    row.appendChild(sw);
+  });
+}
+
+// ── MANUAL SCORE EDIT ────────────────────────────────────────────────────────
+function editScore(i) {
+  var span = document.getElementById('tsc-' + i);
+  if (\!span || span.querySelector('input')) return;
+  var cur = teams[i].score;
+  var inp = document.createElement('input');
+  inp.type = 'number';
+  inp.className = 'score-edit-inp';
+  inp.value = cur;
+  span.textContent = '';
+  span.appendChild(inp);
+  inp.focus(); inp.select();
+  function apply() {
+    var v = parseInt(inp.value);
+    if (\!isNaN(v)) {
+      var delta = v - teams[i].score;
+      pushUndo({ teamIdx: i, prevScore: teams[i].score, cell: null, prevOwner: -1, prevOwnerPrevScore: null, streakSnapshot: streaks.slice() });
+      teams[i].score = v;
+      logScore(i, delta);
+      updateScore(i);
+      updateLeader();
+      save();
+    } else {
+      updateScore(i);
+    }
+  }
+  inp.addEventListener('blur', apply);
+  inp.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { inp.blur(); }
+    if (e.key === 'Escape') { teams[i].score = cur; updateScore(i); }
+  });
+}
+
+// ── SCORE HISTORY ────────────────────────────────────────────────────────────
+var scoreHistory = [];
+function logScore(teamIdx, delta) {
+  if (delta === 0) return;
+  var now = new Date();
+  var hh = now.getHours(), mm = String(now.getMinutes()).padStart(2,'0');
+  scoreHistory.unshift({
+    teamName: (teams[teamIdx] && teams[teamIdx].name) || 'Team',
+    delta: delta,
+    newScore: (teams[teamIdx] && teams[teamIdx].score) || 0,
+    timeStr: hh + ':' + mm,
+    color: (teams[teamIdx] && teams[teamIdx].teamColor) || '#fff'
+  });
+  if (scoreHistory.length > 50) scoreHistory.pop();
+  if (document.getElementById('hist-panel').classList.contains('open')) renderHistPanel();
+}
+function renderHistPanel() {
+  var panel = document.getElementById('hist-panel');
+  if (\!scoreHistory.length) { panel.innerHTML = '<div class="hist-empty">No score changes yet</div>'; return; }
+  panel.innerHTML = scoreHistory.slice(0, 20).map(function(r) {
+    return '<div class="hist-row">' +
+      '<span class="hist-team" style="color:' + r.color + '">' + escH(r.teamName) + '</span>' +
+      '<span class="hist-delta ' + (r.delta > 0 ? 'pos' : 'neg') + '">' + (r.delta > 0 ? '+' : '') + r.delta + '</span>' +
+      '<span class="hist-time">' + r.timeStr + '</span>' +
+      '</div>';
+  }).join('');
+}
+function toggleHistPanel() {
+  var panel = document.getElementById('hist-panel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) renderHistPanel();
+}
+document.addEventListener('click', function(e) {
+  var wrap = document.querySelector('.hist-wrap');
+  if (wrap && \!wrap.contains(e.target)) document.getElementById('hist-panel').classList.remove('open');
+});
+
+// ── SPECTATOR MODE ────────────────────────────────────────────────────────────
+(function() {
+  if (new URLSearchParams(location.search).get('spectator') === '1') {
+    document.body.classList.add('spectator');
+  }
+})();
+
 // ── OVERFLOW MENU ──────────────────────────────────────────────────────────
 function toggleOverflowMenu() {
   var m = document.getElementById('overflow-menu');
@@ -1662,6 +1888,22 @@ if ('serviceWorker' in navigator) {
       if (tbh1b) tbh1b.textContent = '⚡ ' + entry.title;
     }
   } catch(e) {}
+})();
+
+// Random default board when no custom game is loaded
+(function() {
+  if (_currentGameData) return;
+  var picks = DEFAULT_BOARDS.filter(function(b){ return b \!== null; });
+  if (\!picks.length) return;
+  var roll = Math.floor(Math.random() * (picks.length + 1)); // +1 to include static board
+  if (roll === 0) return; // keep static HTML
+  var board = picks[roll - 1 < picks.length ? roll - 1 : picks.length - 1];
+  if (board && buildBoardFromGame(board)) {
+    _currentGameData = board;
+    document.title = board.title + ' · Holden\'s Jeopardy';
+    var h = document.querySelector('#topbar h1');
+    if (h) h.textContent = '⚡ ' + board.title;
+  }
 })();
 
 buildTeamBlocks();

@@ -8,7 +8,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Holden's Jeopardy">
 <link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="/icon-192.png">
 <title>Jeopardy Builder · Holden's Jeopardy</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -558,7 +557,221 @@ const QB = {
   }
 };
 
-// ─── Available categories (all 15) ────────────────────────────────────────────
+// ─── Extended question bank ──────────────────────────────────────────────────
+const QB_EXTRA = {
+  easy: {
+    "Geography & Maps": [
+      {c:"The capital city of Australia — often mistakenly thought to be Sydney", a:"Canberra"},
+      {c:"This ocean is the largest and deepest on Earth", a:"The Pacific Ocean"},
+      {c:"The country shaped like a boot that extends into the Mediterranean Sea", a:"Italy"},
+      {c:"The world's longest river, flowing through northeastern Africa", a:"The Nile"},
+      {c:"This country contains the Amazon rainforest — more than half of it by area", a:"Brazil"}
+    ],
+    "Movies & TV": [
+      {c:"The Disney film featuring the song 'Let It Go' and a princess named Elsa", a:"Frozen"},
+      {c:"This streaming service produced Stranger Things and The Crown", a:"Netflix"},
+      {c:"The 1994 film in which Tom Hanks plays Forrest Gump", a:"Forrest Gump"},
+      {c:"The Simpsons family lives in this fictional American city", a:"Springfield"},
+      {c:"The actor who played Tony Stark / Iron Man in the MCU", a:"Robert Downey Jr."}
+    ],
+    "Sports & Games": [
+      {c:"The number of players on a standard soccer (football) team on the field", a:"Eleven"},
+      {c:"In chess, this piece can only move diagonally", a:"The bishop"},
+      {c:"The sport played at Wimbledon", a:"Tennis"},
+      {c:"In basketball, a shot worth three points must be taken from beyond this line", a:"The three-point line"},
+      {c:"The Olympic Games are held every this many years for each (summer and winter) cycle", a:"Four years"}
+    ],
+    "Food & Cooking": [
+      {c:"The main ingredient in guacamole", a:"Avocado"},
+      {c:"This grain — used to make bread, pasta, and pizza dough — is the most widely consumed cereal crop in the world", a:"Wheat"},
+      {c:"Sushi is wrapped in sheets of this dried seaweed", a:"Nori"},
+      {c:"This yellow spice, derived from the root of a plant in the ginger family, gives curry its distinctive color", a:"Turmeric"},
+      {c:"The French term for a mixture of diced vegetables used as a base for soups and sauces", a:"Mirepoix"}
+    ],
+    "Music": [
+      {c:"The four-piece band from Liverpool that had a famous Ed Sullivan Show appearance in 1964", a:"The Beatles"},
+      {c:"Musical symbol indicating a piece should be played softly", a:"Piano (p)"},
+      {c:"This singer released 'Thriller' in 1982 — the best-selling album of all time", a:"Michael Jackson"},
+      {c:"An instrument with 88 keys played by pressing them to produce sound", a:"The piano"},
+      {c:"In music, the number of beats per minute is called this", a:"Tempo (or BPM)"}
+    ],
+    "Famous People": [
+      {c:"The scientist who developed the theory of general relativity", a:"Albert Einstein"},
+      {c:"The first woman to win a Nobel Prize, who won it twice — in physics and chemistry", a:"Marie Curie"},
+      {c:"This civil rights leader delivered the 'I Have a Dream' speech in 1963", a:"Martin Luther King Jr."},
+      {c:"The painter of the Mona Lisa and The Last Supper", a:"Leonardo da Vinci"},
+      {c:"This British prime minister led the UK through most of World War II", a:"Winston Churchill"}
+    ],
+    "Animals & Nature": [
+      {c:"The fastest land animal, capable of reaching speeds up to 70 mph", a:"The cheetah"},
+      {c:"A group of lions is called this", a:"A pride"},
+      {c:"This large marine mammal is the largest animal on Earth", a:"The blue whale"},
+      {c:"The process by which caterpillars transform into butterflies inside a chrysalis", a:"Metamorphosis"},
+      {c:"This flightless bird from New Zealand is also the national symbol of that country", a:"The kiwi"}
+    ],
+    "World Capitals": [
+      {c:"The capital of Japan", a:"Tokyo"},
+      {c:"The capital of Brazil", a:"Brasília"},
+      {c:"The capital of Canada", a:"Ottawa"},
+      {c:"The capital of Australia", a:"Canberra"},
+      {c:"The capital of Egypt", a:"Cairo"}
+    ],
+    "Pop Culture": [
+      {c:"The social media platform known for 280-character posts, now rebranded as X", a:"Twitter"},
+      {c:"The highest-grossing video game franchise of all time", a:"Mario (Nintendo)"},
+      {c:"This superhero's alter ego is Bruce Wayne", a:"Batman"},
+      {c:"The Boy Who Lived in J.K. Rowling's fantasy series", a:"Harry Potter"},
+      {c:"This card game, originally from Japan, features Pokémon characters battling each other", a:"The Pokémon Trading Card Game"}
+    ],
+    "Science Lab": [
+      {c:"H₂O is the chemical formula for this common substance", a:"Water"},
+      {c:"The planet with the most moons in our solar system", a:"Saturn"},
+      {c:"DNA stands for this", a:"Deoxyribonucleic acid"},
+      {c:"The force that keeps planets orbiting the Sun", a:"Gravity"},
+      {c:"An atom with 6 protons is this element, the basis of all life on Earth", a:"Carbon"}
+    ],
+    "Brands & Companies": [
+      {c:"This search engine's name became a verb meaning 'to look something up online'", a:"Google"},
+      {c:"The coffee chain known for writing customer names on cups", a:"Starbucks"},
+      {c:"This electric car company was founded by Elon Musk in 2003", a:"Tesla"},
+      {c:"The Swedish furniture company famous for flat-pack furniture and meatballs", a:"IKEA"},
+      {c:"This online marketplace, founded by Jeff Bezos in 1994, started as a bookstore", a:"Amazon"}
+    ],
+    "Holidays & Traditions": [
+      {c:"The holiday celebrated on October 31st, associated with costumes and candy", a:"Halloween"},
+      {c:"On this day each year, Americans give thanks and eat turkey", a:"Thanksgiving"},
+      {c:"The Jewish holiday of lights, celebrated with a menorah over 8 nights", a:"Hanukkah"},
+      {c:"The holiday marking the birth of Jesus Christ, celebrated on December 25th", a:"Christmas"},
+      {c:"This celebration of the new year in the Chinese calendar includes fireworks and dragon dances", a:"Chinese New Year (Lunar New Year)"}
+    ]
+  },
+  medium: {
+    "Geography & Maps": [
+      {c:"The only country that is both an island and a continent", a:"Australia"},
+      {c:"Lake Baikal in Siberia holds approximately 20% of the world's total unfrozen freshwater. It is also the world's oldest and this", a:"Deepest lake"},
+      {c:"This narrow strip of land connecting North and South America is also the location of a famous canal", a:"The Isthmus of Panama"},
+      {c:"The phenomenon causing the apparent deflection of moving objects (like winds) due to Earth's rotation", a:"The Coriolis effect"},
+      {c:"The Ring of Fire — a horseshoe-shaped zone of earthquakes and volcanic eruptions — encircles this ocean", a:"The Pacific Ocean"}
+    ],
+    "Movies & TV": [
+      {c:"This director's films include Pulp Fiction, Kill Bill, and Once Upon a Time in Hollywood", a:"Quentin Tarantino"},
+      {c:"The Academy Award for Best Picture in 2020 went to this South Korean film directed by Bong Joon-ho", a:"Parasite"},
+      {c:"In Breaking Bad, Walter White's drug kingpin alias is this", a:"Heisenberg"},
+      {c:"This 1968 Stanley Kubrick film ends with a mysterious monolith, a murderous AI called HAL, and a journey to Jupiter", a:"2001: A Space Odyssey"},
+      {c:"The fictional newspaper in The Simpsons is the Springfield", a:"Springfield Shopper"}
+    ],
+    "Sports & Games": [
+      {c:"In American football, a safety scores how many points for the defensive team", a:"Two points"},
+      {c:"This is the maximum score achievable in a single game of ten-pin bowling", a:"300"},
+      {c:"In poker, a hand containing five cards in sequence but not all the same suit is called this", a:"A straight"},
+      {c:"The governing body of world soccer (football), founded in 1904 and based in Zurich", a:"FIFA"},
+      {c:"Chess grandmaster and former world champion Garry Kasparov famously lost a match in 1997 to this IBM computer", a:"Deep Blue"}
+    ],
+    "Food & Cooking": [
+      {c:"The Maillard reaction — responsible for the browning of bread crusts, seared meat, and roasted coffee — is named after this type of scientist", a:"A French chemist (Louis-Camille Maillard)"},
+      {c:"This fermentation process converts sugars into alcohol and carbon dioxide using yeast", a:"Alcoholic fermentation"},
+      {c:"Umami is considered the fifth basic taste. This amino acid, first isolated from seaweed in 1908 by Japanese scientist Kikunae Ikeda, is primarily responsible for it", a:"Glutamate (monosodium glutamate / MSG)"},
+      {c:"A roux is made by cooking equal parts flour and this fat together — it's the base for many French sauces", a:"Butter"},
+      {c:"This French cooking technique involves sealing food in airtight plastic bags and cooking it in a precisely temperature-controlled water bath", a:"Sous vide"}
+    ],
+    "Music": [
+      {c:"This Italian composer wrote La Traviata, Rigoletto, and Aida — making him the dominant force in 19th-century opera", a:"Giuseppe Verdi"},
+      {c:"In jazz, this technique involves a soloist improvising over the chord changes of a standard tune while the rhythm section continues", a:"Playing over the changes (chord substitution / improvisation)"},
+      {c:"The time signature 6/8 means there are six of these per measure", a:"Eighth notes (quavers)"},
+      {c:"David Bowie's alter ego — a glam rock character from the 1972 album The Rise and Fall of Ziggy Stardust", a:"Ziggy Stardust"},
+      {c:"This electronic instrument, invented by Léon Theremin in 1920, is played without physical contact — the musician moves their hands near two antennas", a:"The theremin"}
+    ],
+    "Famous People": [
+      {c:"This mathematician and logician proved, in his incompleteness theorems, that in any consistent formal system there are statements that cannot be proven or disproven within that system", a:"Kurt Gödel"},
+      {c:"Before becoming a revolutionary, this Cuban leader was a lawyer and trained baseball pitcher who once allegedly tried out for professional teams", a:"Fidel Castro"},
+      {c:"She became the youngest person ever to win the Nobel Peace Prize in 2014, at age 17, for her advocacy of children's education", a:"Malala Yousafzai"},
+      {c:"This Renaissance polymath wrote the Codex Leicester — a scientific journal later purchased by Bill Gates — and also painted The Last Supper", a:"Leonardo da Vinci"},
+      {c:"The philosopher who proposed the thought experiment of a person locked in a room following instructions in Chinese, to argue that computers cannot truly understand language", a:"John Searle (the Chinese Room argument)"}
+    ],
+    "Animals & Nature": [
+      {c:"This cephalopod mollusk can change color in milliseconds using specialized cells called chromatophores, despite being colorblind", a:"The octopus (or cuttlefish)"},
+      {c:"The migratory route of the monarch butterfly spans up to 3,000 miles between this country and their Mexican wintering grounds", a:"The United States (or Canada)"},
+      {c:"Tardigrades — microscopic animals also called 'water bears' — are famous for surviving in conditions lethal to all other life, including this environment with no air", a:"The vacuum of space"},
+      {c:"This chemical compound, produced by fireflies through a reaction involving luciferin and oxygen, is responsible for their bioluminescent glow", a:"Luciferase (or the luciferin-luciferase reaction)"},
+      {c:"The pistol shrimp generates a cavitation bubble hot enough to briefly match the temperature of the surface of this celestial body when it snaps its claw", a:"The Sun"}
+    ],
+    "World Capitals": [
+      {c:"The capital of Kazakhstan, renamed Nur-Sultan in 2019 and then renamed again to this in 2022", a:"Astana"},
+      {c:"This capital city sits at the highest elevation of any national capital in the world, at over 11,900 feet above sea level, in Bolivia", a:"La Paz (or Sucre — both are capitals)"},
+      {c:"Naypyidaw replaced Yangon as the capital of this Southeast Asian country in 2006", a:"Myanmar (Burma)"},
+      {c:"This island nation's capital, Reykjavik, is the world's northernmost national capital", a:"Iceland"},
+      {c:"The capital of New Zealand, often confused with its largest city Auckland", a:"Wellington"}
+    ],
+    "Pop Culture": [
+      {c:"The name of Tony Stark's AI assistant in the Iron Man films before Vision took over", a:"JARVIS"},
+      {c:"This author's dystopian novel, featuring the telescreens and the phrase 'Big Brother is watching you', was published in 1949", a:"George Orwell (Nineteen Eighty-Four / 1984)"},
+      {c:"The fictional town of Hawkins, Indiana is the setting for this Netflix supernatural series", a:"Stranger Things"},
+      {c:"This 2009 James Cameron film — the highest-grossing film in history until Avatar: The Way of Water — was set on the moon Pandora", a:"Avatar"},
+      {c:"The language invented by J.R.R. Tolkien for the Elves in The Lord of the Rings", a:"Quenya (or Sindarin)"}
+    ],
+    "Science Lab": [
+      {c:"This subatomic particle, discovered in 2012 at CERN using the Large Hadron Collider, is responsible for giving other particles mass", a:"The Higgs boson"},
+      {c:"In chemistry, pH 7 is considered neutral. A solution with pH 3 is this compared to one with pH 4", a:"Ten times more acidic"},
+      {c:"This branch of physics studies phenomena at the quantum scale and gives rise to effects like superposition and entanglement", a:"Quantum mechanics"},
+      {c:"The double-helix structure of DNA was described in a 1953 Nature paper by these two scientists, using X-ray crystallography data from Rosalind Franklin", a:"Watson and Crick (James Watson and Francis Crick)"},
+      {c:"This thought experiment, proposed by Erwin Schrödinger, illustrates the paradox of quantum superposition using a cat that is both alive and dead until observed", a:"Schrödinger's cat"}
+    ],
+    "Brands & Companies": [
+      {c:"This company's logo features a bitten apple, inspired by — according to designer Rob Janoff — simply making it recognizable at small sizes", a:"Apple"},
+      {c:"This Dutch streaming music company, founded in 2006, pays artists a fraction of a cent per stream", a:"Spotify"},
+      {c:"The two Stanford PhD students who founded Google in 1998", a:"Larry Page and Sergey Brin"},
+      {c:"This company, founded by Masayoshi Son, runs one of the world's largest technology investment funds and owns SoftBank", a:"SoftBank"},
+      {c:"This consulting firm — founded in 1926 and known for recruiting only from elite universities — is considered one of the most prestigious in the world alongside McKinsey and Bain", a:"Booz Allen Hamilton (or Deloitte — accept McKinsey if confused with peer)"}
+    ]
+  },
+  hard: {
+    "Geography & Maps": [
+      {c:"The Mercator projection — invented in 1569 and still widely used in navigation — significantly distorts the size of land masses near this geographic feature", a:"The poles (high latitudes)"},
+      {c:"The Fertile Crescent — the region often called the 'Cradle of Civilization' — spans parts of modern Iraq, Syria, Lebanon, Jordan, Israel, and this country", a:"Turkey (and Egypt, depending on definition)"},
+      {c:"This tiny European microstate, completely surrounded by Italy, holds the title of the world's oldest republic, founded in 301 AD", a:"San Marino"},
+      {c:"The Bosporus Strait divides this country between two continents — Europe and Asia", a:"Turkey"},
+      {c:"Dixon Line and the Mason-Dixon Line are often confused. The actual Mason-Dixon Line, surveyed in the 1760s, forms the border between Pennsylvania and this state", a:"Maryland"}
+    ],
+    "Movies & TV": [
+      {c:"Andrei Tarkovsky's 1972 Soviet science fiction film — based on a novel by Stanislaw Lem — depicts a psychologist sent to a space station orbiting this mysterious ocean planet", a:"Solaris"},
+      {c:"The Dogme 95 movement — a filmmaking collective rejecting Hollywood artifice — was cofounded by Danish director Lars von Trier and this director, who made the film Festen", a:"Thomas Vinterberg"},
+      {c:"Charlie Kaufman wrote the screenplay for this 2004 Michel Gondry film featuring a couple erasing each other from their memories using a fictional procedure", a:"Eternal Sunshine of the Spotless Mind"},
+      {c:"In the TV series The Wire, this fictional drug dealer — played by Michael K. Williams — is known for robbing drug dealers and whistling 'The Farmer in the Dell'", a:"Omar Little"},
+      {c:"The Austrian director Michael Haneke remade his own film shot-for-shot in the US in 2007. The 1997 original — in German — depicted a bourgeois family terrorized by two young men in white gloves", a:"Funny Games"}
+    ],
+    "Sports & Games": [
+      {c:"In cricket, a batsman is dismissed 'LBW' when a delivery would have hit the stumps but was blocked by this part of the body", a:"The leg (Leg Before Wicket)"},
+      {c:"The Queensberry Rules — which govern modern boxing — were written in 1867 by John Graham Chambers and sponsored by the Marquess of Queensberry. They replaced the London Prize Ring Rules, which allowed this technique now banned in boxing", a:"Grappling and wrestling holds"},
+      {c:"In competitive Go, the game's complexity is estimated to exceed the number of atoms in the observable universe in possible positions. Professional players are ranked using this title system's highest rank", a:"9-dan (professional)"},
+      {c:"The Fosbury Flop — a high jump technique involving going over the bar headfirst and backward — was invented by Dick Fosbury at the 1968 Mexico City Olympics. Before this, athletes used this traditional technique", a:"The straddle (Western Roll)"},
+      {c:"In Formula 1, the 'undercut' strategy involves pitting earlier than a rival to gain an advantage. Its opposite, staying out longer on fresh tyres, is called this", a:"The overcut"}
+    ],
+    "Food & Cooking": [
+      {c:"The Maillard reaction — responsible for browning — begins at approximately this temperature in Celsius", a:"140–165°C (280–330°F)"},
+      {c:"This Japanese knife-making region in Osaka Prefecture has been producing blades since the 13th century and supplies roughly 90% of Japan's professional kitchen knives", a:"Sakai"},
+      {c:"Ferran Adrià's restaurant elBulli pioneered this culinary movement, using techniques like spherification and gelification to transform traditional dishes into surprising forms", a:"Molecular gastronomy"},
+      {c:"The French AOC system (now EU-protected AOP) restricts the name 'Champagne' to sparkling wines from a specific region. The same process — secondary fermentation in the bottle — used outside this region is called this", a:"Méthode traditionnelle (or Méthode champenoise)"},
+      {c:"This chemical compound — C₁₂H₂₂O₁₁ — is a disaccharide made of glucose and fructose, and is the most common form of sugar used in cooking worldwide", a:"Sucrose"}
+    ],
+    "Music": [
+      {c:"Arnold Schoenberg developed this compositional technique, which uses all 12 notes of the chromatic scale in a fixed sequence called a 'tone row', as an alternative to traditional tonal harmony", a:"Twelve-tone technique (serialism / dodecaphony)"},
+      {c:"The Symphony No. 9 in D minor, Op. 125 — the last complete symphony by this composer — was premiered in 1824 when he was completely deaf", a:"Ludwig van Beethoven"},
+      {c:"This West African percussion instrument, a 21-string lute-bridge harp, is the national instrument of Mali and Guinea and is played by a hereditary caste of musicians called griots", a:"The kora"},
+      {c:"Messiaen's Quartet for the End of Time was composed and first performed in 1941 in a Nazi prison camp. It is scored for these four instruments", a:"Violin, cello, clarinet, and piano"},
+      {c:"This Russian-born composer, who wrote The Rite of Spring (which caused a riot at its 1913 Paris premiere), later emigrated to the US and became a citizen", a:"Igor Stravinsky"}
+    ]
+  }
+};
+
+// Merge QB_EXTRA into QB
+Object.keys(QB_EXTRA).forEach(diff => {
+  Object.keys(QB_EXTRA[diff]).forEach(cat => {
+    if (\!QB[diff][cat]) QB[diff][cat] = [];
+    QB[diff][cat] = QB[diff][cat].concat(QB_EXTRA[diff][cat]);
+  });
+});
+
+// ─── Available categories ────────────────────────────────────────────────────
 const ALL_CATS   = Object.keys(QB.easy);
 const ALL_POINTS = [100,200,300,400,500,600,700];
 let numCats    = 5;

@@ -116,6 +116,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
 .kbd-hint{font-size:.62rem;color:rgba(255,255,255,.25);margin-top:14px;line-height:1.8;}
 .hint-touch{display:none;}
 .hint-keys{display:inline;}
+/* ── HOST MODE ── */
+.host-ans-box{display:none;background:rgba(0,0,0,.55);border:1px solid rgba(245,197,24,.28);border-radius:8px;padding:10px 14px;margin-bottom:14px;text-align:left;}
+body.host-mode .host-ans-box{display:block;}
+.host-ans-label{font-size:.58rem;text-transform:uppercase;letter-spacing:1px;color:rgba(245,197,24,.5);margin-bottom:5px;}
+.host-ans-text{font-size:1rem;font-weight:800;color:rgba(245,197,24,.9);line-height:1.4;}
+#host-indicator{display:none;font-size:.68rem;background:rgba(245,197,24,.14);border:1px solid rgba(245,197,24,.35);color:#f5c518;padding:4px 9px;border-radius:5px;font-weight:800;letter-spacing:.4px;white-space:nowrap;}
+body.host-mode #host-indicator{display:inline-flex;align-items:center;gap:3px;}
+body.host-mode .m-score{display:block !important;}
 /* ── TIMER ── */
 .timer-wrap{height:6px;background:rgba(255,255,255,.1);border-radius:3px;margin:-10px 0 18px;overflow:hidden;display:none;}
 .timer-bar{height:100%;background:var(--gold);border-radius:3px;transition:width .95s linear,background .25s;}
@@ -406,6 +414,7 @@ body.spectator::after{content:'📺 Spectator Mode';position:fixed;bottom:10px;r
   </nav>
   <h1>⚡ Holden's Jeopardy</h1>
     <span id="session-clock" title="Game duration">0:00</span>
+    <span id="host-indicator" title="Host mode — answer visible to you">🎙 HOST</span>
   <p class="sub">Set up your teams, then play</p>
   <button onclick="document.getElementById('htp-overlay').classList.add('open')" style="background:none;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.5);font-size:.75rem;padding:5px 14px;border-radius:20px;cursor:pointer;font-family:inherit;font-weight:600;margin-bottom:10px;transition:.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.5)'">? How to Play</button>
 
@@ -460,6 +469,7 @@ body.spectator::after{content:'📺 Spectator Mode';position:fixed;bottom:10px;r
           <button onclick="manualSave();closeOverflowMenu()">💾 Save</button>
           <button onclick="undoLastAction();closeOverflowMenu()">↩ Undo</button>
           <button onclick="shareGame();closeOverflowMenu()">🔗 Share</button>
+          <button id="overflow-host-btn" onclick="toggleHostMode();closeOverflowMenu()">🎙 Host Mode: OFF</button>
           <button id="overflow-install" style="display:none" onclick="installPWA();closeOverflowMenu()">⊕ Install</button>
         </div>
       </div>
@@ -524,6 +534,10 @@ body.spectator::after{content:'📺 Spectator Mode';position:fixed;bottom:10px;r
     <div class="m-cat" id="m-cat"></div>
     <div class="m-pts" id="m-pts"></div>
     <div class="m-clue" id="m-clue"></div>
+    <div class="host-ans-box" id="host-ans-box">
+      <div class="host-ans-label">🔐 Judge’s Answer — visible to host only</div>
+      <div class="host-ans-text" id="host-ans-text"></div>
+    </div>
     <div class="timer-wrap" id="timer-wrap"><div class="timer-bar" id="timer-bar"></div></div>
     <div class="m-ans" id="m-ans"></div>
     <div class="m-actions">
@@ -1278,6 +1292,13 @@ function openCell(cell) {
   aEl.className = 'm-ans';
   document.getElementById('m-score').className = 'm-score';
   document.getElementById('score-grid').innerHTML = '';
+  // Host mode: show answer privately + score buttons immediately
+  var hat = document.getElementById('host-ans-text');
+  if (hat) hat.textContent = cell.dataset.ans || '';
+  if (_hostMode) {
+    renderScoreButtons();
+    document.getElementById('m-score').className = 'm-score show';
+  }
   if (!clue) {
     sndReveal();
     aEl.className = 'm-ans show';
@@ -1335,7 +1356,7 @@ function renderScoreButtons() {
   });
 }
 
-function closeModal() { stopTimer(); ddWager = null; document.getElementById('overlay').classList.remove('open'); current = null; }
+function closeModal() { stopTimer(); ddWager = null; document.getElementById('overlay').classList.remove('open'); current = null; var hat = document.getElementById('host-ans-text'); if (hat) hat.textContent = ''; }
 
 document.getElementById('overlay').addEventListener('click', function(e){ if (e.target === this) closeModal(); });
 
@@ -1971,6 +1992,31 @@ document.addEventListener('click', function(e) {
 (function() {
   if (new URLSearchParams(location.search).get('spectator') === '1') {
     document.body.classList.add('spectator');
+  }
+})();
+
+// ── HOST MODE ─────────────────────────────────────────────────────────────────
+var _hostMode = false;
+function toggleHostMode() {
+  _hostMode = !_hostMode;
+  document.body.classList.toggle('host-mode', _hostMode);
+  localStorage.setItem('arc4-host-mode', _hostMode ? '1' : '0');
+  var btn = document.getElementById('overflow-host-btn');
+  if (btn) btn.textContent = '🎙 Host Mode: ' + (_hostMode ? 'ON' : 'OFF');
+  showToast(_hostMode ? '🎙 Host mode ON — answer visible to you only' : '🎙 Host mode OFF');
+  // If a clue is already open, show score buttons immediately
+  if (_hostMode && current) {
+    renderScoreButtons();
+    document.getElementById('m-score').className = 'm-score show';
+  }
+}
+// Restore saved host mode
+(function() {
+  if (localStorage.getItem('arc4-host-mode') === '1') {
+    _hostMode = true;
+    document.body.classList.add('host-mode');
+    var btn = document.getElementById('overflow-host-btn');
+    if (btn) btn.textContent = '🎙 Host Mode: ON';
   }
 })();
 

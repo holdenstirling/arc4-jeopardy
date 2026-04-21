@@ -22,9 +22,11 @@ h1{font-size:clamp(2.2rem,6vw,3.8rem);font-weight:900;color:#f5c518;text-shadow:
 .card p{font-size:0.84rem;color:rgba(255,255,255,0.5);line-height:1.55;}
 .card.primary{border-color:rgba(245,197,24,0.3);background:rgba(245,197,24,0.07);}
 .card.primary:hover{background:rgba(245,197,24,0.13);}
-#install-btn{display:none;margin-top:28px;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.4);color:#f5c518;padding:10px 24px;border-radius:8px;font-size:.88rem;font-weight:700;cursor:pointer;}
-#install-btn:hover{background:rgba(245,197,24,.2);}
 footer{margin-top:60px;color:rgba(255,255,255,0.18);font-size:0.75rem;}
+.share-btn{margin-top:20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);padding:9px 22px;border-radius:8px;font-size:.84rem;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
+.share-btn:hover{background:rgba(255,255,255,.12);color:#fff;}
+#toast-idx{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(20,30,90,.97);border:1px solid rgba(245,197,24,.45);border-radius:8px;padding:11px 22px;font-size:.82rem;font-weight:700;color:#fff;opacity:0;pointer-events:none;z-index:9000;transition:opacity .22s,transform .22s;white-space:nowrap;}
+#toast-idx.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .install-guide{margin-top:44px;max-width:680px;width:100%;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:24px 26px;}
 .install-guide h3{font-size:.95rem;font-weight:800;color:#f5c518;margin-bottom:14px;letter-spacing:.5px;}
 .install-steps{display:flex;gap:20px;flex-wrap:wrap;}
@@ -54,7 +56,11 @@ footer{margin-top:60px;color:rgba(255,255,255,0.18);font-size:0.75rem;}
     <p>All your saved games in one place — replay any past game or re-download it any time.</p>
   </a>
 </div>
-<button id="install-btn" onclick="installApp()">⊕ Install App for Offline Use</button>
+<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:28px;">
+  <button id="install-btn" onclick="installApp()" style="display:none;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.4);color:#f5c518;padding:10px 24px;border-radius:8px;font-size:.88rem;font-weight:700;cursor:pointer;">⊕ Install App for Offline Use</button>
+  <button class="share-btn" onclick="shareApp()">🔗 Share This App</button>
+</div>
+<div id="toast-idx"></div>
 
 <div class="install-guide">
   <h3>📲 Install to Your Home Screen</h3>
@@ -91,6 +97,24 @@ function installApp() {
   if (!deferredInstall) return;
   deferredInstall.prompt();
   deferredInstall.userChoice.then(function(){ deferredInstall = null; document.getElementById('install-btn').style.display = 'none'; });
+}
+function showToastIdx(msg) {
+  var t = document.getElementById('toast-idx');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._tmr);
+  t._tmr = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+function shareApp() {
+  var url = location.origin + '/';
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url)
+      .then(function(){ showToastIdx('🔗 App link copied!'); })
+      .catch(function(){ window.prompt('Copy this link:', url); });
+  } else {
+    window.prompt('Copy this link:', url);
+  }
 }
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js').catch(function(){}); }
 </script>

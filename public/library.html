@@ -213,7 +213,8 @@ function render() {
         '<span>🎯 '+cap(entry.difficulty||'medium')+'</span>'+
       '</div>'+
       '<div class="gc-actions">'+
-        (entry.html?'<button class="gc-btn gc-play" onclick="playGame(\''+entry.id+'\')">▶ Play</button>':'')+
+        '<button class="gc-btn gc-play" onclick="playGame(\''+entry.id+'\')">▶ Play</button>'+
+        '<button class="gc-btn gc-dl" onclick="shareGame(\''+entry.id+'\')" title="Copy shareable link">🔗 Share</button>'+
         (entry.html?'<button class="gc-btn gc-dl" onclick="downloadGame(\''+entry.id+'\')">⬇ Download</button>':'')+
         '<button class="gc-btn gc-del" onclick="deleteGame(\''+entry.id+'\')" title="Delete">🗑</button>'+
       '</div>';
@@ -224,9 +225,38 @@ function render() {
 function playGame(id) {
   var lib = getLibrary();
   var entry = lib.find(function(e){ return e.id===id; });
-  if (!entry||!entry.html) return;
-  var blob = new Blob([entry.html],{type:'text/html;charset=utf-8'});
-  window.open(URL.createObjectURL(blob),'_blank');
+  if (!entry) return;
+  // Navigate to the hosted play page (works on same device; share link works cross-device)
+  if (entry.catData) {
+    try {
+      var data = { id: entry.id, title: entry.title, catData: entry.catData };
+      var encoded = btoa(encodeURIComponent(JSON.stringify(data)));
+      window.location.href = '/play.html?game=' + id + '#data=' + encoded;
+      return;
+    } catch(e) {}
+  }
+  window.location.href = '/play.html?game=' + id;
+}
+
+function shareGame(id) {
+  var lib = getLibrary();
+  var entry = lib.find(function(e){ return e.id===id; });
+  if (!entry) return;
+  if (!entry.catData) { showToast('⚠ No game data to share','err'); return; }
+  try {
+    var data = { title: entry.title, catData: entry.catData };
+    var encoded = btoa(encodeURIComponent(JSON.stringify(data)));
+    var url = location.origin + '/play.html#data=' + encoded;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url)
+        .then(function(){ showToast('🔗 Share link copied!','ok'); })
+        .catch(function(){ window.prompt('Copy this shareable link:', url); });
+    } else {
+      window.prompt('Copy this shareable link:', url);
+    }
+  } catch(e) {
+    showToast('⚠ Could not generate link','err');
+  }
 }
 
 function downloadGame(id) {

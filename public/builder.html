@@ -120,6 +120,7 @@ label.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba
   <div class="header-nav">
     <a href="/index.html" class="nav-link">⌂ Home</a>
     <a href="/library.html" class="nav-link">📚 Library</a>
+    <a href="#" class="nav-link" onclick="shareBuilderGame();return false;" title="Copy shareable link to this game">🔗 Share</a>
     <a href="#" class="nav-link" onclick="saveAndPlay();return false;" style="color:#f5c518;border-color:rgba(245,197,24,.35);font-weight:800;">▶ Play</a>
     <span class="badge" id="sw-badge">● Offline Ready</span>
   </div>
@@ -203,9 +204,10 @@ label.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba
 <div class="gen-section">
   <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
     <button class="btn btn-gold btn-lg" onclick="saveAndPlay()">▶ Save &amp; Play</button>
+    <button class="btn btn-ghost btn-lg" onclick="shareBuilderGame()">🔗 Share Link</button>
     <button class="btn btn-ghost btn-lg" onclick="generateGame()">⬇ Download</button>
   </div>
-  <div class="gen-hint">Save &amp; Play — saves to your library and opens the game instantly · Download — creates a standalone HTML file you can share or use offline</div>
+  <div class="gen-hint">Save &amp; Play — saves to your library and opens the game · Share Link — copies a URL that works on any device · Download — standalone HTML file</div>
   <div class="err-box" id="err-box"></div>
 </div>
 
@@ -1149,21 +1151,49 @@ function collectCats() {
   return cats;
 }
 
-// ─── Save & Play (primary CTA — saves to library + opens at unique URL) ──────
+// ─── Save & Play (primary CTA — saves to library + navigates to game URL) ────
 function saveAndPlay() {
   if (!validate()) return;
   const title = document.getElementById('game-title').value.trim();
   const cats = collectCats();
   const html = buildGameHTML(title, cats, numCats);
   const id = saveToLibrary(title, cats, html);
+  showToast('💾 Saved — loading game…', 'ok');
   if (id) {
-    window.open('/play.html?game=' + id, '_blank');
+    try {
+      // Embed game data in hash so the URL is cross-device shareable
+      const data = { id, title, catData: cats };
+      const encoded = btoa(encodeURIComponent(JSON.stringify(data)));
+      window.location.href = '/play.html?game=' + id + '#data=' + encoded;
+    } catch(e) {
+      window.location.href = '/play.html?game=' + id;
+    }
   } else {
-    // fallback if localStorage is full
+    // fallback if localStorage is full — blob download
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     window.open(URL.createObjectURL(blob), '_blank');
   }
-  showToast('💾 Saved &amp; opening game…', 'ok');
+}
+
+// ─── Share — encodes current game into a URL that works on any device ─────────
+function shareBuilderGame() {
+  if (!validate()) return;
+  const title = document.getElementById('game-title').value.trim();
+  const cats = collectCats();
+  try {
+    const data = { title, catData: cats };
+    const encoded = btoa(encodeURIComponent(JSON.stringify(data)));
+    const url = location.origin + '/play.html#data=' + encoded;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url)
+        .then(function(){ showToast('🔗 Share link copied!', 'ok'); })
+        .catch(function(){ window.prompt('Copy this shareable link:', url); });
+    } else {
+      window.prompt('Copy this shareable link:', url);
+    }
+  } catch(e) {
+    showToast('⚠ Could not generate link', 'err');
+  }
 }
 
 // ─── Preview (legacy alias — same as saveAndPlay) ─────────────────────────────

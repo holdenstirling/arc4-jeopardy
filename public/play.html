@@ -271,6 +271,10 @@ body{padding-bottom:env(safe-area-inset-bottom,0);}
 @media (max-width:640px) and (orientation:portrait){
   #portrait-hint{display:flex;}
 }
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0));left:50%;transform:translateX(-50%) translateY(20px);background:rgba(20,30,90,.97);border:1px solid rgba(245,197,24,.45);border-radius:8px;padding:11px 22px;font-size:.82rem;font-weight:700;color:#fff;opacity:0;pointer-events:none;z-index:9000;transition:opacity .22s,transform .22s;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.4);}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
@@ -322,13 +326,15 @@ body{padding-bottom:env(safe-area-inset-bottom,0);}
   <div id="topbar">
     <h1>⚡ Holden's Jeopardy</h1>
     <div class="topbar-right">
+      <button class="hdr-btn" onclick="location.href='/index.html'" title="Home">⌂ Home</button>
       <button class="hdr-btn" id="mute-btn" onclick="toggleMute()" title="Toggle sound">🔊</button>
-      <button class="hdr-btn" id="timer-btn" onclick="toggleTimer()" title="Toggle 30s countdown timer">⏱</button>
+      <button class="hdr-btn" id="timer-btn" onclick="toggleTimer()" title="Cycle timer: OFF → 15s → 30s → 1m → 2m">⏱</button>
       <button class="hdr-btn" onclick="triggerFinalJeopardy()" title="Final Jeopardy">🏁 Final</button>
       <button class="hdr-btn" onclick="resetBoard()">↺ Reset</button>
       <button class="hdr-btn" onclick="goSetup()">⚙ Teams</button>
+      <button class="hdr-btn" onclick="manualSave()" title="Save game progress">💾 Save</button>
+      <button class="hdr-btn" onclick="shareGame()" title="Copy shareable link">🔗 Share</button>
       <button class="hdr-btn" id="install-btn" style="display:none" onclick="installPWA()">⊕ Install</button>
-      <button class="hdr-btn" onclick="location.href='/index.html'">⌂ Home</button>
     </div>
   </div>
   <div id="scoreboard"></div>
@@ -477,6 +483,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0);}
   </div>
 </div>
 
+<div id="toast"></div>
 <canvas id="confetti-canvas"></canvas>
 
 <script>
@@ -529,28 +536,32 @@ function toggleMute() {
 }
 
 // ── TIMER ─────────────────────────────────────────────────────────────────────
-var timerEnabled = false, _timerInterval = null;
+var TIMER_OPTS   = [0, 15, 30, 60, 120];
+var TIMER_LABELS = ['⏱', '⏱ 15s', '⏱ 30s', '⏱ 1m', '⏱ 2m'];
+var timerIdx = 0, _timerInterval = null;
 function toggleTimer() {
-  timerEnabled = !timerEnabled;
+  timerIdx = (timerIdx + 1) % TIMER_OPTS.length;
   var btn = document.getElementById('timer-btn');
-  btn.style.background = timerEnabled ? 'rgba(245,197,24,.2)' : '';
-  btn.style.borderColor = timerEnabled ? 'rgba(245,197,24,.5)' : '';
-  btn.style.color = timerEnabled ? '#f5c518' : '';
-  btn.textContent = timerEnabled ? '⏱ ON' : '⏱';
+  var on = timerIdx > 0;
+  btn.style.background  = on ? 'rgba(245,197,24,.2)' : '';
+  btn.style.borderColor = on ? 'rgba(245,197,24,.5)' : '';
+  btn.style.color       = on ? '#f5c518' : '';
+  btn.textContent = TIMER_LABELS[timerIdx];
 }
 function startTimer() {
-  if (!timerEnabled) return;
+  if (!timerIdx) return;
   clearInterval(_timerInterval);
-  var secs = 30;
+  var total = TIMER_OPTS[timerIdx];
+  var secs = total;
   var wrap = document.getElementById('timer-wrap');
-  var bar = document.getElementById('timer-bar');
+  var bar  = document.getElementById('timer-bar');
   wrap.style.display = 'block';
   bar.style.width = '100%'; bar.className = 'timer-bar';
   _timerInterval = setInterval(function() {
     secs--;
-    bar.style.width = (secs / 30 * 100) + '%';
-    if (secs <= 10) bar.className = 'timer-bar warning';
-    if (secs <= 5)  bar.className = 'timer-bar danger';
+    bar.style.width = (secs / total * 100) + '%';
+    if (secs / total <= 0.33) bar.className = 'timer-bar warning';
+    if (secs / total <= 0.15) bar.className = 'timer-bar danger';
     if (secs <= 0) {
       clearInterval(_timerInterval);
       if (!muted) { try { var c=getAC(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='square';o.frequency.setValueAtTime(880,c.currentTime);o.frequency.setValueAtTime(440,c.currentTime+.1);o.frequency.setValueAtTime(880,c.currentTime+.2);g.gain.setValueAtTime(.15,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.35);o.start();o.stop(c.currentTime+.36); } catch(e) {} }
@@ -558,6 +569,39 @@ function startTimer() {
   }, 1000);
 }
 function stopTimer() { clearInterval(_timerInterval); document.getElementById('timer-wrap').style.display = 'none'; }
+
+// ── TOAST / SAVE / SHARE ──────────────────────────────────────────────────────
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._tmr);
+  t._tmr = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+function manualSave() { save(); showToast('💾 Game saved!'); }
+
+var _currentGameData = null; // set when a custom game is loaded
+
+function shareGame() {
+  var url;
+  if (_currentGameData) {
+    // Encode full game data in hash → works on any device
+    try {
+      var encoded = btoa(encodeURIComponent(JSON.stringify(_currentGameData)));
+      url = location.origin + location.pathname + '#data=' + encoded;
+    } catch(e) { url = location.href; }
+  } else {
+    url = location.href;
+  }
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url)
+      .then(function(){ showToast('🔗 Link copied!'); })
+      .catch(function(){ window.prompt('Copy this link:', url); });
+  } else {
+    window.prompt('Copy this link:', url);
+  }
+}
 
 // ── DATA ──────────────────────────────────────────────────────────────────────
 var RAND_NAMES=['The Trivia Titans','Brain Trust','Les Quizerables','The Fact Finders','Smarty Pants','Agatha Quiztie','The Think Tank','Wild Guessers','I Am Smarticus','Tequila Mockingbird','404: Name Not Found','Ctrl+Alt+Defeat','Stack Overflow','The Dark Horses','Know-It-Alls','The Underdogs','The Renaissance Crew','Trivia Newton John','Quiz Khalifa','Team Phenomenal'];
@@ -1269,20 +1313,38 @@ if ('serviceWorker' in navigator) {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-// Load custom game from ?game=<id> if present
+// Load custom game from URL hash (#data=BASE64) or ?game=<id>
 (function() {
+  // 1. Try hash-encoded game data first — works cross-device (no localStorage needed)
+  try {
+    var hash = location.hash;
+    if (hash && hash.indexOf('#data=') === 0) {
+      var b64 = hash.slice(6);
+      var gameData = JSON.parse(decodeURIComponent(atob(b64)));
+      if (gameData && buildBoardFromGame(gameData)) {
+        _currentGameData = gameData;
+        var slug = (gameData.title || 'game').replace(/\W+/g, '-').toLowerCase();
+        SAVE = 'arc4-trivia-hash-' + slug;
+        document.title = (gameData.title || 'Game') + ' · Holden\'s Jeopardy';
+        var tbh1 = document.querySelector('#topbar h1');
+        if (tbh1) tbh1.textContent = '⚡ ' + (gameData.title || 'Game');
+        return; // done — skip ?game= lookup
+      }
+    }
+  } catch(e) {}
+
+  // 2. Fall back to ?game=<id> lookup in localStorage (same device)
   var gameId = new URLSearchParams(location.search).get('game');
   if (!gameId) return;
   try {
     var lib = JSON.parse(localStorage.getItem('arc4-jeopardy-library') || '[]');
     var entry = lib.find(function(e) { return e.id === gameId; });
     if (entry && buildBoardFromGame(entry)) {
-      // Scope save state to this specific game so games don't overwrite each other
+      _currentGameData = entry; // store so Share can encode it
       SAVE = 'arc4-trivia-' + gameId;
-      // Update titles
       document.title = entry.title + ' · Holden\'s Jeopardy';
-      var tbh1 = document.querySelector('#topbar h1');
-      if (tbh1) tbh1.textContent = '⚡ ' + entry.title;
+      var tbh1b = document.querySelector('#topbar h1');
+      if (tbh1b) tbh1b.textContent = '⚡ ' + entry.title;
     }
   } catch(e) {}
 })();

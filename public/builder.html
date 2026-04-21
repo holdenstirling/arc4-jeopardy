@@ -765,6 +765,48 @@ const QB_EXTRA = {
       {c:"This West African percussion instrument, a 21-string lute-bridge harp, is the national instrument of Mali and Guinea and is played by a hereditary caste of musicians called griots", a:"The kora"},
       {c:"Messiaen's Quartet for the End of Time was composed and first performed in 1941 in a Nazi prison camp. It is scored for these four instruments", a:"Violin, cello, clarinet, and piano"},
       {c:"This Russian-born composer, who wrote The Rite of Spring (which caused a riot at its 1913 Paris premiere), later emigrated to the US and became a citizen", a:"Igor Stravinsky"}
+    ],
+    "Famous People": [
+      {c:"This polymath — painter, sculptor, architect, musician, mathematician, engineer, and writer — kept notebooks describing flying machines and anatomical studies centuries ahead of their time", a:"Leonardo da Vinci"},
+      {c:"Ada Lovelace wrote what is considered the first computer algorithm in 1843, as notes on a translation of a paper about this mathematician's Analytical Engine", a:"Charles Babbage"},
+      {c:"This mathematician published a proof in 1995 that took seven years to complete, solving a problem that had gone unsolved for 358 years since being posed by Pierre de Fermat", a:"Andrew Wiles"},
+      {c:"Nikola Tesla held over 300 patents. His 'War of Currents' with Edison ended when this landmark power station, harnessing Niagara Falls, opened in 1895 using Tesla's AC system", a:"Adams Power Plant (Edward Dean Adams Station)"},
+      {c:"Simone de Beauvoir's 1949 book 'The Second Sex' begins with this famous line arguing that femininity is not innate but socially constructed", a:"One is not born, but rather becomes, a woman"}
+    ],
+    "Animals & Nature": [
+      {c:"The mimic octopus, discovered in 1998, can impersonate over 15 species including flatfish and lionfish. It is found in the shallow waters of this ocean region", a:"Southeast Asia / Indo-Pacific"},
+      {c:"Tardigrades can survive extreme radiation, dehydration, and even the vacuum of space by entering a state called cryptobiosis. Their common nickname reflects their walking style", a:"Water bears (or moss piglets)"},
+      {c:"This tree, Pando, in Utah is considered one of the world's largest organisms — a clonal colony of quaking aspens sharing a single root system estimated at 80,000 years old", a:"Pando (the Trembling Giant)"},
+      {c:"The Bombardier beetle defends itself by mixing hydroquinone and hydrogen peroxide in an abdominal chamber, creating a scalding chemical spray reaching approximately this temperature", a:"100°C (212°F)"},
+      {c:"Crows and ravens belong to the Corvidae family and are known for tool use and long-term memory of human faces. Studies show they can hold grudges for at least this many years", a:"At least 5 years (some studies suggest longer)"}
+    ],
+    "World Capitals": [
+      {c:"Naypyidaw replaced this city as Myanmar's capital in 2006. It was purpose-built in the jungle and is notable for having 20-lane highways with almost no traffic", a:"Yangon (Rangoon)"},
+      {c:"Astana — now called Nur-Sultan and back to Astana — became the capital of this country in 1997, replacing Almaty, partly to shift population toward the underdeveloped north", a:"Kazakhstan"},
+      {c:"This capital city sits at 3,640 meters (11,942 ft) above sea level, making it the world's highest official capital city", a:"Sucre (constitutional) / La Paz (seat of government) — accept either; La Paz is most often cited"},
+      {c:"Dodoma replaced this coastal city as Tanzania's official capital in 1996, though the latter remains the country's largest city and commercial center", a:"Dar es Salaam"},
+      {c:"Sri Jayawardenepura Kotte is the legislative capital of this island nation, though this larger coastal city remains the commercial and de facto administrative capital", a:"Sri Lanka (Colombo is the commercial capital)"}
+    ],
+    "Pop Culture": [
+      {c:"In 2003, this Swedish furniture giant opened a store in Beijing — its first in China — that drew so many visitors police had to shut the highway and crowds required overnight stays inside the store", a:"IKEA"},
+      {c:"The trolley problem — a thought experiment in ethics — was introduced in 1967 by philosopher Philippa Foot and later expanded by Judith Jarvis Thomson. It is used to distinguish these two ethical frameworks", a:"Deontological vs. consequentialist ethics"},
+      {c:"This 1999 film by the Wachowskis contains an allusion to Jean Baudrillard's 1981 book 'Simulacra and Simulation,' shown as a prop in an early scene and reflecting the film's central philosophical theme", a:"The Matrix"},
+      {c:"The 'Streisand effect' — where attempting to suppress information causes it to spread further — is named after this singer who tried in 2003 to suppress aerial photos of her Malibu home", a:"Barbra Streisand"},
+      {c:"This internet phenomenon, originating in a 2005 blog post, describes the tendency for online discussions to grow long enough that someone eventually makes a comparison to Adolf Hitler", a:"Godwin's Law"}
+    ],
+    "Science Lab": [
+      {c:"The Michelson-Morley experiment of 1887 famously failed to detect the 'luminiferous aether' — the medium thought to carry light waves. Its null result provided key evidence for this later theory", a:"Special relativity (Einstein's 1905 theory)"},
+      {c:"PCR (polymerase chain reaction), which amplifies DNA sequences, relies on a heat-stable enzyme called Taq polymerase, originally isolated from a bacterium found in hot springs in this US national park", a:"Yellowstone National Park"},
+      {c:"The famous double-slit experiment demonstrates wave-particle duality: particles create an interference pattern when unobserved, but the pattern disappears when a detector is added. This is called this effect", a:"The observer effect (or wave function collapse)"},
+      {c:"Avogadro's number (6.022 x 10^23) defines the number of particles in one mole of a substance. It was precisely determined by this method, originally used to measure Brownian motion", a:"Einstein's 1905 analysis of Brownian motion (confirmed by Perrin)"},
+      {c:"This spectroscopic technique, developed in the 1950s, measures the absorption of light by free atoms in a flame and is used to detect trace amounts of metals in a sample", a:"Atomic absorption spectroscopy (AAS)"}
+    ],
+    "Brands & Companies": [
+      {c:"Before becoming a tech giant, Nokia was a Finnish company primarily manufacturing this product at a mill on the banks of the Nokianvirta river", a:"Paper (rubber and cables too, but paper/pulp originally)"},
+      {c:"Samsung — now a global electronics conglomerate — was founded in 1938 in Korea as a trading company dealing in groceries, dried fish, and this staple grain", a:"Noodles (and dried fish / groceries)"},
+      {c:"The Swiss multinational Nestle traces its origins to 1867, when Henri Nestle developed a milk-based food product for infants who could not be breastfed. What was this original product called?", a:"Farine Lactee (Henri Nestle's Milk Food)"},
+      {c:"Lamborghini was founded after its founder — a tractor manufacturer — reportedly complained to Enzo Ferrari about the clutch in his Ferrari. Ferrari's dismissive response motivated him to build his own sports car", a:"Ferruccio Lamborghini"},
+      {c:"The phrase 'Google it' entered everyday language so quickly that 'google' was added as a verb to the Oxford English Dictionary in this year", a:"2006"}
     ]
   }
 };
@@ -916,13 +958,26 @@ function syncSuggestions() {
 
 // ─── Question helpers ─────────────────────────────────────────────────────────
 function getRandQ(cat, diff) {
-  const pool = QB[diff]?.[cat];
-  if (!pool) return null;
-  const avail = pool.map((_,i)=>i).filter(i=>!usedQ[`${cat}_${diff}_${i}`]);
-  if (!avail.length) {
-    pool.forEach((_,i)=>delete usedQ[`${cat}_${diff}_${i}`]);
-    return getRandQ(cat, diff);
+  // Fall back to lower difficulty if requested level has no questions for this category
+  const fallback = {hard:['hard','medium','easy'], medium:['medium','easy'], easy:['easy']};
+  const diffs = fallback[diff] || [diff];
+  for (const d of diffs) {
+    const pool = QB[d]?.[cat];
+    if (\!pool || \!pool.length) continue;
+    const avail = pool.map((_,i)=>i).filter(i=>\!usedQ[`${cat}_${d}_${i}`]);
+    if (avail.length) {
+      const idx = avail[Math.floor(Math.random()*avail.length)];
+      usedQ[`${cat}_${d}_${idx}`] = true;
+      return {...pool[idx]};
+    }
+    // Pool exhausted — reset and use it
+    pool.forEach((_,i)=>delete usedQ[`${cat}_${d}_${i}`]);
+    const idx = Math.floor(Math.random()*pool.length);
+    usedQ[`${cat}_${d}_${idx}`] = true;
+    return {...pool[idx]};
   }
+  return null;
+}
   const idx = avail[Math.floor(Math.random()*avail.length)];
   usedQ[`${cat}_${diff}_${idx}`] = true;
   return {...pool[idx]};

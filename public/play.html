@@ -616,6 +616,7 @@ body.spectator::after{content:'📺 Spectator Mode';position:fixed;bottom:10px;r
 // ── SOUND ENGINE (Web Audio API — no external files) ──────────────────────────
 var _ac = null;
 var muted = false;
+var _volume = 0.8; // 0.0 – 1.0
 
 function getAC() {
   if (!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)();
@@ -628,27 +629,41 @@ function beep(freq, type, dur, vol, startDelay) {
     o.connect(g); g.connect(c.destination);
     o.type = type; o.frequency.value = freq;
     var t = c.currentTime + (startDelay || 0);
-    g.gain.setValueAtTime(vol, t);
+    var sv = vol * _volume;
+    g.gain.setValueAtTime(sv, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + dur);
     o.start(t); o.stop(t + dur + 0.01);
   } catch(e) {}
 }
 function sndOpen()   { beep(140,'sine',.45,.22); beep(190,'sine',.38,.12); }
 function sndReveal() { [440,554,659].forEach(function(f,i){ beep(f,'triangle',.22,.18,i*.07); }); }
-function sndAdd()    { beep(880,'sine',.14,.18); beep(1109,'sine',.14,.18,.09); }
-function sndDeduct() {
+// Correct answer: bright rising three-note ding
+function sndCorrect() {
+  beep(659,'sine',.12,.22);
+  beep(880,'sine',.18,.22,.10);
+  beep(1047,'sine',.26,.20,.22);
+}
+// Wrong answer: classic wah-wah-wah descending buzz
+function sndWrong() {
   if (muted) return;
   try {
-    var c=getAC(), o=c.createOscillator(), g=c.createGain();
-    o.connect(g); g.connect(c.destination);
-    o.type='sawtooth';
-    o.frequency.setValueAtTime(260,c.currentTime);
-    o.frequency.exponentialRampToValueAtTime(70,c.currentTime+.32);
-    g.gain.setValueAtTime(.14,c.currentTime);
-    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.32);
-    o.start(); o.stop(c.currentTime+.33);
+    var c = getAC();
+    [0, .18, .36].forEach(function(delay) {
+      var o = c.createOscillator(), g = c.createGain();
+      o.connect(g); g.connect(c.destination);
+      o.type = 'sawtooth';
+      var t = c.currentTime + delay;
+      o.frequency.setValueAtTime(280, t);
+      o.frequency.exponentialRampToValueAtTime(140, t + .15);
+      g.gain.setValueAtTime(0.18 * _volume, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + .16);
+      o.start(t); o.stop(t + .17);
+    });
   } catch(e) {}
 }
+// Aliases used by quickAdj
+function sndAdd()    { sndCorrect(); }
+function sndDeduct() { sndWrong(); }
 function sndWinner() {
   var notes=[523,659,784,1047,1319];
   notes.forEach(function(f,i){
@@ -659,8 +674,22 @@ function sndWinner() {
 function toggleMute() {
   muted = !muted;
   document.getElementById('mute-btn').textContent = muted ? '🔇' : '🔊';
+  var sl = document.getElementById('vol-slider');
+  if (sl) sl.style.opacity = muted ? '.3' : '1';
 }
-
+function setVolume(v) {
+  _volume = Math.max(0, Math.min(1, parseFloat(v)));
+  localStorage.setItem('arc4-jeopardy-vol', _volume);
+}
+// Restore saved volume
+(function() {
+  var sv = parseFloat(localStorage.getItem('arc4-jeopardy-vol'));
+  if (!isNaN(sv)) {
+    _volume = sv;
+    var sl = document.getElementById('vol-slider');
+    if (sl) sl.value = sv;
+  }
+})();
 // ── TIMER ─────────────────────────────────────────────────────────────────────
 var TIMER_OPTS   = [0, 15, 30, 60, 120];
 var TIMER_LABELS = ['⏱', '⏱ 15s', '⏱ 30s', '⏱ 1m', '⏱ 2m'];

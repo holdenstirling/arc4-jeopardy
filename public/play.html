@@ -8,7 +8,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Holden's Jeopardy">
 <link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="/icon-192.png">
 <title>Holden's Jeopardy</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -334,6 +333,11 @@ a:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4
   .overflow-hide{display:none \!important;}
   .overflow-btn{display:inline-flex \!important;}
 }
+
+/* ── UNDO BUTTON ── */
+#undo-btn{opacity:.35;cursor:not-allowed;}
+#undo-btn.active{opacity:1;cursor:pointer;}
+#undo-btn.active:hover{background:rgba(255,120,120,.18);border-color:rgba(255,120,120,.4);color:#ff8a80;}
 </style>
 </head>
 <body>
@@ -388,6 +392,7 @@ a:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4
     <div class="topbar-right">
       <button class="hdr-btn" onclick="location.href='/'" title="Home">⌂ Home</button>
       <button class="hdr-btn" id="mute-btn" onclick="toggleMute()" title="Toggle sound">🔊</button>
+      <button class="hdr-btn" id="undo-btn" onclick="undoLastAction()" title="Undo last score change" disabled>↩ Undo</button>
       <button class="hdr-btn" id="timer-btn" onclick="toggleTimer()" title="Cycle timer: OFF → 15s → 30s → 1m → 2m">⏱</button>
       <button class="hdr-btn" onclick="triggerFinalJeopardy()" title="Final Jeopardy">🏁 Final</button>
       <button class="hdr-btn" onclick="resetBoard()">↺ Reset</button>
@@ -400,6 +405,7 @@ a:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4
         <div id="overflow-menu">
           <button onclick="goSetup();closeOverflowMenu()">⚙ Teams</button>
           <button onclick="manualSave();closeOverflowMenu()">💾 Save</button>
+          <button onclick="undoLastAction();closeOverflowMenu()">↩ Undo</button>
           <button onclick="shareGame();closeOverflowMenu()">🔗 Share</button>
           <button id="overflow-install" style="display:none" onclick="installPWA();closeOverflowMenu()">⊕ Install</button>
         </div>
@@ -954,6 +960,16 @@ function adjScore(i, dir) {
   var prevOwner = (prevOwnerStr !== undefined && prevOwnerStr !== '') ? parseInt(prevOwnerStr) : -1;
   var isSteal = (dir > 0 && prevOwner >= 0 && prevOwner !== i);
 
+  // Snapshot for undo before any score changes
+  pushUndo({
+    teamIdx: i,
+    prevScore: teams[i].score,
+    cell: current,
+    prevOwner: prevOwner,
+    prevOwnerPrevScore: (isSteal && prevOwner >= 0) ? teams[prevOwner].score : null,
+    streakSnapshot: streaks.slice()
+  });
+
   // Steal: original owner loses their points (transfer, not duplication)
   if (isSteal) {
     teams[prevOwner].score -= delta;
@@ -1187,6 +1203,9 @@ function resetBoard() {
     if (badge) badge.remove();
   });
   teams.forEach(function(t, i){ t.score = 0; updateScore(i); });
+  undoStack = [];
+  var undoBtn = document.getElementById('undo-btn');
+  if (undoBtn) { undoBtn.disabled = true; undoBtn.classList.remove('active'); }
   document.getElementById('winner-overlay').classList.remove('open');
   initStreaks();
   teams.forEach(function(_, i){ clearStreakBadge(i); });
@@ -1309,6 +1328,51 @@ function sndDailyDouble() {
 
 // ── DAILY DOUBLE WAGER ────────────────────────────────────────────────────────
 var ddWager = null;
+var undoStack = []; // [{teamIdx, delta, prevScore, cell, prevOwner, prevOwnerPrevScore, streakSnapshot}]
+function pushUndo(record) {
+  undoStack.push(record);
+  if (undoStack.length > 20) undoStack.shift(); // cap at 20
+  var btn = document.getElementById('undo-btn');
+  if (btn) { btn.disabled = false; btn.classList.add('active'); }
+}
+function undoLastAction() {
+  if (\!undoStack.length) return;
+  var r = undoStack.pop();
+  // Restore team score
+  teams[r.teamIdx].score = r.prevScore;
+  updateScore(r.teamIdx);
+  // Restore previous owner score if steal happened
+  if (r.prevOwner >= 0 && r.prevOwnerPrevScore \!== null) {
+    teams[r.prevOwner].score = r.prevOwnerPrevScore;
+    updateScore(r.prevOwner);
+  }
+  // Restore cell ownership
+  if (r.cell) {
+    if (r.prevOwner >= 0) {
+      r.cell.dataset.owner = r.prevOwner;
+      updateCellOwner(r.cell, r.prevOwner, false);
+    } else {
+      delete r.cell.dataset.owner;
+      updateCellOwner(r.cell, -1, false);
+    }
+  }
+  // Restore streaks
+  if (r.streakSnapshot) {
+    streaks = r.streakSnapshot.slice();
+    // Re-render all streak badges
+    for (var i = 0; i < streaks.length; i++) renderStreakBadge(i);
+  }
+  updateLeader();
+  save();
+  renderScoreButtons();
+  var teamName = (teams[r.teamIdx] && teams[r.teamIdx].name) ? teams[r.teamIdx].name : 'Team';
+  showToast('↩ Undid ' + teamName + ' score change');
+  // Dim button if stack empty
+  if (\!undoStack.length) {
+    var btn = document.getElementById('undo-btn');
+    if (btn) { btn.disabled = true; btn.classList.remove('active'); }
+  }
+}
 
 function showDDWagerInput(cell) {
   var ddEl = document.getElementById('dd-overlay');

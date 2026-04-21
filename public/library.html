@@ -27,8 +27,8 @@ header h1{font-size:1.35rem;font-weight:900;color:var(--gold);letter-spacing:1px
 .lib-header-left h2{font-size:1.4rem;font-weight:800;color:var(--gold);margin-bottom:4px;}
 .lib-stats{font-size:.8rem;color:rgba(255,255,255,.35);}
 .lib-actions{display:flex;gap:8px;}
-.btn-sm{border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:.78rem;font-weight:700;font-family:inherit;transition:.15s;}
-.btn-sm:hover{opacity:.85;transform:translateY(-1px);}
+.btn-sm{border:none;padding:8px 16px;border-radius:7px;cursor:pointer;font-size:.8rem;font-weight:700;font-family:inherit;transition:.15s;}
+.btn-sm:hover{opacity:.88;transform:translateY(-1px);}
 .btn-danger{background:rgba(239,83,80,.1);border:1px solid rgba(239,83,80,.3);color:#ff8a80;}
 .btn-primary{background:linear-gradient(135deg,var(--gold),#e6b800);color:#1a1a1a;}
 
@@ -53,7 +53,7 @@ header h1{font-size:1.35rem;font-weight:900;color:var(--gold);letter-spacing:1px
 .gc-cat{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:3px 9px;font-size:.67rem;color:rgba(255,255,255,.6);}
 .gc-info{display:flex;gap:14px;font-size:.7rem;color:rgba(255,255,255,.32);}
 .gc-actions{display:flex;gap:7px;margin-top:4px;}
-.gc-btn{flex:1;border:none;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:.76rem;font-weight:700;font-family:inherit;transition:.15s;white-space:nowrap;}
+.gc-btn{flex:1;border:none;padding:8px 10px;border-radius:7px;cursor:pointer;font-size:.78rem;font-weight:700;font-family:inherit;transition:.15s;white-space:nowrap;}
 .gc-btn:hover{opacity:.88;transform:translateY(-1px);}
 .gc-btn.gc-edit{background:rgba(74,144,226,.15);color:#74b9ff;}
 .gc-btn.gc-edit:hover{background:rgba(74,144,226,.25);}
@@ -74,7 +74,9 @@ header h1{font-size:1.35rem;font-weight:900;color:var(--gold);letter-spacing:1px
 .empty-icon{font-size:4rem;margin-bottom:18px;}
 #empty-state h3{font-size:1.2rem;font-weight:700;color:rgba(255,255,255,.55);margin-bottom:8px;}
 #empty-state p{font-size:.85rem;color:rgba(255,255,255,.3);margin-bottom:24px;}
-.btn-build{background:linear-gradient(135deg,var(--gold),#e6b800);color:#1a1a1a;border:none;padding:12px 28px;border-radius:8px;font-size:.9rem;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block;}
+.btn-build{background:linear-gradient(135deg,var(--gold),#e6b800);color:#1a1a1a;border:none;padding:12px 28px;border-radius:8px;font-size:.9rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:.15s;font-family:inherit;}
+.btn-build:hover{opacity:.9;transform:translateY(-1px);}
+.btn-build:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 
 /* TOAST */
 .toast{position:fixed;bottom:22px;right:22px;background:#333;color:#fff;padding:11px 18px;border-radius:8px;font-size:.85rem;font-weight:600;z-index:999;opacity:0;transform:translateY(8px);transition:.28s;pointer-events:none;}
@@ -103,7 +105,7 @@ header h1{font-size:1.35rem;font-weight:900;color:var(--gold);letter-spacing:1px
       <h3>Playing Offline &amp; Saving Games <span class="badge-pwa">PWA</span></h3>
       <p>This app works fully offline once loaded. To install it on your device, look for the install icon (⊕) in your browser's address bar, or use the button below. Downloaded game files (.html) work anywhere with no internet — just open them in a browser.</p>
       <div class="oc-actions">
-        <button class="btn-sm btn-primary" id="pwa-install-btn" style="display:none" onclick="installPWA()">⊕ Install App</button>
+        <button class="btn-sm btn-primary" id="pwa-install-btn" onclick="installPWA()">&#x2295; Install App</button>
         <a href="/builder" class="btn-sm btn-primary" style="text-decoration:none">🛠 Build a Game</a>
       </div>
     </div>
@@ -143,16 +145,19 @@ let deferredInstall = null;
 window.addEventListener('beforeinstallprompt', function(e) {
   e.preventDefault();
   deferredInstall = e;
-  document.getElementById('pwa-install-btn').style.display = 'inline-block';
 });
-
+window.addEventListener('appinstalled', function() {
+  deferredInstall = null;
+  var btn = document.getElementById('pwa-install-btn');
+  if (btn) { btn.textContent = 'Installed'; btn.style.opacity = '.45'; btn.style.cursor = 'default'; }
+});
 function installPWA() {
-  if (!deferredInstall) return;
-  deferredInstall.prompt();
-  deferredInstall.userChoice.then(function() {
-    deferredInstall = null;
-    document.getElementById('pwa-install-btn').style.display = 'none';
-  });
+  if (deferredInstall) {
+    deferredInstall.prompt();
+    deferredInstall.userChoice.then(function(r) { if (r.outcome === 'accepted') deferredInstall = null; });
+  } else {
+    window.location.href = '/';
+  }
 }
 
 function getStorageUsage() {

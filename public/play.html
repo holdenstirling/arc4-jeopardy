@@ -436,15 +436,15 @@ body{padding-bottom:env(safe-area-inset-bottom,0);}
       <div style="font-size:1.05rem;font-weight:700;margin-bottom:18px;">Set up Final Jeopardy</div>
       <div style="margin-bottom:12px;text-align:left;">
         <label style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.38);display:block;margin-bottom:5px;">Category</label>
-        <input id="fj-cat-inp" type="text" placeholder="e.g. Famous Scientists" style="width:100%;padding:9px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.95rem;outline:none;font-family:inherit;">
+        <input id="fj-cat-inp" type="text" placeholder="e.g. Famous Scientists" maxlength="80" style="width:100%;padding:9px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.95rem;outline:none;font-family:inherit;">
       </div>
       <div style="margin-bottom:12px;text-align:left;">
         <label style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.38);display:block;margin-bottom:5px;">Clue</label>
-        <textarea id="fj-clue-inp" rows="3" placeholder="Write the Final Jeopardy clue here…" style="width:100%;padding:9px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.88rem;outline:none;resize:vertical;font-family:inherit;line-height:1.4;"></textarea>
+        <textarea id="fj-clue-inp" rows="3" placeholder="Write the Final Jeopardy clue here…" maxlength="500" style="width:100%;padding:9px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.88rem;outline:none;resize:vertical;font-family:inherit;line-height:1.4;"></textarea>
       </div>
       <div style="margin-bottom:20px;text-align:left;">
         <label style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.38);display:block;margin-bottom:5px;">Answer (host only)</label>
-        <input id="fj-ans-inp" type="text" placeholder="Correct answer" style="width:100%;padding:9px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.88rem;outline:none;font-family:inherit;">
+        <input id="fj-ans-inp" type="text" placeholder="Correct answer" maxlength="200" style="width:100%;padding:9px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.88rem;outline:none;font-family:inherit;">
       </div>
       <div style="display:flex;gap:10px;justify-content:center;">
         <button onclick="fjRevealCategory()" style="background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:12px 28px;border-radius:7px;font-weight:800;cursor:pointer;font-size:.95rem;font-family:inherit;">Reveal Category →</button>
@@ -585,18 +585,23 @@ var _currentGameData = null; // set when a custom game is loaded
 
 function shareGame() {
   var url;
-  if (_currentGameData) {
-    // Encode full game data in hash → works on any device
+  var isDefault = !_currentGameData;
+  if (!isDefault) {
+    // Custom game — encode full data in hash so link works on any device
     try {
       var encoded = btoa(encodeURIComponent(JSON.stringify(_currentGameData)));
       url = location.origin + location.pathname + '#data=' + encoded;
-    } catch(e) { url = location.href; }
+    } catch(e) {
+      showToast('⚠ Could not encode game — try Share from Library');
+      return;
+    }
   } else {
-    url = location.href;
+    // Default built-in game — share the root play URL
+    url = location.origin + '/play.html';
   }
   if (navigator.clipboard) {
     navigator.clipboard.writeText(url)
-      .then(function(){ showToast('🔗 Link copied!'); })
+      .then(function(){ showToast(isDefault ? '🔗 Default game link copied!' : '🔗 Link copied!'); })
       .catch(function(){ window.prompt('Copy this link:', url); });
   } else {
     window.prompt('Copy this link:', url);
@@ -1026,6 +1031,7 @@ function resetBoard() {
 // ── CUSTOM GAME LOADER ────────────────────────────────────────────────────────
 function buildBoardFromGame(entry) {
   var cats = entry.catData || [];
+  // Validate: need at least one category with at least one clue
   if (!cats.length || !cats[0].clues || !cats[0].clues.length) return false;
   var numCols = cats.length;
   var board = document.getElementById('board');
@@ -1041,8 +1047,10 @@ function buildBoardFromGame(entry) {
     catRow.appendChild(cell);
   });
   board.appendChild(catRow);
-  // Clue rows
-  var numRows = cats[0].clues.length;
+  // Use the minimum clue count across all categories to prevent undefined access
+  var numRows = cats.reduce(function(min, cat) {
+    return Math.min(min, (cat.clues && cat.clues.length) || 0);
+  }, cats[0].clues.length);
   for (var r = 0; r < numRows; r++) {
     var row = document.createElement('div');
     row.className = 'board-row';
@@ -1292,6 +1300,7 @@ function fjMarkResult(i, correct) {
 }
 
 function closeFJ() {
+  stopTimer();
   document.getElementById('fj-overlay').style.display = 'none';
 }
 

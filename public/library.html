@@ -226,8 +226,8 @@ function playGame(id) {
   var lib = getLibrary();
   var entry = lib.find(function(e){ return e.id===id; });
   if (!entry) return;
-  // Navigate to the hosted play page (works on same device; share link works cross-device)
-  if (entry.catData) {
+  // Prefer hosted URL with hash-encoded data (cross-device shareable)
+  if (entry.catData && entry.catData.length) {
     try {
       var data = { id: entry.id, title: entry.title, catData: entry.catData };
       var encoded = btoa(encodeURIComponent(JSON.stringify(data)));
@@ -235,7 +235,18 @@ function playGame(id) {
       return;
     } catch(e) {}
   }
-  window.location.href = '/play.html?game=' + id;
+  // Fall back to ?game= lookup (same device, catData missing or encode failed)
+  if (entry.html || entry.catData) {
+    window.location.href = '/play.html?game=' + id;
+    return;
+  }
+  // Legacy: game was saved as HTML blob only — open directly
+  if (entry.html) {
+    var blob = new Blob([entry.html], { type: 'text/html;charset=utf-8' });
+    window.open(URL.createObjectURL(blob), '_blank');
+  } else {
+    showToast('⚠ Game data unavailable', 'err');
+  }
 }
 
 function shareGame(id) {

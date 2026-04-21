@@ -978,10 +978,6 @@ function getRandQ(cat, diff) {
   }
   return null;
 }
-  const idx = avail[Math.floor(Math.random()*avail.length)];
-  usedQ[`${cat}_${diff}_${idx}`] = true;
-  return {...pool[idx]};
-}
 
 // ─── Auto-generate ────────────────────────────────────────────────────────────
 function autoGenerate() {

@@ -309,6 +309,30 @@ a:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4
 /* ── TOAST ── */
 #toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0));left:50%;transform:translateX(-50%) translateY(20px);background:rgba(20,30,90,.97);border:1px solid rgba(245,197,24,.45);border-radius:8px;padding:11px 22px;font-size:.82rem;font-weight:700;color:#fff;opacity:0;pointer-events:none;z-index:9000;transition:opacity .22s,transform .22s;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.4);}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── HOW TO PLAY MODAL ── */
+#htp-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:600;align-items:center;justify-content:center;padding:20px;}
+#htp-overlay.open{display:flex;}
+#htp-card{background:linear-gradient(160deg,#0d1b5e,#1a237e);border:2px solid rgba(245,197,24,.4);border-radius:16px;max-width:560px;width:100%;padding:32px 28px;max-height:88vh;overflow-y:auto;animation:winnerIn .3s cubic-bezier(.34,1.56,.64,1);}
+#htp-card h2{font-size:1.3rem;font-weight:900;color:var(--gold);margin-bottom:18px;text-align:center;}
+.htp-section{margin-bottom:18px;}
+.htp-section h3{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--gold);margin-bottom:8px;}
+.htp-section p,.htp-section li{font-size:.84rem;color:rgba(255,255,255,.75);line-height:1.6;}
+.htp-section ul{padding-left:18px;}
+.htp-close-btn{display:block;width:100%;margin-top:22px;background:rgba(245,197,24,.12);border:2px solid rgba(245,197,24,.4);color:var(--gold);padding:10px;border-radius:8px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s;}
+.htp-close-btn:hover{background:rgba(245,197,24,.2);}
+
+/* ── MOBILE OVERFLOW MENU ── */
+.overflow-menu-wrap{position:relative;}
+#overflow-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:#1a237e;border:2px solid rgba(245,197,24,.3);border-radius:10px;z-index:500;min-width:150px;padding:6px;box-shadow:0 8px 32px rgba(0,0,0,.5);}
+#overflow-menu.open{display:block;}
+#overflow-menu button{display:block;width:100%;text-align:left;background:none;border:none;color:#fff;padding:8px 12px;font-size:.82rem;font-weight:700;cursor:pointer;border-radius:6px;font-family:inherit;transition:.12s;}
+#overflow-menu button:hover{background:rgba(255,255,255,.1);}
+.overflow-btn{display:none \!important;}
+@media(max-width:680px){
+  .overflow-hide{display:none \!important;}
+  .overflow-btn{display:inline-flex \!important;}
+}
 </style>
 </head>
 <body>
@@ -324,12 +348,13 @@ a:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4
 <!-- ── SETUP ── -->
 <div id="setup">
   <nav class="setup-nav">
-    <a href="/index.html">⌂ Home</a>
-    <a href="/builder.html">🛠 Builder</a>
-    <a href="/library.html">📚 Library</a>
+    <a href="/">⌂ Home</a>
+    <a href="/builder">🛠 Builder</a>
+    <a href="/library">📚 Library</a>
   </nav>
   <h1>⚡ Holden's Jeopardy</h1>
   <p class="sub">Set up your teams, then play</p>
+  <button onclick="document.getElementById('htp-overlay').classList.add('open')" style="background:none;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.5);font-size:.75rem;padding:5px 14px;border-radius:20px;cursor:pointer;font-family:inherit;font-weight:600;margin-bottom:10px;transition:.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.5)'">? How to Play</button>
 
   <div class="setup-card">
     <div class="setup-label">How many teams?</div>
@@ -360,15 +385,24 @@ a:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4
   <div id="topbar">
     <h1>⚡ Holden's Jeopardy</h1>
     <div class="topbar-right">
-      <button class="hdr-btn" onclick="location.href='/index.html'" title="Home">⌂ Home</button>
+      <button class="hdr-btn" onclick="location.href='/'" title="Home">⌂ Home</button>
       <button class="hdr-btn" id="mute-btn" onclick="toggleMute()" title="Toggle sound">🔊</button>
       <button class="hdr-btn" id="timer-btn" onclick="toggleTimer()" title="Cycle timer: OFF → 15s → 30s → 1m → 2m">⏱</button>
       <button class="hdr-btn" onclick="triggerFinalJeopardy()" title="Final Jeopardy">🏁 Final</button>
       <button class="hdr-btn" onclick="resetBoard()">↺ Reset</button>
-      <button class="hdr-btn" onclick="goSetup()">⚙ Teams</button>
-      <button class="hdr-btn" onclick="manualSave()" title="Save game progress">💾 Save</button>
-      <button class="hdr-btn" onclick="shareGame()" title="Copy shareable link">🔗 Share</button>
+      <button class="hdr-btn overflow-hide" onclick="goSetup()">⚙ Teams</button>
+      <button class="hdr-btn overflow-hide" onclick="manualSave()" title="Save game progress">💾 Save</button>
+      <button class="hdr-btn overflow-hide" onclick="shareGame()" title="Copy shareable link">🔗 Share</button>
       <button class="hdr-btn" id="install-btn" style="display:none" onclick="installPWA()">⊕ Install</button>
+      <div class="overflow-menu-wrap">
+        <button class="hdr-btn overflow-btn" id="overflow-toggle" onclick="toggleOverflowMenu()" title="More options">⋮</button>
+        <div id="overflow-menu">
+          <button onclick="goSetup();closeOverflowMenu()">⚙ Teams</button>
+          <button onclick="manualSave();closeOverflowMenu()">💾 Save</button>
+          <button onclick="shareGame();closeOverflowMenu()">🔗 Share</button>
+          <button id="overflow-install" style="display:none" onclick="installPWA();closeOverflowMenu()">⊕ Install</button>
+        </div>
+      </div>
     </div>
   </div>
   <div id="scoreboard"></div>
@@ -451,6 +485,7 @@ a:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:0;">
       <button class="btn-play-again" onclick="resetBoard()">↺ Play Again</button>
       <button class="btn-play-again" style="background:linear-gradient(135deg,#283593,#1a237e);border:2px solid #f5c518;color:#f5c518;box-shadow:0 4px 20px rgba(245,197,24,.2);" onclick="document.getElementById('winner-overlay').classList.remove('open');triggerFinalJeopardy();">🏁 Final Jeopardy</button>
+      <button class="btn-play-again" style="background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);" onclick="shareWinner()">🔗 Share Results</button>
     </div>
   </div>
 </div>
@@ -1488,6 +1523,40 @@ function installPWA() {
   deferredInstall.userChoice.then(function(){ deferredInstall = null; document.getElementById('install-btn').style.display = 'none'; });
 }
 
+
+// ── OVERFLOW MENU ──────────────────────────────────────────────────────────
+function toggleOverflowMenu() {
+  var m = document.getElementById('overflow-menu');
+  m.classList.toggle('open');
+}
+function closeOverflowMenu() {
+  document.getElementById('overflow-menu').classList.remove('open');
+}
+document.addEventListener('click', function(e) {
+  var wrap = document.querySelector('.overflow-menu-wrap');
+  if (wrap && \!wrap.contains(e.target)) closeOverflowMenu();
+});
+
+// ── SHARE WINNER ──────────────────────────────────────────────────────────
+function shareWinner() {
+  var sorted = teams.slice().sort(function(a,b){ return b.score-a.score; });
+  var medals = ['🥇','🥈','🥉'];
+  var title = (_currentGameData && _currentGameData.title) ? _currentGameData.title : "Holden's Jeopardy";
+  var lines = ['🏆 ' + title + ' Results\n'];
+  sorted.forEach(function(t,i){
+    lines.push((medals[i]||((i+1)+'.')) + ' ' + t.name + ' — ' + t.score.toLocaleString() + ' pts');
+  });
+  lines.push('\n🎮 Play: ' + location.origin + '/play');
+  var text = lines.join('\n');
+  if (navigator.share) {
+    navigator.share({ title: title + ' Results', text: text }).catch(function(){});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function(){ showToast('🔗 Results copied\!'); }).catch(function(){ window.prompt('Copy results:', text); });
+  } else {
+    window.prompt('Copy results:', text);
+  }
+}
+
 // ── SERVICE WORKER ────────────────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(function(){});
@@ -1541,5 +1610,42 @@ if (loadSave() && teams.length) {
   updateLeader();
 }
 </script>
+
+<\!-- ── HOW TO PLAY MODAL ── -->
+<div id="htp-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div id="htp-card">
+    <h2>📖 How to Play</h2>
+    <div class="htp-section">
+      <h3>The Basics</h3>
+      <p>Teams take turns picking a category and point value. The host reads the clue — teams buzz in to answer. Correct? Win the points. Wrong? Lose them.</p>
+    </div>
+    <div class="htp-section">
+      <h3>Scoring</h3>
+      <ul>
+        <li>Click a dollar amount on the board to open the clue</li>
+        <li>Press <strong>Space</strong> to reveal the answer</li>
+        <li>Press <strong>1–8</strong> to award that team the points</li>
+        <li>Press <strong>Shift+1–8</strong> to deduct points from a team</li>
+      </ul>
+    </div>
+    <div class="htp-section">
+      <h3>Daily Double</h3>
+      <p>One hidden clue is a Daily Double — the answering team wagers up to their total score (or $1,000 minimum). Only that team may answer.</p>
+    </div>
+    <div class="htp-section">
+      <h3>Final Jeopardy</h3>
+      <p>When all clues are answered (or click <strong>🏁 Final</strong>), every team secretly wagers before hearing the final clue. Everyone writes their answer — host reveals and adjusts scores.</p>
+    </div>
+    <div class="htp-section">
+      <h3>Timer</h3>
+      <p>Click <strong>⏱</strong> to cycle through OFF → 15s → 30s → 1m → 2m. Timer starts automatically when a clue opens.</p>
+    </div>
+    <div class="htp-section">
+      <h3>Streaks 🔥</h3>
+      <p>Teams earn streak badges for 3+ consecutive correct answers. Get on a roll\!</p>
+    </div>
+    <button class="htp-close-btn" onclick="document.getElementById('htp-overlay').classList.remove('open')">Got it — Let's Play\!</button>
+  </div>
+</div>
 </body>
 </html>

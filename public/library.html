@@ -79,10 +79,10 @@ header h1{font-size:1.35rem;font-weight:900;color:var(--gold);letter-spacing:1px
 <header>
   <h1>📚 Game Library</h1>
   <nav class="header-nav">
-    <a href="/index.html" class="nav-link">⌂ Home</a>
-    <a href="/play.html" class="nav-link">🎮 Play</a>
-    <a href="/builder.html" class="nav-link">🛠 Builder</a>
-    <a href="/library.html" class="nav-link active">📚 Library</a>
+    <a href="/" class="nav-link">⌂ Home</a>
+    <a href="/play" class="nav-link">🎮 Play</a>
+    <a href="/builder" class="nav-link">🛠 Builder</a>
+    <a href="/library" class="nav-link active">📚 Library</a>
   </nav>
 </header>
 
@@ -96,7 +96,7 @@ header h1{font-size:1.35rem;font-weight:900;color:var(--gold);letter-spacing:1px
       <p>This app works fully offline once loaded. To install it on your device, look for the install icon (⊕) in your browser's address bar, or use the button below. Downloaded game files (.html) work anywhere with no internet — just open them in a browser.</p>
       <div class="oc-actions">
         <button class="btn-sm btn-primary" id="pwa-install-btn" style="display:none" onclick="installPWA()">⊕ Install App</button>
-        <a href="/builder.html" class="btn-sm btn-primary" style="text-decoration:none">🛠 Build a Game</a>
+        <a href="/builder" class="btn-sm btn-primary" style="text-decoration:none">🛠 Build a Game</a>
       </div>
     </div>
   </div>
@@ -121,7 +121,7 @@ header h1{font-size:1.35rem;font-weight:900;color:var(--gold);letter-spacing:1px
     <div class="empty-icon">🎮</div>
     <h3>No games saved yet</h3>
     <p>Every game you generate in the Builder is automatically saved here.<br>You can play it again or download it any time.</p>
-    <a href="/builder.html" class="btn-build">🛠 Build Your First Game</a>
+    <a href="/builder" class="btn-build">🛠 Build Your First Game</a>
   </div>
 
 </div>
@@ -235,13 +235,13 @@ function playGame(id) {
     try {
       var data = { id: entry.id, title: entry.title, catData: entry.catData };
       var encoded = btoa(encodeURIComponent(JSON.stringify(data)));
-      window.location.href = '/play.html?game=' + id + '#data=' + encoded;
+      window.location.href = '/play?game=' + id + '#data=' + encoded;
       return;
     } catch(e) {}
   }
   // Fall back to ?game= lookup (same device, catData missing or encode failed)
   if (entry.html || entry.catData) {
-    window.location.href = '/play.html?game=' + id;
+    window.location.href = '/play?game=' + id;
     return;
   }
   // Legacy: game was saved as HTML blob only — open directly
@@ -261,7 +261,7 @@ function shareGame(id) {
   try {
     var data = { title: entry.title, catData: entry.catData };
     var encoded = btoa(encodeURIComponent(JSON.stringify(data)));
-    var url = location.origin + '/play.html#data=' + encoded;
+    var url = location.origin + '/play#data=' + encoded;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(url)
         .then(function(){ showToast('🔗 Share link copied!','ok'); })

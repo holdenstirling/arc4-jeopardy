@@ -122,10 +122,10 @@ label.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba
     <p>Generate, customize &amp; export self-contained Jeopardy games</p>
   </div>
   <div class="header-nav">
-    <a href="/index.html" class="nav-link">⌂ Home</a>
-    <a href="/play.html" class="nav-link">🎮 Play</a>
-    <a href="/library.html" class="nav-link">📚 Library</a>
-    <a href="/builder.html" class="nav-link active">🛠 Builder</a>
+    <a href="/" class="nav-link">⌂ Home</a>
+    <a href="/play" class="nav-link">🎮 Play</a>
+    <a href="/library" class="nav-link">📚 Library</a>
+    <a href="/builder" class="nav-link active">🛠 Builder</a>
     <a href="#" class="nav-link" onclick="shareBuilderGame();return false;" title="Copy shareable link to this game" style="color:rgba(255,255,255,.6);">🔗 Share</a>
     <a href="#" class="nav-link" onclick="saveAndPlay();return false;" style="color:#f5c518;border-color:rgba(245,197,24,.4);background:rgba(245,197,24,.08);font-weight:800;">▶ Save &amp; Play</a>
     <span class="badge" id="sw-badge">● Offline Ready</span>
@@ -1170,9 +1170,9 @@ function saveAndPlay() {
       // Embed game data in hash so the URL is cross-device shareable
       const data = { id, title, catData: cats };
       const encoded = btoa(encodeURIComponent(JSON.stringify(data)));
-      window.location.href = '/play.html?game=' + id + '#data=' + encoded;
+      window.location.href = '/play?game=' + id + '#data=' + encoded;
     } catch(e) {
-      window.location.href = '/play.html?game=' + id;
+      window.location.href = '/play?game=' + id;
     }
   } else {
     // fallback if localStorage is full — blob download
@@ -1189,7 +1189,7 @@ function shareBuilderGame() {
   try {
     const data = { title, catData: cats };
     const encoded = btoa(encodeURIComponent(JSON.stringify(data)));
-    const url = location.origin + '/play.html#data=' + encoded;
+    const url = location.origin + '/play#data=' + encoded;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(url)
         .then(function(){ showToast('🔗 Share link copied!', 'ok'); })

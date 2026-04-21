@@ -514,6 +514,7 @@ body.spectator::after{content:'📺 Spectator Mode';position:fixed;bottom:10px;r
   </div>
 </div>
 
+<div id="board-hint" style="text-align:center;padding:10px 0 2px;font-size:.72rem;color:rgba(255,255,255,.28);letter-spacing:.3px;transition:opacity .6s;">Tap any dollar amount to open a clue · 1–8 = award team</div>
 <!-- ── MODAL ── -->
 <div id="overlay">
   <div id="modal">
@@ -1121,20 +1122,13 @@ function animateScore(i, delta) {
 function goNewGame() {
   // Clear save and return to setup screen for a fresh game
   clearSave();
+  clearFJSave();
   resetSessionClock();
   undoStack = []; scoreHistory = [];
   document.getElementById('winner-overlay').classList.remove('open');
   document.getElementById('game').style.display = 'none';
   document.getElementById('setup').style.display = '';
   // Reload page to get fresh board choices (preserves URL game param if any)
-  location.reload();
-}
-function goNewGame() {
-  // Clear save and reload for a completely fresh game
-  clearSave();
-  resetSessionClock();
-  undoStack = []; scoreHistory = [];
-  document.getElementById('winner-overlay').classList.remove('open');
   location.reload();
 }
 function boardMinPts() {
@@ -1312,28 +1306,29 @@ function renderScoreButtons() {
   var ownerStr = current ? current.dataset.owner : undefined;
   var ownerIdx = (ownerStr !== undefined && ownerStr !== '') ? parseInt(ownerStr) : -1;
   teams.forEach(function(t, i) {
+    var pair = document.createElement('div');
+    pair.className = 'sg-pair';
     var a = document.createElement('button');
     var s = document.createElement('button');
-
     if (ownerIdx >= 0 && ownerIdx !== i) {
-      // This team can steal from the current owner
       a.className = 'sg-btn sg-steal';
       a.textContent = '🔄 ' + t.name;
     } else if (ownerIdx === i) {
-      // This team already owns it
       a.className = 'sg-btn sg-add';
       a.textContent = '✓ ' + t.name;
     } else {
       a.className = 'sg-btn sg-add';
-      a.textContent = '+ ' + t.name;
+      a.textContent = '➕ ' + t.name;
     }
+    a.title = 'Award (' + (i+1) + ')'; 
     a.onclick = (function(idx){ return function(){ adjScore(idx, 1); }; })(i);
-
     s.className = 'sg-btn sg-sub';
-    s.textContent = '− ' + t.name;
+    s.textContent = '➖ ' + t.name;
+    s.title = 'Deduct (Shift+' + (i+1) + ')'; 
     s.onclick = (function(idx){ return function(){ adjScore(idx, -1); }; })(i);
-
-    g.appendChild(a); g.appendChild(s);
+    pair.appendChild(a);
+    pair.appendChild(s);
+    g.appendChild(pair);
   });
 }
 
@@ -1441,6 +1436,7 @@ function resetBoard() {
   teams.forEach(function(t, i){ t.score = 0; updateScore(i); });
   undoStack = []; scoreHistory = [];
   resetSessionClock();
+  clearFJSave();
   var undoBtn = document.getElementById('undo-btn');
   if (undoBtn) { undoBtn.disabled = true; undoBtn.classList.remove('active'); }
   document.getElementById('winner-overlay').classList.remove('open');

@@ -1,7 +1,7 @@
 {
   "name": "Holden's Jeopardy",
   "short_name": "Jeopardy",
-  "description": "Holden's team trivia builder and game player",
+  "description": "Team trivia builder and game player",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0d1b5e",
@@ -10,9 +10,15 @@
   "categories": ["games", "entertainment"],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%231a237e'/><text x='50' y='72' font-size='60' text-anchor='middle' fill='%23f5c518'>⚡</text></svg>",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]

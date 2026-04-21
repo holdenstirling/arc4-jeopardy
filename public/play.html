@@ -107,11 +107,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
 .m-score.show{display:block;}
 .m-score-label{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);margin-bottom:8px;}
 .score-grid{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;}
-.sg-btn{border:none;padding:8px 15px;border-radius:6px;cursor:pointer;font-size:.78rem;font-weight:700;font-family:inherit;transition:.15s;}
+.sg-pair{display:flex;flex-direction:column;gap:4px;flex:1 1 auto;min-width:120px;}
+.sg-btn{border:none;padding:8px 15px;border-radius:6px;cursor:pointer;font-size:.78rem;font-weight:700;font-family:inherit;transition:.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
 .sg-btn:hover{opacity:.85;transform:translateY(-1px);}
 .sg-add{background:rgba(76,175,80,.2);border:1px solid rgba(76,175,80,.5);color:#a5d6a7;}
-.sg-sub{background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.4);color:#ff8a80;}
-.kbd-hint{font-size:.62rem;color:rgba(255,255,255,.2);margin-top:14px;}
+.sg-sub{background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.4);color:#ff8a80;font-size:.72rem;padding:5px 10px;}
+.kbd-hint{font-size:.62rem;color:rgba(255,255,255,.25);margin-top:14px;line-height:1.8;}
+.hint-touch{display:none;}
+.hint-keys{display:inline;}
 /* ── TIMER ── */
 .timer-wrap{height:6px;background:rgba(255,255,255,.1);border-radius:3px;margin:-10px 0 18px;overflow:hidden;display:none;}
 .timer-bar{height:100%;background:var(--gold);border-radius:3px;transition:width .95s linear,background .25s;}
@@ -249,9 +252,13 @@ body{padding-bottom:env(safe-area-inset-bottom,0);}
   .m-actions{gap:8px;}
   .btn-reveal{padding:14px 24px;font-size:.92rem;min-height:48px;flex:1;}
   .btn-close{padding:14px 18px;font-size:.88rem;min-height:48px;}
-  .sg-btn{padding:12px 10px;font-size:.75rem;min-height:44px;}
-  .score-grid{gap:5px;}
-  .kbd-hint{display:none;}
+  .score-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .sg-pair{min-width:0;flex:none;}
+  .sg-add{padding:12px 8px;font-size:.78rem;min-height:44px;max-width:100%;}
+  .sg-sub{padding:8px 8px;font-size:.72rem;min-height:36px;max-width:100%;}
+  .kbd-hint{display:block !important;}
+  .hint-touch{display:inline !important;}
+  .hint-keys{display:none !important;}
 
   /* Setup */
   #setup{padding:20px 14px 36px;}
@@ -523,7 +530,10 @@ body.spectator::after{content:'📺 Spectator Mode';position:fixed;bottom:10px;r
       <div class="m-score-label">Award / Deduct Points</div>
       <div class="score-grid" id="score-grid"></div>
     </div>
-    <div class="kbd-hint">Space = reveal &nbsp;·&nbsp; Esc = close &nbsp;·&nbsp; 1–8 = award team &nbsp;·&nbsp; Shift+1–8 = deduct</div>
+    <div class="kbd-hint" id="modal-hint">
+      <span class="hint-touch">Tap <strong style="color:#a5d6a7">green</strong> to award &nbsp;·&nbsp; Tap <strong style="color:#ff8a80">red</strong> to deduct</span>
+      <span class="hint-keys">Space = reveal &nbsp;·&nbsp; 1–8 = award &nbsp;·&nbsp; Shift+1–8 = deduct &nbsp;·&nbsp; Esc = close</span>
+    </div>
   </div>
 </div>
 
@@ -1254,6 +1264,9 @@ document.getElementById('board').addEventListener('keydown', function(e) {
 function openCell(cell) {
   if (cell.classList.contains('used')) return;
   sndOpen();
+  // Dismiss board hint on first open
+  var bh = document.getElementById('board-hint');
+  if (bh) { bh.style.opacity = '0'; setTimeout(function(){ bh.style.display='none'; }, 700); }
   // Flip animation
   cell.classList.add('flip');
   setTimeout(function(){ cell.classList.remove('flip'); }, 340);
@@ -1669,8 +1682,33 @@ var fjClue = '';
 var fjAnswer = '';
 
 function triggerFinalJeopardy() {
-  fjWagers = [];
   fjResultsApplied = [];
+  // Check for a saved mid-flight FJ session
+  var saved = loadFJSave();
+  if (saved && saved.wagers && saved.wagers.some(function(w){ return w !== null; })) {
+    fjWagers = saved.wagers;
+    fjCategory = saved.category || '';
+    fjClue = saved.clue || '';
+    fjAnswer = saved.answer || '';
+    // Find the first team who still needs to wager
+    var nextIdx = fjWagers.indexOf(null);
+    document.getElementById('fj-step1').style.display = 'none';
+    document.getElementById('fj-step2').style.display = 'block';
+    document.getElementById('fj-step3').style.display = 'none';
+    document.getElementById('fj-step4').style.display = 'none';
+    document.getElementById('fj-cat-display').textContent = fjCategory;
+    document.getElementById('fj-overlay').style.display = 'flex';
+    if (nextIdx >= 0) {
+      fjShowWagerForTeam(nextIdx);
+    } else {
+      // All wagers collected — go straight to clue reveal
+      fjRevealClue();
+    }
+    showToast('Resumed Final Jeopardy — wagers restored');
+    return;
+  }
+  // Fresh start
+  fjWagers = [];
   fjCategory = ''; fjClue = ''; fjAnswer = '';
   document.getElementById('fj-step1').style.display = 'block';
   document.getElementById('fj-step2').style.display = 'none';
@@ -1693,6 +1731,7 @@ function fjRevealCategory() {
   document.getElementById('fj-step1').style.display = 'none';
   document.getElementById('fj-step2').style.display = 'block';
   fjWagers = new Array(teams.length).fill(null);
+  saveFJ();
   fjShowWagerForTeam(0);
 }
 
@@ -1722,6 +1761,7 @@ function fjLockWager(i) {
   if (isNaN(val) || val < 0) val = 0;
   if (val > maxWager) val = maxWager;
   fjWagers[i] = val;
+  saveFJ();
 
   var section = document.getElementById('fj-wager-section');
   var nextTeam = i + 1;
@@ -1807,6 +1847,23 @@ function fjMarkResult(i, correct) {
 function closeFJ() {
   stopTimer();
   document.getElementById('fj-overlay').style.display = 'none';
+  // Only wipe saved FJ state when we're done (step 4)
+  var s4 = document.getElementById('fj-step4');
+  if (s4 && s4.style.display !== 'none') clearFJSave();
+}
+var _FJ_SAVE_KEY = 'arc4-jeopardy-fj';
+function saveFJ() {
+  try {
+    localStorage.setItem(_FJ_SAVE_KEY, JSON.stringify({
+      wagers: fjWagers, category: fjCategory, clue: fjClue, answer: fjAnswer
+    }));
+  } catch(e) {}
+}
+function loadFJSave() {
+  try { return JSON.parse(localStorage.getItem(_FJ_SAVE_KEY)); } catch(e) { return null; }
+}
+function clearFJSave() {
+  try { localStorage.removeItem(_FJ_SAVE_KEY); } catch(e) {}
 }
 
 // ── PWA INSTALL ───────────────────────────────────────────────────────────────

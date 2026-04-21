@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Holden's Jeopardy">
 <link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <title>Jeopardy Builder · Holden's Jeopardy</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -766,7 +767,7 @@ const QB_EXTRA = {
 // Merge QB_EXTRA into QB
 Object.keys(QB_EXTRA).forEach(diff => {
   Object.keys(QB_EXTRA[diff]).forEach(cat => {
-    if (\!QB[diff][cat]) QB[diff][cat] = [];
+    if (!QB[diff][cat]) QB[diff][cat] = [];
     QB[diff][cat] = QB[diff][cat].concat(QB_EXTRA[diff][cat]);
   });
 });

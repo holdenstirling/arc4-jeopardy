@@ -963,8 +963,8 @@ function getRandQ(cat, diff) {
   const diffs = fallback[diff] || [diff];
   for (const d of diffs) {
     const pool = QB[d]?.[cat];
-    if (\!pool || \!pool.length) continue;
-    const avail = pool.map((_,i)=>i).filter(i=>\!usedQ[`${cat}_${d}_${i}`]);
+    if (!pool || !pool.length) continue;
+    const avail = pool.map((_,i)=>i).filter(i=>!usedQ[`${cat}_${d}_${i}`]);
     if (avail.length) {
       const idx = avail[Math.floor(Math.random()*avail.length)];
       usedQ[`${cat}_${d}_${idx}`] = true;

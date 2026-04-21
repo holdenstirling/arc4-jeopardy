@@ -722,7 +722,7 @@ const QB_EXTRA = {
       {c:"This Dutch streaming music company, founded in 2006, pays artists a fraction of a cent per stream", a:"Spotify"},
       {c:"The two Stanford PhD students who founded Google in 1998", a:"Larry Page and Sergey Brin"},
       {c:"This company, founded by Masayoshi Son, runs one of the world's largest technology investment funds and owns SoftBank", a:"SoftBank"},
-      {c:"This consulting firm — founded in 1926 and known for recruiting only from elite universities — is considered one of the most prestigious in the world alongside McKinsey and Bain", a:"Booz Allen Hamilton (or Deloitte — accept McKinsey if confused with peer)"}
+      {c:"The top-tier strategy consulting firms nicknamed 'MBB' are McKinsey & Company, Boston Consulting Group, and this third firm — founded in 1973 when its namesake left BCG to start his own firm.", a:"Bain & Company"}
     ]
   },
   hard: {
@@ -731,7 +731,7 @@ const QB_EXTRA = {
       {c:"The Fertile Crescent — the region often called the 'Cradle of Civilization' — spans parts of modern Iraq, Syria, Lebanon, Jordan, Israel, and this country", a:"Turkey (and Egypt, depending on definition)"},
       {c:"This tiny European microstate, completely surrounded by Italy, holds the title of the world's oldest republic, founded in 301 AD", a:"San Marino"},
       {c:"The Bosporus Strait divides this country between two continents — Europe and Asia", a:"Turkey"},
-      {c:"Dixon Line and the Mason-Dixon Line are often confused. The actual Mason-Dixon Line, surveyed in the 1760s, forms the border between Pennsylvania and this state", a:"Maryland"}
+      {c:"The Mason-Dixon Line — surveyed in the 1760s by Charles Mason and Jeremiah Dixon — forms the boundary between Pennsylvania and this state, and became the symbolic dividing line between North and South.", a:"Maryland"}
     ],
     "Movies & TV": [
       {c:"Andrei Tarkovsky's 1972 Soviet science fiction film — based on a novel by Stanislaw Lem — depicts a psychologist sent to a space station orbiting this mysterious ocean planet", a:"Solaris"},
@@ -742,7 +742,7 @@ const QB_EXTRA = {
     ],
     "Sports & Games": [
       {c:"In cricket, a batsman is dismissed 'LBW' when a delivery would have hit the stumps but was blocked by this part of the body", a:"The leg (Leg Before Wicket)"},
-      {c:"The Queensberry Rules — which govern modern boxing — were written in 1867 by John Graham Chambers and sponsored by the Marquess of Queensberry. They replaced the London Prize Ring Rules, which allowed this technique now banned in boxing", a:"Grappling and wrestling holds"},
+      {c:"The Queensberry Rules of 1867 standardized modern boxing. Unlike the earlier London Prize Ring Rules, they required boxers to wear these protective items on their hands.", a:"Gloves (padded boxing gloves)"},
       {c:"In competitive Go, the game's complexity is estimated to exceed the number of atoms in the observable universe in possible positions. Professional players are ranked using this title system's highest rank", a:"9-dan (professional)"},
       {c:"The Fosbury Flop — a high jump technique involving going over the bar headfirst and backward — was invented by Dick Fosbury at the 1968 Mexico City Olympics. Before this, athletes used this traditional technique", a:"The straddle (Western Roll)"},
       {c:"In Formula 1, the 'undercut' strategy involves pitting earlier than a rival to gain an advantage. Its opposite, staying out longer on fresh tyres, is called this", a:"The overcut"}
@@ -1547,13 +1547,14 @@ function loadFromHash() {
     updatePreview();
     history.replaceState(null, '', '/builder');
     showToast('✏️ Game loaded — edit and Save & Play when ready', 'ok');
+    return true; // signal: skip draft restore
   } catch(e) {
     console.warn('loadFromHash error:', e);
   }
+  return false;
 }
 
-loadDraft();
-loadFromHash();
+if (!loadFromHash()) loadDraft();
 // Auto-save draft on any input change
 document.addEventListener('input', function(e) {
   if (e.target.matches('#game-title, .cat-inp, .clue-card textarea')) scheduleDraftSave();

@@ -354,6 +354,9 @@ body.spectator #progress-strip{opacity:.6;}
 body.spectator::after{content:'📺 Spectator Mode';position:fixed;bottom:10px;right:14px;font-size:.62rem;color:rgba(255,255,255,.25);pointer-events:none;}
 
 /* ── KEYBOARD BAR ── */
+/* ── SESSION CLOCK ── */
+#session-clock{font-size:.72rem;font-weight:700;color:rgba(255,255,255,.38);letter-spacing:.5px;white-space:nowrap;padding:0 2px;font-variant-numeric:tabular-nums;}
+#session-clock.running{color:rgba(255,255,255,.5);}
 #kbd-bar{background:rgba(0,0,0,.2);border-bottom:1px solid rgba(255,255,255,.05);padding:4px 14px;font-size:.62rem;color:rgba(255,255,255,.22);letter-spacing:.3px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 @media(max-width:480px){#kbd-bar{display:none;}}
 
@@ -392,6 +395,7 @@ body.spectator::after{content:'📺 Spectator Mode';position:fixed;bottom:10px;r
     <a href="/library">📚 Library</a>
   </nav>
   <h1>⚡ Holden's Jeopardy</h1>
+    <span id="session-clock" title="Game duration">0:00</span>
   <p class="sub">Set up your teams, then play</p>
   <button onclick="document.getElementById('htp-overlay').classList.add('open')" style="background:none;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.5);font-size:.75rem;padding:5px 14px;border-radius:20px;cursor:pointer;font-family:inherit;font-weight:600;margin-bottom:10px;transition:.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.5)'">? How to Play</button>
 
@@ -1005,6 +1009,7 @@ function startGame() {
   updateProgress();
   updateLeader();
   save();
+  startSessionClock();
 }
 
 function goSetup() {
@@ -1071,12 +1076,20 @@ function animateScore(i, delta) {
   if (delta > 0) sndAdd(); else sndDeduct();
 }
 
+function boardMinPts() {
+  // Smallest point value among remaining (unused) cells — fallback 100
+  var cells = Array.from(document.querySelectorAll('.cell-wrap:not(.used)'));
+  if (!cells.length) return 100;
+  return cells.reduce(function(m, c){ return Math.min(m, parseInt(c.dataset.pts) || 100); }, Infinity);
+}
 function quickAdj(i, dir) {
-  // When a clue is open use its value; otherwise adjust by 100 for manual corrections
-  var delta = current ? parseInt(current.dataset.pts) * dir : 100 * dir;
+  var delta = current ? parseInt(current.dataset.pts) * dir : boardMinPts() * dir;
+  pushUndo({ teamIdx: i, prevScore: teams[i].score, cell: null, prevOwner: -1, prevOwnerPrevScore: null, streakSnapshot: streaks.slice() });
   teams[i].score += delta;
   updateScore(i);
   animateScore(i, delta);
+  logScore(i, delta);
+  updateLeader();
   save();
 }
 
@@ -1355,7 +1368,8 @@ function resetBoard() {
     if (badge) badge.remove();
   });
   teams.forEach(function(t, i){ t.score = 0; updateScore(i); });
-  undoStack = [];
+  undoStack = []; scoreHistory = [];
+  resetSessionClock();
   var undoBtn = document.getElementById('undo-btn');
   if (undoBtn) { undoBtn.disabled = true; undoBtn.classList.remove('active'); }
   document.getElementById('winner-overlay').classList.remove('open');
@@ -1870,6 +1884,29 @@ function shareWinner() {
   }
 }
 
+
+// ── SESSION CLOCK ─────────────────────────────────────────────────────────────
+var _sessionStart = null;
+var _clockInterval = null;
+function startSessionClock() {
+  _sessionStart = _sessionStart || Date.now();
+  if (_clockInterval) return;
+  _clockInterval = setInterval(function() {
+    var el = document.getElementById('session-clock');
+    if (!el) return;
+    var secs = Math.floor((Date.now() - _sessionStart) / 1000);
+    var m = Math.floor(secs / 60);
+    var s = String(secs % 60).padStart(2, '0');
+    el.textContent = m + ':' + s;
+    el.classList.add('running');
+  }, 1000);
+}
+function resetSessionClock() {
+  _sessionStart = null;
+  clearInterval(_clockInterval); _clockInterval = null;
+  var el = document.getElementById('session-clock');
+  if (el) { el.textContent = '0:00'; el.classList.remove('running'); }
+}
 // ── SERVICE WORKER ────────────────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(function(){});
@@ -1937,6 +1974,7 @@ if (loadSave() && teams.length) {
   initDailyDoubles();
   updateProgress();
   updateLeader();
+  startSessionClock();
 }
 </script>
 

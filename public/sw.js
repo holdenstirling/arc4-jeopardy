@@ -1,4 +1,4 @@
-const CACHE = 'jeopardy-v23';
+const CACHE = 'jeopardy-v24';
 const ASSETS = [
   '/',
   '/play',

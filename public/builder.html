@@ -92,6 +92,9 @@ label.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba
 .diff-dot.hard{background:var(--red);}
 .regen-btn{background:none;border:none;color:rgba(255,255,255,.28);cursor:pointer;font-size:.88rem;padding:2px 4px;border-radius:3px;transition:.15s;line-height:1;}
 .regen-btn:hover{color:var(--gold);background:rgba(245,197,24,.1);}
+.fill-col-btn{width:100%;margin-top:5px;padding:5px 0;font-size:.7rem;font-weight:700;background:rgba(245,197,24,.08);border:1px solid rgba(245,197,24,.22);color:rgba(245,197,24,.7);border-radius:5px;cursor:pointer;transition:.15s;letter-spacing:.3px;}
+.fill-col-btn:hover{background:rgba(245,197,24,.16);color:#f5c518;border-color:rgba(245,197,24,.5);}
+.fill-col-btn.filled{border-color:rgba(80,200,120,.4);color:rgba(80,200,120,.8);background:rgba(80,200,120,.07);}
 .clue-card textarea{min-height:50px;font-size:.78rem;margin-bottom:5px;padding:6px 8px;}
 .ans-ta{min-height:30px;font-size:.78rem;padding:5px 8px;background:rgba(80,200,120,.07);border-color:rgba(80,200,120,.2);}
 .ans-ta:focus{border-color:var(--green);background:rgba(80,200,120,.12);}
@@ -191,11 +194,13 @@ label.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba
   <div class="controls-row">
     <button class="btn btn-gold" onclick="autoGenerate()">✦ Generate All Questions</button>
     <div class="sep"></div>
+    <button class="btn btn-ghost" onclick="fillAllClues()">✦ Add Clues for Typed Categories</button>
+    <div class="sep"></div>
     <button class="btn btn-ghost" onclick="randomizeCategories()">🎲 Randomize Categories</button>
     <button class="btn btn-ghost" onclick="clearAll()">✕ Clear All</button>
   </div>
   <div style="margin-top:10px;font-size:.72rem;color:rgba(255,255,255,.3);line-height:1.6;">
-    Fills all cells from a verified bank of 225 questions across 15 topics. Each ↺ button regenerates an individual cell.
+    <strong style="color:rgba(255,255,255,.55);">Generate All</strong> fills everything from the bank. <strong style="color:rgba(255,255,255,.55);">Add Clues for Typed Categories</strong> keeps your category names and fills only their clues. Each column also has an <strong style="color:rgba(255,255,255,.55);">✦ Add Clues</strong> button, and each cell has a <strong style="color:rgba(255,255,255,.55);">↺</strong> regen button.
   </div>
 </div>
 
@@ -792,7 +797,7 @@ function buildBoard() {
     col.className = 'col-wrapper';
 
     // Category name
-    col.innerHTML = `<div><label class="fl">Category ${c+1}</label><input type="text" class="cat-inp" id="cat-${c}" placeholder="Category name" maxlength="40" oninput="syncSuggestions();updatePreview();"></div>`;
+    col.innerHTML = `<div><label class="fl">Category ${c+1}</label><input type="text" class="cat-inp" id="cat-${c}" placeholder="Category name" maxlength="40" oninput="syncSuggestions();updatePreview();fillColBtnSync(${c})"><button class="fill-col-btn" id="fcb-${c}" onclick="fillColumnClues(${c})" title="Fill all clues for this category from the question bank">✦ Add Clues</button></div>`;
 
     POINTS.forEach((pts, r) => {
       const diff = cellDiff(r);
@@ -954,6 +959,95 @@ function autoGenerate() {
   syncSuggestions();
   updatePreview();
   showToast('✦ Questions generated!','ok');
+}
+
+// ─── Fuzzy-match a typed name to a bank category ────────────────────────────────
+function fuzzyMatchCat(name) {
+  if (!name) return null;
+  const n = name.toLowerCase().trim();
+  // Exact match first
+  if (ALL_CATS.includes(name)) return name;
+  // Case-insensitive exact
+  const exact = ALL_CATS.find(c => c.toLowerCase() === n);
+  if (exact) return exact;
+  // Contains match (bank name contains typed, or typed contains bank name)
+  const contains = ALL_CATS.find(c => c.toLowerCase().includes(n) || n.includes(c.toLowerCase()));
+  if (contains) return contains;
+  return null;
+}
+
+// ─── Per-column Add Clues button state sync ───────────────────────────────────
+function fillColBtnSync(c) {
+  const btn = document.getElementById('fcb-' + c);
+  if (!btn) return;
+  const cat = document.getElementById('cat-' + c)?.value.trim() || '';
+  const match = fuzzyMatchCat(cat);
+  btn.classList.toggle('filled', !!match);
+  btn.textContent = match ? ('✦ Add Clues (' + match + ')') : '✦ Add Clues';
+}
+
+// ─── Fill all clues for a single column from the bank ────────────────────────
+function fillColumnClues(c) {
+  const rawCat = document.getElementById('cat-' + c)?.value.trim() || '';
+  const match = fuzzyMatchCat(rawCat);
+  if (!match) {
+    showToast(rawCat
+      ? '"' + rawCat + '" is not in the question bank — try a bank category or enter clues manually'
+      : 'Enter a category name first', 'err');
+    return;
+  }
+  // If matched a different name, update the input
+  if (match !== rawCat) {
+    const el = document.getElementById('cat-' + c);
+    if (el) { el.value = match; syncSuggestions(); updatePreview(); }
+  }
+  let filled = 0;
+  POINTS.forEach((_, r) => {
+    const diff = cellDiff(r);
+    const q = getRandQ(match, diff);
+    if (q) {
+      document.getElementById('clue-' + c + '-' + r).value = q.c;
+      document.getElementById('ans-' + c + '-' + r).value  = q.a;
+      filled++;
+    }
+  });
+  updatePreview();
+  const btn = document.getElementById('fcb-' + c);
+  if (btn) { btn.classList.add('filled'); btn.textContent = '✓ Clues Added'; }
+  showToast(filled + ' clues added for "' + match + '"', 'ok');
+}
+
+// ─── Fill clues for all columns that have a bank-matched category ─────────────
+function fillAllClues() {
+  let filled = 0, skipped = 0;
+  for (let c = 0; c < numCats; c++) {
+    const rawCat = document.getElementById('cat-' + c)?.value.trim() || '';
+    const match = fuzzyMatchCat(rawCat);
+    if (!match) { skipped++; continue; }
+    if (match !== rawCat) {
+      const el = document.getElementById('cat-' + c);
+      if (el) { el.value = match; }
+    }
+    POINTS.forEach((_, r) => {
+      const diff = cellDiff(r);
+      const q = getRandQ(match, diff);
+      if (q) {
+        document.getElementById('clue-' + c + '-' + r).value = q.c;
+        document.getElementById('ans-' + c + '-' + r).value  = q.a;
+        filled++;
+      }
+    });
+    const btn = document.getElementById('fcb-' + c);
+    if (btn) { btn.classList.add('filled'); btn.textContent = '✓ Clues Added'; }
+  }
+  syncSuggestions();
+  updatePreview();
+  if (filled === 0) {
+    showToast('No typed categories matched the question bank', 'err');
+  } else {
+    const msg = filled + ' clues filled' + (skipped ? ' · ' + skipped + ' categor' + (skipped === 1 ? 'y' : 'ies') + ' not in bank (fill manually)' : '');
+    showToast(msg, 'ok');
+  }
 }
 
 // ─── Randomize categories only ────────────────────────────────────────────────

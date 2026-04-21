@@ -1163,7 +1163,28 @@ document.getElementById('board').addEventListener('click', function(e) {
 });
 document.getElementById('board').addEventListener('keydown', function(e) {
   var cell = e.target.closest('.cell-wrap');
-  if (cell && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openCell(cell); }
+  if (cell && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openCell(cell); return; }
+  if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].indexOf(e.key) >= 0) {
+    e.preventDefault();
+    var allCells = Array.from(document.querySelectorAll('.cell-wrap'));
+    var catRow = document.querySelector('.cat-row');
+    var numCols = catRow ? catRow.children.length : 5;
+    var focusedIdx = cell ? allCells.indexOf(cell) : -1;
+    if (focusedIdx === -1) {
+      var first = allCells.find(function(c){ return !c.classList.contains('used'); });
+      if (first) first.focus();
+      return;
+    }
+    var deltas = { ArrowRight:1, ArrowLeft:-1, ArrowDown:numCols, ArrowUp:-numCols };
+    var delta = deltas[e.key];
+    var next = focusedIdx + delta;
+    var limit = delta > 0 ? allCells.length : -1;
+    var step = delta > 0 ? 1 : -1;
+    while (next >= 0 && next < allCells.length) {
+      if (!allCells[next].classList.contains('used')) { allCells[next].focus(); break; }
+      next += delta;
+    }
+  }
 });
 
 function openCell(cell) {

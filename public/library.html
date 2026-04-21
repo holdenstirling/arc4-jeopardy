@@ -52,6 +52,10 @@ header h1{font-size:1.35rem;font-weight:900;color:var(--gold);letter-spacing:1px
 .gc-actions{display:flex;gap:7px;margin-top:4px;}
 .gc-btn{flex:1;border:none;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:.76rem;font-weight:700;font-family:inherit;transition:.15s;white-space:nowrap;}
 .gc-btn:hover{opacity:.88;transform:translateY(-1px);}
+.gc-btn.gc-edit{background:rgba(74,144,226,.15);color:#74b9ff;}
+.gc-btn.gc-edit:hover{background:rgba(74,144,226,.25);}
+.gc-btn.gc-dup{background:rgba(255,255,255,.06);color:rgba(255,255,255,.65);}
+.gc-btn.gc-dup:hover{background:rgba(255,255,255,.12);}
 .gc-play{background:linear-gradient(135deg,var(--gold),#e6b800);color:#1a1a1a;}
 .gc-dl{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);color:#fff;}
 .gc-del{background:rgba(239,83,80,.09);border:1px solid rgba(239,83,80,.22);color:#ff8a80;flex:0;padding:8px 11px;}
@@ -219,6 +223,8 @@ function render() {
       '</div>'+
       '<div class="gc-actions">'+
         '<button class="gc-btn gc-play" onclick="playGame(\''+entry.id+'\')">▶ Play</button>'+
+        '<button class="gc-btn gc-edit" onclick="editGame(\''+entry.id+'\')" title="Reopen in Builder to edit">✏️ Edit</button>'+
+        '<button class="gc-btn gc-dup" onclick="duplicateGame(\''+entry.id+'\')" title="Duplicate this game">⧉ Copy</button>'+
         '<button class="gc-btn gc-dl" onclick="shareGame(\''+entry.id+'\')" title="Copy shareable link">🔗 Share</button>'+
         (entry.html?'<button class="gc-btn gc-dl" onclick="downloadGame(\''+entry.id+'\')">⬇ Download</button>':'')+
         '<button class="gc-btn gc-del" onclick="deleteGame(\''+entry.id+'\')" title="Delete">🗑</button>'+
@@ -286,6 +292,31 @@ function downloadGame(id) {
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showToast('⬇ Downloaded!','ok');
+}
+
+function editGame(id) {
+  var lib = getLibrary();
+  var entry = lib.find(function(e){ return e.id===id; });
+  if (!entry || !entry.catData) { showToast('No edit data for this game — try rebuilding it','err'); return; }
+  try {
+    var data = { title: entry.title, catData: entry.catData, numCats: entry.numCats, numRows: entry.numRows, difficulty: entry.difficulty };
+    var encoded = btoa(encodeURIComponent(JSON.stringify(data)));
+    window.location.href = '/builder#edit=' + encoded;
+  } catch(e) { showToast('Could not load game for editing','err'); }
+}
+
+function duplicateGame(id) {
+  var lib = getLibrary();
+  var entry = lib.find(function(e){ return e.id===id; });
+  if (!entry) return;
+  var copy = JSON.parse(JSON.stringify(entry));
+  copy.id = 'game-copy-' + Date.now();
+  copy.title = entry.title + ' (copy)';
+  copy.createdAt = new Date().toISOString();
+  lib.push(copy);
+  saveLibrary(lib);
+  render();
+  showToast('⧉ Duplicated: ' + copy.title,'ok');
 }
 
 function deleteGame(id) {

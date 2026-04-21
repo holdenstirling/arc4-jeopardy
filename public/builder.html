@@ -1489,7 +1489,71 @@ buildBoard();
   }
 })();
 // Load draft (offers restore if one exists)
+
+// ─── Load from Library "Edit" link ────────────────────────────────────────────
+function loadFromHash() {
+  try {
+    var hash = location.hash;
+    if (!hash || hash.indexOf('#edit=') !== 0) return;
+    var b64 = hash.slice(6);
+    var data = JSON.parse(decodeURIComponent(atob(b64)));
+    if (!data || !data.catData || !data.catData.length) return;
+
+    // Title
+    if (data.title) document.getElementById('game-title').value = data.title;
+
+    // numCats
+    var nc = data.catData.length || data.numCats || 5;
+    numCats = Math.min(Math.max(nc, 1), 7);
+    document.querySelectorAll('#num-pills .pill').forEach(function(p) {
+      p.classList.toggle('active-num', parseInt(p.dataset.n) === numCats);
+    });
+
+    // numRows
+    var firstClues = data.catData[0] && data.catData[0].clues;
+    var nr = (firstClues && firstClues.length) || data.numRows || 5;
+    numRows = Math.min(Math.max(nr, 1), ALL_POINTS.length);
+    POINTS = ALL_POINTS.slice(0, numRows);
+    document.querySelectorAll('#row-pills .pill').forEach(function(p) {
+      p.classList.toggle('active-num', parseInt(p.dataset.r) === numRows);
+    });
+
+    // Difficulty
+    if (data.difficulty) {
+      difficulty = data.difficulty;
+      document.querySelectorAll('#diff-pills .pill').forEach(function(p) {
+        p.className = p.className.replace(/active-\S+/g, '').trim();
+        if (p.dataset.diff === difficulty) p.classList.add('active-' + difficulty);
+      });
+    }
+
+    buildBoard();
+
+    // Populate categories + clues
+    data.catData.forEach(function(cat, c) {
+      if (c >= numCats) return;
+      var catEl = document.getElementById('cat-' + c);
+      if (catEl) catEl.value = cat.name || '';
+      (cat.clues || []).forEach(function(q, r) {
+        if (r >= numRows) return;
+        var cl = document.getElementById('clue-' + c + '-' + r);
+        var an = document.getElementById('ans-' + c + '-' + r);
+        if (cl) cl.value = q.clue || q.c || '';
+        if (an) an.value = q.ans || q.a || '';
+      });
+    });
+
+    syncSuggestions();
+    updatePreview();
+    history.replaceState(null, '', '/builder');
+    showToast('✏️ Game loaded — edit and Save & Play when ready', 'ok');
+  } catch(e) {
+    console.warn('loadFromHash error:', e);
+  }
+}
+
 loadDraft();
+loadFromHash();
 // Auto-save draft on any input change
 document.addEventListener('input', function(e) {
   if (e.target.matches('#game-title, .cat-inp, .clue-card textarea')) scheduleDraftSave();

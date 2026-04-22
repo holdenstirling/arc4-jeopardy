@@ -1,4 +1,4 @@
-const CACHE = 'jeopardy-v39';
+const CACHE = 'jeopardy-v40';
 const ASSETS = [
   '/',
   '/play',
@@ -6,7 +6,8 @@ const ASSETS = [
   '/library',
   '/manifest.json',
   '/icon-192.png',
-  '/icon-512.png'
+  '/icon-512.png',
+  '/buzzer'
 ];
 
 // Install: pre-cache all core assets

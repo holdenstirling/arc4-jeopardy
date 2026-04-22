@@ -468,6 +468,7 @@ body.spectator::after{content:'📺 Spectator Mode';position:fixed;bottom:10px;r
       <button class="hdr-btn overflow-hide" onclick="manualSave()" title="Save game progress">💾 Save</button>
       <button class="hdr-btn overflow-hide" onclick="shareGame()" title="Copy shareable link">🔗 Share</button>
       <button class="hdr-btn" id="install-btn" style="display:none" onclick="installPWA()">⊕ Install</button>
+      <button class="hdr-btn" id="host-topbar-btn" onclick="toggleHostMode()" title="Toggle host mode — see answers privately">🎙 Host</button>
       <div class="overflow-menu-wrap">
         <button class="hdr-btn overflow-btn" id="overflow-toggle" onclick="toggleOverflowMenu()" title="More options">⋮</button>
         <div id="overflow-menu">
@@ -2075,6 +2076,13 @@ function toggleHostMode() {
   localStorage.setItem('arc4-host-mode', _hostMode ? '1' : '0');
   var btn = document.getElementById('overflow-host-btn');
   if (btn) btn.textContent = '🎙 Host Mode: ' + (_hostMode ? 'ON' : 'OFF');
+  var tbtn = document.getElementById('host-topbar-btn');
+  if (tbtn) {
+    tbtn.textContent = _hostMode ? '🎙 Host: ON' : '🎙 Host';
+    tbtn.style.background  = _hostMode ? 'rgba(245,197,24,.2)' : '';
+    tbtn.style.borderColor = _hostMode ? 'rgba(245,197,24,.5)' : '';
+    tbtn.style.color       = _hostMode ? '#f5c518' : '';
+  }
   showToast(_hostMode ? '🎙 Host mode ON — answer visible to you only' : '🎙 Host mode OFF');
   // If a clue is already open, show score buttons immediately
   if (_hostMode && current) {
@@ -2090,6 +2098,13 @@ function toggleHostMode() {
     document.body.classList.add('host-mode');
     var btn = document.getElementById('overflow-host-btn');
     if (btn) btn.textContent = '🎙 Host Mode: ON';
+    var tbtn = document.getElementById('host-topbar-btn');
+    if (tbtn) {
+      tbtn.textContent = '🎙 Host: ON';
+      tbtn.style.background  = 'rgba(245,197,24,.2)';
+      tbtn.style.borderColor = 'rgba(245,197,24,.5)';
+      tbtn.style.color       = '#f5c518';
+    }
   }
 })();
 

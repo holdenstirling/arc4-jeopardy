@@ -953,19 +953,30 @@ function buildSuggestions() {
 }
 
 function selectCategory(cat) {
-  // Find first empty category slot
+  // Toggle: if already selected, clear that slot
+  for (let c=0;c<numCats;c++) {
+    const el = document.getElementById(`cat-${c}`);
+    if (el && el.value.trim() === cat) {
+      el.value = '';
+      syncSuggestions();
+      updatePreview();
+      return;
+    }
+  }
+  // Find first empty slot, fill it and auto-generate questions
   for (let c=0;c<numCats;c++) {
     const el = document.getElementById(`cat-${c}`);
     if (el && !el.value.trim()) {
       el.value = cat;
       syncSuggestions();
       updatePreview();
+      fillColumnClues(c);
       return;
     }
   }
   // All slots full — replace the last one
   const last = document.getElementById(`cat-${numCats-1}`);
-  if (last) { last.value = cat; syncSuggestions(); updatePreview(); }
+  if (last) { last.value = cat; syncSuggestions(); updatePreview(); fillColumnClues(numCats-1); }
 }
 
 function syncSuggestions() {
@@ -1193,7 +1204,9 @@ function validate() {
   const box=document.getElementById('err-box');
   if(errs.length){
     box.innerHTML=errs.slice(0,6).map(e=>`• ${e}`).join('<br>')+(errs.length>6?`<br>…and ${errs.length-6} more.`:'');
-    box.style.display='block';return false;
+    box.style.display='block';
+    box.scrollIntoView({behavior:'smooth',block:'center'});
+    return false;
   }
   box.style.display='none';return true;
 }
@@ -1212,6 +1225,7 @@ function saveToLibrary(title, cats, html) {
       numCats, numRows, difficulty,
       categories: cats.map(c=>c.name),
       catData: cats,
+      teams: (typeof bldGetTeams === 'function') ? bldGetTeams() : [],
       html
     });
     if(lib.length>60) lib.length=60;
@@ -1582,7 +1596,17 @@ function bldBuildTeamInputs() {
     var row = document.createElement('div');
     row.style.cssText = 'display:flex;align-items:center;gap:10px;';
     var dot = document.createElement('div');
-    dot.style.cssText = 'width:12px;height:12px;border-radius:50%;flex-shrink:0;background:' + BLD_TEAM_COLORS[i % BLD_TEAM_COLORS.length] + ';';
+    var colorIdx = i % BLD_TEAM_COLORS.length;
+    dot.dataset.colorIdx = colorIdx;
+    dot.title = 'Click to change color';
+    dot.style.cssText = 'width:18px;height:18px;border-radius:50%;flex-shrink:0;background:' + BLD_TEAM_COLORS[colorIdx] + ';cursor:pointer;border:2px solid rgba(255,255,255,.25);transition:transform .15s;';
+    dot.onmouseenter = function(){ this.style.transform='scale(1.2)'; };
+    dot.onmouseleave = function(){ this.style.transform='scale(1)'; };
+    dot.onclick = (function(d, rowIdx) { return function() {
+      var ci = (parseInt(d.dataset.colorIdx) + 1) % BLD_TEAM_COLORS.length;
+      d.dataset.colorIdx = ci;
+      d.style.background = BLD_TEAM_COLORS[ci];
+    }; })(dot, i);
     var inp = document.createElement('input');
     inp.type = 'text';
     inp.className = 'bld-team-inp';
@@ -1611,7 +1635,9 @@ function bldGetTeams() {
   var inputs = document.querySelectorAll('.bld-team-inp');
   for (var i = 0; i < bldNTeams; i++) {
     var name = (inputs[i] ? inputs[i].value.trim() : '') || ('Team ' + (i + 1));
-    result.push({ name: name, color: BLD_TEAM_COLORS[i % BLD_TEAM_COLORS.length] });
+    var dots = document.querySelectorAll('#bld-team-inputs [data-color-idx]');
+    var ci = dots[i] ? parseInt(dots[i].dataset.colorIdx) : i % BLD_TEAM_COLORS.length;
+    result.push({ name: name, color: BLD_TEAM_COLORS[ci % BLD_TEAM_COLORS.length] });
   }
   return result;
 }

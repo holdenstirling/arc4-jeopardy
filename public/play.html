@@ -1805,11 +1805,22 @@ function triggerFinalJeopardy() {
   fjCurrentQ = 0;
   fjWagers = [];
   fjResultsApplied = [];
-  fjGenerateQuestions(false);
+  fjGenerateQuestions(true); // always fresh set
   var prog = document.getElementById('fj-progress');
   if (prog) prog.textContent = '';
-  fjShowStep('fj-step0');
   document.getElementById('fj-overlay').style.display = 'flex';
+  // Send full preview to host window only
+  if (window._hostWindow && !window._hostWindow.closed) {
+    var previewHtml = fjQuestions.map(function(q,i) {
+      return '<div style="margin-bottom:12px;padding:10px;background:rgba(255,255,255,.08);border-radius:8px;">' +
+        '<div style="font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:#f5c518;margin-bottom:3px;">Q'+(i+1)+' · '+q.cat+'</div>' +
+        '<div style="font-size:.85rem;margin-bottom:4px;">'+q.clue+'</div>' +
+        '<div style="font-weight:700;color:#4ecdc4;">→ '+q.ans+'</div>' +
+        '</div>';
+    }).join('');
+    window._hostWindow.postMessage({type:'fj-preview', html: previewHtml}, '*');
+  }
+  fjStartRound(); // skip preview screen, go straight to wagering
 }
 
 function fjStartRound() {
@@ -1879,8 +1890,16 @@ function fjRevealClue() {
 }
 
 function fjRevealAnswer() {
-  document.getElementById('fj-ans-display').textContent = fjAnswer;
+  // Show answer in host window only — not on shared screen
+  if (window._hostWindow && !window._hostWindow.closed) {
+    window._hostWindow.postMessage({type:'cell-open', cat:fjCategory, pts:'FJ', clue:fjClue, ans:fjAnswer}, '*');
+  }
+  // On main screen just hide the reveal button, show a subtle confirmation
+  document.getElementById('fj-ans-display').textContent = '✓ Answer revealed in Host Window';
   document.getElementById('fj-ans-display').style.display = 'block';
+  document.getElementById('fj-ans-display').style.color = 'rgba(255,255,255,.4)';
+  document.getElementById('fj-ans-display').style.fontSize = '.82rem';
+  document.getElementById('fj-ans-display').style.background = 'rgba(255,255,255,.05)';
   document.getElementById('fj-reveal-btn').style.display = 'none';
   sndReveal();
   var grid = document.getElementById('fj-results-grid');
@@ -1899,7 +1918,11 @@ function fjRevealAnswer() {
     grid.appendChild(row);
   });
   document.getElementById('fj-clue-display2').textContent = fjClue;
-  document.getElementById('fj-ans-display2').textContent = fjAnswer;
+  document.getElementById('fj-ans-display2').textContent = (window._hostWindow && !window._hostWindow.closed) ? '✓ Answer shown in Host Window' : fjAnswer;
+  if (window._hostWindow && !window._hostWindow.closed) {
+    document.getElementById('fj-ans-display2').style.color = 'rgba(255,255,255,.35)';
+    document.getElementById('fj-ans-display2').style.fontSize = '.8rem';
+  }
   var btn = document.getElementById('fj-next-btn');
   if (btn) btn.textContent = (fjCurrentQ + 1 < fjQuestions.length) ? 'Next Question \u2192' : '\U0001f3c6 See Final Scores';
   fjShowStep('fj-step4');
@@ -2113,7 +2136,7 @@ function copyShareLink(mode) {
 function openHostWindow() {
   var hw = window.open('', 'jeopardy-host-view', 'width=800,height=560,menubar=no,toolbar=no,location=no,status=no');
   if (!hw) { showToast('⚠ Popup blocked — allow popups for this site', 'err'); return; }
-  hw.document.write('<!DOCTYPE html><html><head><title>Host View – Holden&#39;s Jeopardy</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{background:#0a0e1a;color:#fff;font-family:system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px;text-align:center;}#hw-waiting{color:rgba(255,255,255,.3);font-size:1.3rem;letter-spacing:2px;}#hw-content{display:none;width:100%;max-width:700px;}#hw-cat{font-size:.85rem;text-transform:uppercase;letter-spacing:3px;color:rgba(255,255,255,.45);margin-bottom:6px;}#hw-pts{font-size:2.2rem;font-weight:900;color:#f5c518;margin-bottom:18px;}#hw-clue{font-size:1.25rem;color:rgba(255,255,255,.75);line-height:1.55;margin-bottom:28px;padding:16px 20px;background:rgba(255,255,255,.05);border-radius:10px;}#hw-ans-label{font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.35);margin-bottom:8px;}#hw-ans{font-size:clamp(1.8rem,5vw,3rem);font-weight:900;color:#4ecdc4;padding:22px 32px;background:rgba(78,205,196,.1);border:2px solid rgba(78,205,196,.35);border-radius:14px;line-height:1.3;}</style></head><body><div id="hw-waiting">⏳ Waiting for question…</div><div id="hw-content"><div id="hw-cat"></div><div id="hw-pts"></div><div id="hw-clue"></div><div id="hw-ans-label">Answer</div><div id="hw-ans"></div></div><script>window.addEventListener("message",function(e){if(!e.data)return;if(e.data.type==="cell-open"){document.getElementById("hw-waiting").style.display="none";document.getElementById("hw-content").style.display="block";document.getElementById("hw-cat").textContent=e.data.cat;document.getElementById("hw-pts").textContent="$"+e.data.pts;document.getElementById("hw-clue").textContent=e.data.clue||"(no clue — reveal answer immediately)";document.getElementById("hw-ans").textContent=e.data.ans;}else if(e.data.type==="cell-close"){document.getElementById("hw-waiting").style.display="block";document.getElementById("hw-content").style.display="none";}});<\/script></body></html>');
+  hw.document.write('<!DOCTYPE html><html><head><title>Host View – Holden&#39;s Jeopardy</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{background:#0a0e1a;color:#fff;font-family:system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px;text-align:center;}#hw-waiting{color:rgba(255,255,255,.3);font-size:1.3rem;letter-spacing:2px;}#hw-content{display:none;width:100%;max-width:700px;}#hw-cat{font-size:.85rem;text-transform:uppercase;letter-spacing:3px;color:rgba(255,255,255,.45);margin-bottom:6px;}#hw-pts{font-size:2.2rem;font-weight:900;color:#f5c518;margin-bottom:18px;}#hw-clue{font-size:1.25rem;color:rgba(255,255,255,.75);line-height:1.55;margin-bottom:28px;padding:16px 20px;background:rgba(255,255,255,.05);border-radius:10px;}#hw-ans-label{font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.35);margin-bottom:8px;}#hw-ans{font-size:clamp(1.8rem,5vw,3rem);font-weight:900;color:#4ecdc4;padding:22px 32px;background:rgba(78,205,196,.1);border:2px solid rgba(78,205,196,.35);border-radius:14px;line-height:1.3;}</style></head><body><div id="hw-waiting">⏳ Waiting for question…</div><div id="hw-content"><div id="hw-cat"></div><div id="hw-pts"></div><div id="hw-clue"></div><div id="hw-ans-label">Answer</div><div id="hw-ans"></div></div><script>window.addEventListener("message",function(e){if(!e.data)return;if(e.data.type==="fj-preview"){document.getElementById("hw-waiting").style.display="none";document.getElementById("hw-content").style.display="block";document.getElementById("hw-cat").textContent="Final Jeopardy — Host Preview";document.getElementById("hw-pts").textContent="";document.getElementById("hw-clue").innerHTML=e.data.html||"";document.getElementById("hw-ans").textContent="";}else if(e.data.type==="cell-open"){document.getElementById("hw-waiting").style.display="none";document.getElementById("hw-content").style.display="block";document.getElementById("hw-cat").textContent=e.data.cat;document.getElementById("hw-pts").textContent="$"+e.data.pts;document.getElementById("hw-clue").textContent=e.data.clue||"(no clue — reveal answer immediately)";document.getElementById("hw-ans").textContent=e.data.ans;}else if(e.data.type==="cell-close"){document.getElementById("hw-waiting").style.display="block";document.getElementById("hw-content").style.display="none";}});<\/script></body></html>');
   hw.document.close();
   window._hostWindow = hw;
   showToast('🖥 Host window opened', 'ok');

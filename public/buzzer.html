@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Buzz in for Holden's Jeopardy — tap to answer first.">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1a237e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Jeopardy Buzzer">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<title>Buzzer - Holden's Jeopardy</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--gold:#f5c518;--bd:#0d1b5e;--bm:#1a237e;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(160deg,var(--bd) 0%,var(--bm) 60%,#0d47a1 100%);color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:0 0 env(safe-area-inset-bottom,0);}
+#topbar{width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 18px 12px;border-bottom:1px solid rgba(255,255,255,.07);}
+#topbar h1{font-size:1.1rem;font-weight:900;color:var(--gold);letter-spacing:1px;}
+.nav-link{color:rgba(255,255,255,.5);text-decoration:none;font-size:.8rem;padding:6px 13px;border-radius:6px;border:1px solid rgba(255,255,255,.12);transition:.15s;font-weight:600;}
+.nav-link:hover{color:#fff;border-color:rgba(255,255,255,.3);}
+.field-label{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--gold);margin-bottom:6px;}
+.field-inp{width:100%;padding:12px 14px;border-radius:8px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:#fff;font-size:1rem;outline:none;font-family:inherit;transition:border-color .18s;}
+.field-inp:focus{border-color:var(--gold);}
+.btn-join{width:100%;padding:16px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--gold),#e6b800);color:#1a1a1a;font-size:1.1rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 22px rgba(245,197,24,.35);transition:.15s;margin-top:4px;}
+.btn-join:hover{transform:translateY(-2px);}
+#setup{width:100%;max-width:420px;padding:32px 20px 24px;display:flex;flex-direction:column;gap:14px;}
+.session-hint{font-size:.75rem;color:rgba(255,255,255,.35);text-align:center;line-height:1.6;}
+.session-hint strong{color:rgba(255,255,255,.6);}
+#arena{display:none;width:100%;max-width:420px;padding:24px 20px;flex-direction:column;align-items:center;gap:20px;}
+.player-badge{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 18px;font-size:.82rem;color:rgba(255,255,255,.55);text-align:center;width:100%;}
+.player-badge strong{color:#fff;}
+#buzz-btn{width:220px;height:220px;border-radius:50%;border:6px solid var(--gold);background:linear-gradient(135deg,#1a237e,#283593);color:var(--gold);font-size:2.2rem;font-weight:900;letter-spacing:2px;cursor:pointer;font-family:inherit;transition:.12s;box-shadow:0 0 0 0 rgba(245,197,24,.4),0 8px 40px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+#buzz-btn:active:not(:disabled){transform:scale(.93);}
+#buzz-btn:disabled{opacity:.35;cursor:not-allowed;border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.35);}
+#buzz-btn.ready{animation:pulse 2s infinite;box-shadow:0 0 0 0 rgba(245,197,24,.5),0 8px 40px rgba(0,0,0,.5);}
+#buzz-btn.buzzed-me{background:linear-gradient(135deg,#1b5e20,#2e7d32);border-color:#69f0ae;color:#69f0ae;animation:none;}
+#buzz-btn.buzzed-other{background:rgba(0,0,0,.3);border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.3);animation:none;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(245,197,24,.5),0 8px 40px rgba(0,0,0,.5);}70%{box-shadow:0 0 0 22px rgba(245,197,24,0),0 8px 40px rgba(0,0,0,.5);}100%{box-shadow:0 0 0 0 rgba(245,197,24,0),0 8px 40px rgba(0,0,0,.5);}}
+#result-card{width:100%;border-radius:14px;padding:18px 20px;text-align:center;display:none;}
+#result-card.win{background:rgba(76,175,80,.15);border:2px solid rgba(76,175,80,.4);}
+#result-card.lose{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);}
+.result-icon{font-size:2.8rem;margin-bottom:8px;}
+.result-name{font-size:1.3rem;font-weight:900;margin-bottom:4px;}
+.result-team{font-size:.82rem;color:rgba(255,255,255,.5);}
+#conn-bar{width:100%;padding:6px 18px;font-size:.72rem;font-weight:700;text-align:center;transition:.3s;}
+#conn-bar.ok{color:rgba(100,220,100,.7);}
+#conn-bar.err{color:rgba(255,100,100,.8);background:rgba(255,0,0,.07);}
+#conn-bar.connecting{color:rgba(255,255,255,.35);}
+#no-server{display:none;width:100%;max-width:420px;padding:32px 20px;text-align:center;}
+#no-server h2{color:var(--gold);font-size:1.1rem;margin-bottom:12px;}
+#no-server p{font-size:.84rem;color:rgba(255,255,255,.55);line-height:1.7;}
+code{background:rgba(255,255,255,.07);padding:2px 7px;border-radius:4px;font-size:.88em;}
+</style>
+</head>
+<body>
+<div id="topbar"><h1>&#x1F4E1; Buzzer</h1><a href="/" class="nav-link">&#x2302; Home</a></div>
+<div id="conn-bar" class="connecting">Connecting&#x2026;</div>
+
+<div id="setup">
+  <div><div class="field-label">Your Name</div><input class="field-inp" id="inp-name" type="text" placeholder="e.g. Alex" maxlength="30" autocomplete="off" autocapitalize="words"></div>
+  <div><div class="field-label">Your Team</div><input class="field-inp" id="inp-team" type="text" placeholder="e.g. Team 1" maxlength="30" autocomplete="off"></div>
+  <button class="btn-join" onclick="joinBuzzer()">Join Buzzer</button>
+  <p class="session-hint" id="session-hint"></p>
+</div>
+
+<div id="arena">
+  <div class="player-badge" id="player-badge"></div>
+  <button id="buzz-btn" disabled onclick="buzz()">
+    <span style="font-size:2.8rem">&#x1F514;</span>
+    <span id="buzz-label">BUZZ!</span>
+  </button>
+  <div id="result-card">
+    <div class="result-icon" id="result-icon"></div>
+    <div class="result-name" id="result-name"></div>
+    <div class="result-team" id="result-team"></div>
+  </div>
+</div>
+
+<div id="no-server">
+  <h2>&#x26A0; Server Required</h2>
+  <p>The buzzer needs the game server running locally or on Railway. It won't work on the Vercel hosted version since that's a static deployment.<br><br>
+  To use it: run <code>npm start</code> locally, then open <strong>localhost:3000/buzzer</strong> on all players' phones (same Wi-Fi network).</p>
+</div>
+
+<script>
+var _ws=null,_sid=new URLSearchParams(location.search).get('s')||'default',_playerName='',_playerTeam='',_hasBuzzed=false,_reconnectTimer=null,_serverOk=null;
+
+(function(){var h=document.getElementById('session-hint');h.innerHTML='Session: <strong>'+_sid+'</strong> &nbsp;&middot;&nbsp; Make sure you\'re on the same Wi-Fi as the host.';})();
+
+function setConn(state,text){var el=document.getElementById('conn-bar');el.textContent=text;el.className=state;}
+
+function wsUrl(){var p=location.protocol==='https:'?'wss:':'ws:';return p+'//'+location.host+'/buzz-ws?s='+encodeURIComponent(_sid);}
+
+function connect(){
+  try{_ws=new WebSocket(wsUrl());}catch(e){showNoServer();return;}
+  _ws.onopen=function(){_serverOk=true;setConn('ok','&#x25CF; Connected');clearTimeout(_reconnectTimer);};
+  _ws.onmessage=function(e){try{var m=JSON.parse(e.data);if(m.type==='state'){if(m.winner)handleBuzzed(m.winner);else resetUI();}else if(m.type==='buzzed'){handleBuzzed(m.winner);}else if(m.type==='reset'){resetUI();}}catch(ex){}};
+  _ws.onerror=function(){setConn('err','&#x2715; Connection error');};
+  _ws.onclose=function(ev){if(!_serverOk&&ev.code===1006){showNoServer();return;}setConn('err','&#x2715; Disconnected &mdash; retrying&hellip;');_reconnectTimer=setTimeout(connect,3000);};
+}
+
+function showNoServer(){document.getElementById('setup').style.display='none';document.getElementById('no-server').style.display='block';document.getElementById('conn-bar').style.display='none';}
+
+function joinBuzzer(){var name=document.getElementById('inp-name').value.trim(),team=document.getElementById('inp-team').value.trim();if(!name){document.getElementById('inp-name').focus();return;}if(!team){document.getElementById('inp-team').focus();return;}_playerName=name;_playerTeam=team;document.getElementById('setup').style.display='none';var a=document.getElementById('arena');a.style.display='flex';document.getElementById('player-badge').innerHTML='Playing as <strong>'+escH(name)+'</strong> &middot; <strong>'+escH(team)+'</strong>';var btn=document.getElementById('buzz-btn');btn.disabled=false;btn.className='ready';}
+
+function buzz(){if(_hasBuzzed)return;if(!_ws||_ws.readyState!==1){setConn('err','&#x2715; Not connected');return;}_hasBuzzed=true;_ws.send(JSON.stringify({type:'buzz',name:_playerName,team:_playerTeam}));document.getElementById('buzz-btn').className='buzzed-me';document.getElementById('buzz-label').textContent='BUZZED!';}
+
+function handleBuzzed(w){var isMe=w.name===_playerName&&w.team===_playerTeam;var btn=document.getElementById('buzz-btn');btn.disabled=true;btn.className=isMe?'buzzed-me':'buzzed-other';document.getElementById('buzz-label').textContent=isMe?'YOU BUZZED!':'TOO SLOW';var card=document.getElementById('result-card');card.style.display='block';card.className='result-card '+(isMe?'win':'lose');document.getElementById('result-icon').textContent=isMe?'&#x1F389;':'&#x23F1;';document.getElementById('result-name').textContent=w.name;document.getElementById('result-team').textContent=w.team+' buzzed first!';}
+
+function resetUI(){_hasBuzzed=false;var btn=document.getElementById('buzz-btn');btn.disabled=!_playerName;btn.className=_playerName?'ready':'';document.getElementById('buzz-label').textContent='BUZZ!';var card=document.getElementById('result-card');card.style.display='none';}
+
+function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+connect();
+</script>
+</body>
+</html>

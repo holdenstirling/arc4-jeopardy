@@ -611,7 +611,7 @@ const QB_EXTRA = {
     ],
     "Animals & Nature": [
       {c:"The fastest land animal, capable of reaching speeds up to 70 mph", a:"The cheetah"},
-      {c:"A group of lions is called this", a:"A pride"},
+      {c:"This venomous Australian mammal has a bill like a duck and hunts using electroreception", a:"The platypus"},
       {c:"This large marine mammal is the largest animal on Earth", a:"The blue whale"},
       {c:"The process by which caterpillars transform into butterflies inside a chrysalis", a:"Metamorphosis"},
       {c:"This flightless bird from New Zealand is also the national symbol of that country", a:"The kiwi"}
@@ -1300,9 +1300,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
 .m-cat{font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:4px;}
 .m-pts{font-size:.92rem;font-weight:900;color:rgba(245,197,24,.65);margin-bottom:18px;}
 .m-clue{font-size:clamp(1rem,2.8vw,1.45rem);font-weight:700;line-height:1.5;margin-bottom:18px;color:#fff;}
-.timer-wrap{height:6px;background:rgba(255,255,255,.1);border-radius:3px;margin-bottom:16px;overflow:hidden;display:none;}
-.timer-bar{height:100%;background:var(--gold);border-radius:3px;transition:width .95s linear,background .25s;}
-.timer-bar.warning{background:#ff8a00;}.timer-bar.danger{background:#ff4444;}
+.timer-wrap{background:rgba(255,255,255,.06);border-radius:8px;margin:-10px 0 18px;display:none;padding:8px 12px 6px;}
+.timer-count-row{display:flex;align-items:baseline;justify-content:center;gap:5px;margin-bottom:6px;}
+.timer-count{font-size:2rem;font-weight:900;color:var(--gold);line-height:1;transition:color .25s;font-variant-numeric:tabular-nums;}
+.timer-count.warning{color:#ff8a00;}.timer-count.danger{color:#ff4444;}
+.timer-bar{height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;}
+.timer-bar-fill{height:100%;background:var(--gold);border-radius:3px;transition:width .95s linear,background .25s;}
+.timer-bar-fill.warning{background:#ff8a00;}.timer-bar-fill.danger{background:#ff4444;}
+.host-ans-box{display:none;}
+body.host-mode .host-ans-box{display:block;background:rgba(245,197,24,.08);border:1px solid rgba(245,197,24,.25);border-radius:8px;padding:10px 14px;margin:8px 0 0;color:rgba(255,255,255,.75);font-size:.82rem;}
+.host-ans-label{font-size:.6rem;text-transform:uppercase;letter-spacing:1px;color:rgba(245,197,24,.6);font-weight:800;margin-bottom:4px;}
+.host-ans-text{color:#f5c518;font-weight:700;font-size:.95rem;}
+.hdr-btn.host-on{background:rgba(245,197,24,.2);border-color:rgba(245,197,24,.5);color:#f5c518;}
 .m-ans{background:rgba(0,0,0,.35);border-radius:10px;padding:18px 20px;font-size:clamp(.95rem,2.4vw,1.25rem);font-weight:800;color:#a5d6a7;display:none;margin-bottom:20px;line-height:1.45;}
 .m-ans.show{display:block;animation:answerReveal .28s ease-out;}
 .m-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
@@ -1391,7 +1400,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
     <h1>⚡ ${esc(title)}</h1>
     <div class="topbar-right">
       <button class="hdr-btn" id="mute-btn" onclick="toggleMute()">🔊</button>
-      <button class="hdr-btn" id="timer-btn" onclick="toggleTimer()" title="30s countdown">⏱</button>
+      <button class="hdr-btn" id="host-btn" onclick="toggleHostMode()" title="Toggle host mode — see answers privately">🏙 Host</button>
+      <button class="hdr-btn" id="timer-btn" onclick="toggleTimer()" title="Cycle timer: OFF → 15s → 30s → 1m → 2m">⏱</button>
       <button class="hdr-btn" onclick="resetBoard()">↺ Reset</button>
       <button class="hdr-btn" onclick="goSetup()">⚙ Teams</button>
       <button class="hdr-btn" onclick="tryClose()" title="Close this game tab">✕ Close</button>
@@ -1409,7 +1419,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
     <div class="m-cat" id="m-cat"></div>
     <div class="m-pts" id="m-pts"></div>
     <div class="m-clue" id="m-clue"></div>
-    <div class="timer-wrap" id="timer-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+    <div class="timer-wrap" id="timer-wrap"><div class="timer-count-row"><span id="timer-count" class="timer-count"></span></div><div class="timer-bar"><div class="timer-bar-fill" id="timer-bar-fill"></div></div></div>
+    <div class="host-ans-box"><div class="host-ans-label">🏙 Answer (host only)</div><div class="host-ans-text" id="host-ans-text"></div></div>
     <div class="m-ans" id="m-ans"></div>
     <div class="m-actions">
       <button class="btn-reveal" id="btn-reveal" onclick="reveal()">Reveal Answer</button>
@@ -1454,10 +1465,12 @@ function sndWinner(){[523,659,784,1047,1319].forEach(function(f,i){beep(f,'trian
 function sndDD(){[[150,.5],[200,.4],[250,.3],[300,.25],[400,.2],[500,.15]].forEach(function(p,i){beep(p[0],'sine',p[1],.22,i*.08);});beep(800,'triangle',.4,.18,.55);beep(1000,'triangle',.4,.18,.65);}
 function toggleMute(){muted=!muted;document.getElementById('mute-btn').textContent=muted?'🔇':'🔊';}
 
-var timerEnabled=false,_tI=null;
-function toggleTimer(){timerEnabled=!timerEnabled;var b=document.getElementById('timer-btn');b.style.background=timerEnabled?'rgba(245,197,24,.2)':'';b.style.borderColor=timerEnabled?'rgba(245,197,24,.5)':'';b.style.color=timerEnabled?'#f5c518':'';b.textContent=timerEnabled?'⏱ ON':'⏱';}
-function startTimer(){if(!timerEnabled)return;clearInterval(_tI);var s=30,wrap=document.getElementById('timer-wrap'),bar=document.getElementById('timer-bar');wrap.style.display='block';bar.style.width='100%';bar.className='timer-bar';_tI=setInterval(function(){s--;bar.style.width=(s/30*100)+'%';if(s<=10)bar.className='timer-bar warning';if(s<=5)bar.className='timer-bar danger';if(s<=0){clearInterval(_tI);if(!muted){try{var c=getAC(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='square';o.frequency.setValueAtTime(880,c.currentTime);o.frequency.setValueAtTime(440,c.currentTime+.1);o.frequency.setValueAtTime(880,c.currentTime+.2);g.gain.setValueAtTime(.15,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.35);o.start();o.stop(c.currentTime+.36);}catch(e){}}}},1000);}
-function stopTimer(){clearInterval(_tI);document.getElementById('timer-wrap').style.display='none';}
+var TIMER_OPTS=[0,15,30,60,120],TIMER_LABELS=['⏱','⏱ 15s','⏱ 30s','⏱ 1m','⏱ 2m'],timerIdx=0,_tI=null;
+function toggleTimer(){timerIdx=(timerIdx+1)%TIMER_OPTS.length;var b=document.getElementById('timer-btn'),on=timerIdx>0;b.style.background=on?'rgba(245,197,24,.2)':'';b.style.borderColor=on?'rgba(245,197,24,.5)':'';b.style.color=on?'#f5c518':'';b.textContent=TIMER_LABELS[timerIdx];}
+function startTimer(){if(!timerIdx)return;clearInterval(_tI);var total=TIMER_OPTS[timerIdx],secs=total,wrap=document.getElementById('timer-wrap'),fill=document.getElementById('timer-bar-fill'),count=document.getElementById('timer-count');wrap.style.display='block';if(fill){fill.style.width='100%';fill.className='timer-bar-fill';}if(count){count.textContent=secs;count.className='timer-count';}_tI=setInterval(function(){secs--;var pct=secs/total,cls=secs<=5?' danger':secs<=Math.ceil(total*.33)?' warning':'';if(fill){fill.style.width=(pct*100)+'%';fill.className='timer-bar-fill'+cls;}if(count){count.textContent=secs;count.className='timer-count'+cls;}if(secs<=0){clearInterval(_tI);if(!muted){try{var c=getAC(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='square';o.frequency.setValueAtTime(880,c.currentTime);o.frequency.setValueAtTime(440,c.currentTime+.1);o.frequency.setValueAtTime(880,c.currentTime+.2);g.gain.setValueAtTime(.15,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.35);o.start();o.stop(c.currentTime+.36);}catch(e){}}}},1000);}
+function stopTimer(){clearInterval(_tI);var w=document.getElementById('timer-wrap');if(w)w.style.display='none';}
+var _hostMode=false;
+function toggleHostMode(){_hostMode=!_hostMode;document.body.classList.toggle('host-mode',_hostMode);var b=document.getElementById('host-btn');if(b){b.textContent=_hostMode?'🏙 Host: ON':'🏙 Host';b.classList.toggle('host-on',_hostMode);}}
 
 var RAND_NAMES=${JSON.stringify(rn)};
 var SAVE='${saveKey}';
@@ -1481,11 +1494,11 @@ function updateCellOwner(cell,teamIdx,isSteal){var b=cell.querySelector('.cell-o
 
 document.querySelectorAll('.cell-wrap').forEach(function(cell){cell.addEventListener('click',function(){openCell(cell);});cell.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openCell(cell);}});});
 
-function _doOpen(cell){if(cell.classList.contains('used'))return;sndOpen();cell.classList.add('flip');setTimeout(function(){cell.classList.remove('flip');},340);current=cell;document.getElementById('m-cat').textContent=cell.dataset.cat;document.getElementById('m-pts').textContent='$'+cell.dataset.pts;var clue=cell.dataset.clue||'';var cEl=document.getElementById('m-clue');cEl.textContent=clue;cEl.style.display=clue?'block':'none';var aEl=document.getElementById('m-ans');aEl.textContent=cell.dataset.ans;aEl.className='m-ans';document.getElementById('m-score').className='m-score';document.getElementById('score-grid').innerHTML='';if(!clue){sndReveal();aEl.className='m-ans show';document.getElementById('btn-reveal').style.display='none';cell.classList.add('used');renderScoreButtons();document.getElementById('m-score').className='m-score show';save();}else{document.getElementById('btn-reveal').style.display='inline-block';startTimer();}document.getElementById('overlay').classList.add('open');}
+function _doOpen(cell){if(cell.classList.contains('used'))return;sndOpen();cell.classList.add('flip');setTimeout(function(){cell.classList.remove('flip');},340);current=cell;document.getElementById('m-cat').textContent=cell.dataset.cat;document.getElementById('m-pts').textContent='$'+cell.dataset.pts;var clue=cell.dataset.clue||'';var cEl=document.getElementById('m-clue');cEl.textContent=clue;cEl.style.display=clue?'block':'none';var aEl=document.getElementById('m-ans');aEl.textContent=cell.dataset.ans;var hat=document.getElementById('host-ans-text');if(hat)hat.textContent=cell.dataset.ans||'';aEl.className='m-ans';document.getElementById('m-score').className='m-score';document.getElementById('score-grid').innerHTML='';if(!clue){sndReveal();aEl.className='m-ans show';document.getElementById('btn-reveal').style.display='none';cell.classList.add('used');renderScoreButtons();document.getElementById('m-score').className='m-score show';save();}else{document.getElementById('btn-reveal').style.display='inline-block';startTimer();}document.getElementById('overlay').classList.add('open');}
 function openCell(cell){if(cell.classList.contains('used'))return;if(isDailyDouble(cell)){sndDD();var dd=document.getElementById('dd-overlay');dd.style.display='flex';setTimeout(function(){dd.style.display='none';_doOpen(cell);},3000);return;}_doOpen(cell);}
 function reveal(){sndReveal();stopTimer();document.getElementById('m-ans').className='m-ans show';document.getElementById('btn-reveal').style.display='none';if(current)current.classList.add('used');renderScoreButtons();document.getElementById('m-score').className='m-score show';save();}
 function renderScoreButtons(){var g=document.getElementById('score-grid');g.innerHTML='';var ownerStr=current?current.dataset.owner:undefined;var ownerIdx=(ownerStr!==undefined&&ownerStr!=='')?parseInt(ownerStr):-1;teams.forEach(function(t,i){var a=document.createElement('button');var s=document.createElement('button');if(ownerIdx>=0&&ownerIdx!==i){a.className='sg-btn sg-steal';a.textContent='🔄 '+t.name;}else if(ownerIdx===i){a.className='sg-btn sg-add';a.textContent='✓ '+t.name;}else{a.className='sg-btn sg-add';a.textContent='+ '+t.name;}a.onclick=(function(idx){return function(){adjScore(idx,1);};})(i);s.className='sg-btn sg-sub';s.textContent='− '+t.name;s.onclick=(function(idx){return function(){adjScore(idx,-1);};})(i);g.appendChild(a);g.appendChild(s);});}
-function closeModal(){stopTimer();document.getElementById('overlay').classList.remove('open');current=null;}
+function closeModal(){stopTimer();document.getElementById('overlay').classList.remove('open');current=null;var hat=document.getElementById('host-ans-text');if(hat)hat.textContent='';}
 document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
 document.addEventListener('keydown',function(e){var open=document.getElementById('overlay').classList.contains('open');if(e.key==='Escape'){if(open)closeModal();return;}if(e.key===' '&&open){e.preventDefault();reveal();return;}if(!open)return;var n=parseInt(e.key);if(n>=1&&n<=teams.length){e.preventDefault();adjScore(n-1,e.shiftKey?-1:1);}});
 

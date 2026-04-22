@@ -470,6 +470,7 @@ body.spectator::after{content:'📺 Spectator Mode';position:fixed;bottom:10px;r
       <button class="hdr-btn overflow-hide" onclick="shareGame()" title="Copy shareable link">🔗 Share</button>
       <button class="hdr-btn" id="install-btn" style="display:none" onclick="installPWA()">⊕ Install</button>
       <button class="hdr-btn" id="host-topbar-btn" onclick="toggleHostMode()" title="Toggle host mode — see answers privately">🎙 Host</button>
+      <button class="hdr-btn overflow-hide" id="buzzer-btn" onclick="openBuzzerPanel()" title="Open buzzer panel — share link with players">📡 Buzzer</button>
       <div class="overflow-menu-wrap">
         <button class="hdr-btn overflow-btn" id="overflow-toggle" onclick="toggleOverflowMenu()" title="More options">⋮</button>
         <div id="overflow-menu">
@@ -2165,6 +2166,96 @@ function resetSessionClock() {
   var el = document.getElementById('session-clock');
   if (el) { el.textContent = '0:00'; el.classList.remove('running'); }
 }
+
+// ── BUZZER (WebSocket host client) ───────────────────────────────────────────
+var _buzzWs = null, _buzzConnected = false, _buzzReconnTimer = null;
+
+function _buzzWsUrl() {
+  var p = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return p + '//' + location.host + '/buzz-ws?s=' + encodeURIComponent(_sessionId);
+}
+
+function _buzzConnect() {
+  if (_buzzWs && (_buzzWs.readyState === 0 || _buzzWs.readyState === 1)) return;
+  try { _buzzWs = new WebSocket(_buzzWsUrl()); } catch(e) { return; }
+  _buzzWs.onopen  = function() { _buzzConnected = true; _buzzSetStatus('Connected'); };
+  _buzzWs.onclose = function() { _buzzConnected = false; _buzzSetStatus('Disconnected'); clearTimeout(_buzzReconnTimer); _buzzReconnTimer = setTimeout(_buzzConnect, 4000); };
+  _buzzWs.onerror = function() { _buzzSetStatus('Error'); };
+  _buzzWs.onmessage = function(e) {
+    try {
+      var m = JSON.parse(e.data);
+      if (m.type === 'buzzed') showBuzzWinner(m.winner);
+      else if (m.type === 'reset') hideBuzzToast();
+      else if (m.type === 'state' && m.winner) showBuzzWinner(m.winner);
+    } catch(ex) {}
+  };
+}
+
+function _buzzSetStatus(txt) {
+  var el = document.getElementById('buzz-conn-status');
+  if (el) el.textContent = txt;
+}
+
+function showBuzzWinner(w) {
+  var box = document.getElementById('buzz-winner-box');
+  if (box) {
+    box.style.display = 'block';
+    box.style.background = 'rgba(76,175,80,.15)';
+    box.style.border = '2px solid rgba(76,175,80,.4)';
+    box.style.borderRadius = '10px';
+    box.innerHTML = '<div style="font-size:1.5rem;margin-bottom:6px;">&#x1F514; BUZZ!</div>' +
+      '<div style="font-size:1.1rem;font-weight:900;color:#69f0ae;">' + escH(w.name) + '</div>' +
+      '<div style="font-size:.82rem;color:rgba(255,255,255,.5);">' + escH(w.team) + '</div>';
+  }
+  // Toast
+  var toast = document.getElementById('buzz-toast');
+  var tn = document.getElementById('buzz-toast-name');
+  var tt = document.getElementById('buzz-toast-team');
+  if (toast && tn && tt) {
+    tn.textContent = w.name;
+    tt.textContent = w.team;
+    toast.style.display = 'block';
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(function(){ toast.style.display = 'none'; }, 4000);
+  }
+}
+
+function hideBuzzToast() {
+  var toast = document.getElementById('buzz-toast');
+  if (toast) toast.style.display = 'none';
+  var box = document.getElementById('buzz-winner-box');
+  if (box) box.style.display = 'none';
+}
+
+function openBuzzerPanel() {
+  _buzzConnect();
+  var url = location.origin + '/buzzer?s=' + encodeURIComponent(_sessionId);
+  var urlBox = document.getElementById('buzz-url-box');
+  if (urlBox) urlBox.textContent = url;
+  document.getElementById('buzz-panel').style.display = 'flex';
+}
+
+function closeBuzzerPanel() {
+  document.getElementById('buzz-panel').style.display = 'none';
+}
+
+function copyBuzzerLink() {
+  var url = location.origin + '/buzzer?s=' + encodeURIComponent(_sessionId);
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function(){ showToast('&#x1F4CB; Buzzer link copied!'); }).catch(function(){ window.prompt('Buzzer link:', url); });
+  } else { window.prompt('Buzzer link:', url); }
+}
+
+function resetBuzzer() {
+  if (_buzzWs && _buzzWs.readyState === 1) _buzzWs.send(JSON.stringify({ type: 'reset' }));
+  hideBuzzToast();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeBuzzerPanel(); }
+});
+document.getElementById('buzz-panel').addEventListener('click', function(ev) { if (ev.target === this) closeBuzzerPanel(); });
+
 // ── SERVICE WORKER ────────────────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(function(){});
@@ -2271,6 +2362,27 @@ if (loadSave() && teams.length) {
     </div>
     <button class="htp-close-btn" onclick="document.getElementById('htp-overlay').classList.remove('open')">Got it — Let's Play!</button>
   </div>
+</div>
+
+<!-- ── BUZZER PANEL ── -->
+<div id="buzz-panel" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:800;align-items:center;justify-content:center;">
+  <div style="background:linear-gradient(160deg,#0d1b5e,#1a237e);border:2px solid rgba(245,197,24,.4);border-radius:16px;max-width:400px;width:94%;padding:28px 24px;text-align:center;position:relative;">
+    <button onclick="closeBuzzerPanel()" style="position:absolute;top:10px;right:12px;background:none;border:none;color:rgba(255,255,255,.4);font-size:1.3rem;cursor:pointer;">&#x2715;</button>
+    <div style="font-size:1.4rem;font-weight:900;color:#f5c518;margin-bottom:6px;">&#x1F4E1; Buzzer</div>
+    <div style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:18px;">Share the link below with players. First to tap wins.</div>
+    <div id="buzz-url-box" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 12px;font-size:.78rem;color:rgba(255,255,255,.6);word-break:break-all;margin-bottom:14px;text-align:left;font-family:monospace;"></div>
+    <button onclick="copyBuzzerLink()" style="width:100%;background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:11px;border-radius:7px;font-weight:800;cursor:pointer;font-size:.9rem;font-family:inherit;margin-bottom:12px;">&#x1F4CB; Copy Link</button>
+    <div id="buzz-winner-box" style="display:none;border-radius:10px;padding:14px 16px;margin-bottom:12px;text-align:center;"></div>
+    <button onclick="resetBuzzer()" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:9px;border-radius:7px;font-weight:700;cursor:pointer;font-size:.85rem;font-family:inherit;">&#x21BA; Reset Buzzer</button>
+    <div id="buzz-conn-status" style="margin-top:10px;font-size:.7rem;color:rgba(255,255,255,.3);"></div>
+  </div>
+</div>
+
+<!-- Buzz-in toast (shows on top of everything when someone buzzes) -->
+<div id="buzz-toast" style="display:none;position:fixed;top:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#1b5e20,#2e7d32);border:2px solid #69f0ae;border-radius:12px;padding:14px 24px;text-align:center;z-index:900;animation:winnerIn .25s cubic-bezier(.34,1.56,.64,1);min-width:240px;">
+  <div style="font-size:1.5rem;margin-bottom:4px;">&#x1F514; BUZZ!</div>
+  <div id="buzz-toast-name" style="font-size:1.1rem;font-weight:900;color:#69f0ae;"></div>
+  <div id="buzz-toast-team" style="font-size:.8rem;color:rgba(255,255,255,.6);margin-top:2px;"></div>
 </div>
 </body>
 </html>

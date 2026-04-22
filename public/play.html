@@ -2261,6 +2261,28 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(function(){});
 }
 
+
+// ── AUTO-START: pre-load teams from URL data (set by builder) ────────────────
+function autoStartWithTeams(teamList) {
+  if (!teamList || !teamList.length) return false;
+  // Set nTeams and build team blocks
+  nTeams = teamList.length;
+  // Update the team-count pills UI
+  document.querySelectorAll('.num-pill').forEach(function(p) {
+    p.classList.toggle('sel', parseInt(p.dataset.n) === nTeams);
+  });
+  buildTeamBlocks();
+  // Populate names and colours
+  teamList.forEach(function(t, i) {
+    var inp = document.getElementById('ti-' + i);
+    if (inp) inp.value = t.name || ('Team ' + (i + 1));
+    if (t.color) teamColorIdxs[i] = TEAM_COLORS.indexOf(t.color);
+  });
+  // Skip setup screen — start immediately
+  startGame();
+  return true;
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 // Load custom game from URL hash (#data=BASE64) or ?game=<id>
 (function() {
@@ -2277,6 +2299,7 @@ if ('serviceWorker' in navigator) {
         document.title = (gameData.title || 'Game') + ' · Holden\'s Jeopardy';
         var tbh1 = document.querySelector('#topbar h1');
         if (tbh1) tbh1.textContent = '⚡ ' + (gameData.title || 'Game');
+        if (gameData.teams && gameData.teams.length) autoStartWithTeams(gameData.teams);
         return; // done — skip ?game= lookup
       }
     }

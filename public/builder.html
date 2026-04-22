@@ -205,6 +205,29 @@ label.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba
   </div>
 </div>
 
+<!-- ── TEAMS ── -->
+<div class="card" id="teams-card">
+  <div class="card-title">Teams</div>
+  <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;margin-bottom:16px;">
+    <div>
+      <label class="fl">Number of Teams</label>
+      <div class="pills" id="bld-nteam-pills">
+        <div class="pill" data-n="2">2</div>
+        <div class="pill active-num" data-n="3">3</div>
+        <div class="pill" data-n="4">4</div>
+        <div class="pill" data-n="5">5</div>
+        <div class="pill" data-n="6">6</div>
+        <div class="pill" data-n="7">7</div>
+        <div class="pill" data-n="8">8</div>
+      </div>
+    </div>
+  </div>
+  <div id="bld-team-inputs" style="display:flex;flex-direction:column;gap:8px;max-width:420px;"></div>
+  <div style="margin-top:10px;display:flex;gap:8px;">
+    <button class="btn btn-ghost" onclick="bldRandTeamNames()" style="font-size:.8rem;padding:7px 14px;">&#x1F3B2; Random Names</button>
+  </div>
+</div>
+
 <!-- ── BOARD ── -->
 <div class="card">
   <div class="card-title">Categories &amp; Clues <span style="font-weight:400;color:rgba(255,255,255,.35);font-size:.65rem;text-transform:none;letter-spacing:0;">(Clue is optional — leave blank to reveal answer immediately)</span></div>
@@ -1532,6 +1555,68 @@ function collectCats() {
 }
 
 // ─── Save & Play (primary CTA — saves to library + navigates to game URL) ────
+
+// ─── Builder Teams ─────────────────────────────────────────────────────────────
+var bldNTeams = 3;
+var BLD_TEAM_COLORS = ['#4ecdc4','#ff6b6b','#a29bfe','#45b7d1','#fd79a8','#ffd32a','#55efc4','#badc58'];
+
+(function initBldTeams() {
+  // Wire number-of-teams pills
+  document.getElementById('bld-nteam-pills').addEventListener('click', function(e) {
+    var p = e.target.closest('[data-n]');
+    if (!p) return;
+    bldNTeams = parseInt(p.dataset.n);
+    document.querySelectorAll('#bld-nteam-pills .pill').forEach(function(x) { x.classList.remove('active-num'); });
+    p.classList.add('active-num');
+    bldBuildTeamInputs();
+  });
+  bldBuildTeamInputs();
+})();
+
+function bldBuildTeamInputs() {
+  var c = document.getElementById('bld-team-inputs');
+  // Preserve existing names
+  var existing = [];
+  c.querySelectorAll('.bld-team-inp').forEach(function(inp) { existing.push(inp.value); });
+  c.innerHTML = '';
+  for (var i = 0; i < bldNTeams; i++) {
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;';
+    var dot = document.createElement('div');
+    dot.style.cssText = 'width:12px;height:12px;border-radius:50%;flex-shrink:0;background:' + BLD_TEAM_COLORS[i % BLD_TEAM_COLORS.length] + ';';
+    var inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'bld-team-inp';
+    inp.placeholder = 'Team ' + (i + 1);
+    inp.maxLength = 40;
+    inp.value = existing[i] || '';
+    inp.style.cssText = 'flex:1;padding:9px 12px;border-radius:7px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.9rem;outline:none;font-family:inherit;transition:border-color .18s;';
+    inp.addEventListener('focus', function() { this.style.borderColor = '#f5c518'; });
+    inp.addEventListener('blur', function() { this.style.borderColor = 'rgba(255,255,255,.12)'; });
+    row.appendChild(dot);
+    row.appendChild(inp);
+    c.appendChild(row);
+  }
+}
+
+function bldRandTeamNames() {
+  var RAND = ['The Trivia Titans','Brain Trust','Les Quizerables','The Fact Finders','Smarty Pants','Agatha Quiztie','The Think Tank','Wild Guessers','I Am Smarticus','Tequila Mockingbird','404: Name Not Found','Ctrl+Alt+Defeat','Stack Overflow','The Dark Horses','Know-It-Alls','The Underdogs','Trivia Newton John','Quiz Khalifa','Team Phenomenal','The Renaissance Crew'];
+  var shuffled = RAND.slice().sort(function() { return Math.random() - 0.5; });
+  document.querySelectorAll('.bld-team-inp').forEach(function(inp, i) {
+    inp.value = shuffled[i % shuffled.length];
+  });
+}
+
+function bldGetTeams() {
+  var result = [];
+  var inputs = document.querySelectorAll('.bld-team-inp');
+  for (var i = 0; i < bldNTeams; i++) {
+    var name = (inputs[i] ? inputs[i].value.trim() : '') || ('Team ' + (i + 1));
+    result.push({ name: name, color: BLD_TEAM_COLORS[i % BLD_TEAM_COLORS.length] });
+  }
+  return result;
+}
+
 function saveAndPlay() {
   if (!validate()) return;
   const title = document.getElementById('game-title').value.trim();
@@ -1542,7 +1627,7 @@ function saveAndPlay() {
   if (id) {
     try {
       // Embed game data in hash so the URL is cross-device shareable
-      const data = { id, title, catData: cats };
+      const data = { id, title, catData: cats, teams: bldGetTeams() };
       const encoded = btoa(encodeURIComponent(JSON.stringify(data)));
       window.location.href = '/play?game=' + id + '#data=' + encoded;
     } catch(e) {

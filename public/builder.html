@@ -51,7 +51,6 @@ label.fl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba
 .btn-gold{background:linear-gradient(135deg,var(--gold),#e6b800);color:#1a1a1a;box-shadow:0 3px 14px rgba(245,197,24,.28);}
 .btn-ghost{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;}
 .btn-ghost:hover{background:rgba(255,255,255,.14);}
-.btn-danger{background:rgba(239,83,80,.12);border:1px solid rgba(239,83,80,.3);color:#ff8a80;}
 .btn-lg{padding:14px 40px;font-size:1rem;border-radius:8px;}
 
 /* PILL TOGGLES */
@@ -619,9 +618,9 @@ const QB_EXTRA = {
       {c:"The French term for a mixture of diced vegetables used as a base for soups and sauces", a:"Mirepoix"}
     ],
     "Music": [
-      {c:"The four-piece band from Liverpool that had a famous Ed Sullivan Show appearance in 1964", a:"The Beatles"},
+      {c:"This American singer known as 'The King' popularized rock and roll with hits like Hound Dog and Jailhouse Rock", a:"Elvis Presley"},
       {c:"Musical symbol indicating a piece should be played softly", a:"Piano (p)"},
-      {c:"This singer released 'Thriller' in 1982 — the best-selling album of all time", a:"Michael Jackson"},
+      {c:"This singer's 1984 album and concert film 'Purple Rain' won him an Academy Award for Best Original Song Score", a:"Prince"},
       {c:"An instrument with 88 keys played by pressing them to produce sound", a:"The piano"},
       {c:"In music, the number of beats per minute is called this", a:"Tempo (or BPM)"}
     ],
@@ -629,7 +628,7 @@ const QB_EXTRA = {
       {c:"The scientist who developed the theory of general relativity", a:"Albert Einstein"},
       {c:"The first woman to win a Nobel Prize, who won it twice — in physics and chemistry", a:"Marie Curie"},
       {c:"This civil rights leader delivered the 'I Have a Dream' speech in 1963", a:"Martin Luther King Jr."},
-      {c:"The painter of the Mona Lisa and The Last Supper", a:"Leonardo da Vinci"},
+      {c:"This scientist discovered penicillin in 1928 after noticing mold killing bacteria in his petri dish", a:"Alexander Fleming"},
       {c:"This British prime minister led the UK through most of World War II", a:"Winston Churchill"}
     ],
     "Animals & Nature": [
@@ -715,7 +714,7 @@ const QB_EXTRA = {
       {c:"This mathematician and logician proved, in his incompleteness theorems, that in any consistent formal system there are statements that cannot be proven or disproven within that system", a:"Kurt Gödel"},
       {c:"Before becoming a revolutionary, this Cuban leader was a lawyer and trained baseball pitcher who once allegedly tried out for professional teams", a:"Fidel Castro"},
       {c:"She became the youngest person ever to win the Nobel Peace Prize in 2014, at age 17, for her advocacy of children's education", a:"Malala Yousafzai"},
-      {c:"This Renaissance polymath wrote the Codex Leicester — a scientific journal later purchased by Bill Gates — and also painted The Last Supper", a:"Leonardo da Vinci"},
+      {c:"This theoretical physicist wrote 'A Brief History of Time' and proposed that black holes emit radiation", a:"Stephen Hawking"},
       {c:"The philosopher who proposed the thought experiment of a person locked in a room following instructions in Chinese, to argue that computers cannot truly understand language", a:"John Searle (the Chinese Room argument)"}
     ],
     "Animals & Nature": [
@@ -1793,7 +1792,6 @@ function loadFromHash() {
     showToast('✏️ Game loaded — edit and Save & Play when ready', 'ok');
     return true; // signal: skip draft restore
   } catch(e) {
-    console.warn('loadFromHash error:', e);
   }
   return false;
 }

@@ -970,13 +970,12 @@ function selectCategory(cat) {
       el.value = cat;
       syncSuggestions();
       updatePreview();
-      fillColumnClues(c);
       return;
     }
   }
   // All slots full — replace the last one
   const last = document.getElementById(`cat-${numCats-1}`);
-  if (last) { last.value = cat; syncSuggestions(); updatePreview(); fillColumnClues(numCats-1); }
+  if (last) { last.value = cat; syncSuggestions(); updatePreview(); }
 }
 
 function syncSuggestions() {

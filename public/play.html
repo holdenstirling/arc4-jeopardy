@@ -2124,13 +2124,19 @@ function bcSend(msg) {
 }
 
 function copyShareLink(mode) {
-  var url = new URL(location.href);
-  url.searchParams.delete('host');
-  if (mode === 'host') url.searchParams.set('host', '1');
-  navigator.clipboard.writeText(url.toString()).then(function() {
-    showToast(mode === 'host' ? '🎙 Host link copied — open privately!' : '📺 Player link copied — share your screen!');
+  // Always include full game data hash so the link works on any device
+  var hash = '';
+  if (_currentGameData) {
+    try {
+      hash = '#data=' + btoa(encodeURIComponent(JSON.stringify(_currentGameData)));
+    } catch(e) {}
+  }
+  var search = (mode === 'host') ? '?host=1' : '';
+  var url = location.origin + location.pathname + search + hash;
+  navigator.clipboard.writeText(url).then(function() {
+    showToast(mode === 'host' ? '🎙 Host link copied — open on your private screen!' : '📺 Player link copied — share your screen!');
   }).catch(function() {
-    prompt('Copy this link:', url.toString());
+    prompt('Copy this link:', url);
   });
 }
 function openHostWindow() {

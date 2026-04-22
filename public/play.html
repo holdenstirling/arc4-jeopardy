@@ -594,59 +594,58 @@ body.spectator::after{content:'📺 Spectator Mode';position:fixed;bottom:10px;r
 
 <!-- ── FINAL JEOPARDY MODAL ── -->
 <div id="fj-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:400;align-items:center;justify-content:center;padding:20px;">
-  <div id="fj-card" style="background:linear-gradient(135deg,#1a237e,#0d47a1);border:4px solid #f5c518;border-radius:16px;max-width:640px;width:100%;padding:32px;text-align:center;animation:modalIn .25s cubic-bezier(.34,1.56,.64,1);max-height:92vh;overflow-y:auto;">
-    <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:#f5c518;margin-bottom:10px;">🏁 Final Jeopardy</div>
+  <div id="fj-card" style="background:linear-gradient(135deg,#1a237e,#0d47a1);border:4px solid #f5c518;border-radius:16px;max-width:660px;width:100%;text-align:center;animation:modalIn .25s cubic-bezier(.34,1.56,.64,1);max-height:92vh;overflow-y:auto;">
+    <!-- Header bar -->
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 24px;border-bottom:1px solid rgba(255,255,255,.1);">
+      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:#f5c518;">🏁 Final Jeopardy</div>
+      <div id="fj-progress" style="font-size:.75rem;font-weight:700;color:rgba(255,255,255,.5);"></div>
+    </div>
+    <div style="padding:24px 28px;">
 
-    <!-- Step 1: Host enters category/clue/answer -->
-    <div id="fj-step1">
-      <div style="font-size:1.05rem;font-weight:700;margin-bottom:18px;">Set up Final Jeopardy</div>
-      <div style="margin-bottom:12px;text-align:left;">
-        <label style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.38);display:block;margin-bottom:5px;">Category</label>
-        <input id="fj-cat-inp" type="text" placeholder="e.g. Famous Scientists" maxlength="80" style="width:100%;padding:9px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.95rem;outline:none;font-family:inherit;">
-      </div>
-      <div style="margin-bottom:12px;text-align:left;">
-        <label style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.38);display:block;margin-bottom:5px;">Clue</label>
-        <textarea id="fj-clue-inp" rows="3" placeholder="Write the Final Jeopardy clue here…" maxlength="500" style="width:100%;padding:9px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.88rem;outline:none;resize:vertical;font-family:inherit;line-height:1.4;"></textarea>
-      </div>
-      <div style="margin-bottom:20px;text-align:left;">
-        <label style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.38);display:block;margin-bottom:5px;">Answer (host only)</label>
-        <input id="fj-ans-inp" type="text" placeholder="Correct answer" maxlength="200" style="width:100%;padding:9px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;font-size:.88rem;outline:none;font-family:inherit;">
-      </div>
-      <div style="display:flex;gap:10px;justify-content:center;">
-        <button onclick="fjRevealCategory()" style="background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:12px 28px;border-radius:7px;font-weight:800;cursor:pointer;font-size:.95rem;font-family:inherit;">Reveal Category →</button>
-        <button onclick="closeFJ()" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28);padding:12px 20px;border-radius:7px;cursor:pointer;font-family:inherit;">Cancel</button>
+    <!-- Step 0: Host previews auto-generated questions -->
+    <div id="fj-step0">
+      <div style="font-size:1.1rem;font-weight:800;margin-bottom:6px;">5 Questions Ready</div>
+      <div style="font-size:.78rem;color:rgba(255,255,255,.42);margin-bottom:18px;">Only you can see these. Each category is revealed one at a time.</div>
+      <div id="fj-q-preview" style="display:flex;flex-direction:column;gap:7px;margin-bottom:20px;text-align:left;"></div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button onclick="fjGenerateQuestions(true)" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.25);padding:10px 20px;border-radius:7px;cursor:pointer;font-size:.88rem;font-family:inherit;">↺ Regenerate</button>
+        <button onclick="fjStartRound()" style="background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:10px 28px;border-radius:7px;font-weight:800;cursor:pointer;font-size:.95rem;font-family:inherit;">▶ Begin Final Jeopardy</button>
+        <button onclick="closeFJ()" style="background:rgba(255,255,255,.07);color:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.15);padding:10px 18px;border-radius:7px;cursor:pointer;font-size:.8rem;font-family:inherit;">✕ Cancel</button>
       </div>
     </div>
 
-    <!-- Step 2: Category shown + sequential private wagering -->
+    <!-- Step 2: Category revealed + blind wagering -->
     <div id="fj-step2" style="display:none;">
-      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:2px;color:#f5c518;margin-bottom:8px;">Category</div>
+      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:#f5c518;margin-bottom:8px;">Category</div>
       <div id="fj-cat-display" style="font-size:clamp(1.3rem,4vw,2rem);font-weight:900;margin-bottom:20px;"></div>
-      <div id="fj-wager-section"><!-- injected by fjShowWagerForTeam() --></div>
+      <div id="fj-wager-section"></div>
       <div style="margin-top:14px;text-align:center;">
-        <button onclick="closeFJ()" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.18);padding:8px 20px;border-radius:6px;cursor:pointer;font-size:.78rem;font-family:inherit;">✕ Cancel Final Jeopardy</button>
+        <button onclick="closeFJ()" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.15);padding:7px 18px;border-radius:6px;cursor:pointer;font-size:.75rem;font-family:inherit;">✕ Cancel</button>
       </div>
     </div>
 
-    <!-- Step 3: Clue display + answer reveal -->
+    <!-- Step 3: Clue shown, reveal answer -->
     <div id="fj-step3" style="display:none;">
-      <div id="fj-clue-display" style="font-size:clamp(1rem,2.8vw,1.4rem);font-weight:700;line-height:1.5;margin-bottom:24px;"></div>
+      <div id="fj-clue-display" style="font-size:clamp(1rem,2.8vw,1.4rem);font-weight:700;line-height:1.55;margin-bottom:24px;"></div>
       <div id="fj-ans-display" style="background:rgba(0,0,0,.35);border-radius:8px;padding:14px 18px;font-size:1.05rem;font-weight:800;color:#a5d6a7;display:none;margin-bottom:20px;"></div>
       <div style="display:flex;gap:10px;justify-content:center;">
         <button id="fj-reveal-btn" onclick="fjRevealAnswer()" style="background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:11px 26px;border-radius:7px;font-weight:800;cursor:pointer;font-family:inherit;">Reveal Answer</button>
-        <button onclick="closeFJ()" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28);padding:11px 20px;border-radius:7px;cursor:pointer;font-family:inherit;">Close</button>
       </div>
     </div>
 
-    <!-- Step 4: Mark each team correct/wrong, apply scores -->
+    <!-- Step 4: Mark correct / wrong + Next or Finish -->
     <div id="fj-step4" style="display:none;">
-      <div id="fj-clue-display2" style="font-size:clamp(.88rem,2.3vw,1.05rem);font-weight:600;line-height:1.5;margin-bottom:8px;color:rgba(255,255,255,.65);"></div>
-      <div id="fj-ans-display2" style="background:rgba(0,0,0,.35);border-radius:8px;padding:10px 14px;font-size:.95rem;font-weight:800;color:#a5d6a7;margin-bottom:18px;"></div>
+      <div id="fj-clue-display2" style="font-size:clamp(.85rem,2.2vw,1rem);font-weight:600;line-height:1.5;margin-bottom:6px;color:rgba(255,255,255,.6);"></div>
+      <div id="fj-ans-display2" style="background:rgba(0,0,0,.35);border-radius:8px;padding:9px 14px;font-size:.95rem;font-weight:800;color:#a5d6a7;margin-bottom:16px;"></div>
       <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.32);margin-bottom:10px;">Mark each team's answer</div>
       <div id="fj-results-grid" style="display:flex;flex-direction:column;gap:7px;margin-bottom:18px;"></div>
-      <button onclick="closeFJ()" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28);padding:11px 28px;border-radius:7px;cursor:pointer;font-family:inherit;">Close</button>
+      <button id="fj-next-btn" onclick="fjNextRound()" style="background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:11px 28px;border-radius:7px;font-weight:800;cursor:pointer;font-family:inherit;width:100%;">Next Question →</button>
     </div>
+
+    </div><!-- /inner padding -->
   </div>
+</div>
+
 </div>
 
 <div id="toast"></div>
@@ -1750,131 +1749,140 @@ openCell = function(cell) {
 };
 
 // ── FINAL JEOPARDY (blind wager) ─────────────────────────────────────────────
-var fjWagers = [];
+// ── FINAL JEOPARDY — 5-round auto-generated ────────────────────────────────
+var FJ_QB = [
+  {cat:'U.S. History',      clue:'This 1863 address delivered at a Pennsylvania battlefield began "Four score and seven years ago"',ans:'The Gettysburg Address'},
+  {cat:'Science',           clue:'The only metal that is liquid at room temperature',ans:'Mercury'},
+  {cat:'Literature',        clue:'This Shakespeare tragedy features the soliloquy beginning "To be, or not to be, that is the question"',ans:'Hamlet'},
+  {cat:'World Geography',   clue:'This country has the longest coastline of any nation on Earth',ans:'Canada'},
+  {cat:'Pop Culture',       clue:'In the 1994 film, Forrest Gump said "Life is like a box of ___"',ans:'Chocolates'},
+  {cat:'Famous Scientists', clue:'This physicist developed the theory of general relativity and the famous equation E=mc\u00b2',ans:'Albert Einstein'},
+  {cat:'Music',             clue:'Ludwig van Beethoven composed this famous piano sonata nicknamed after the moon',ans:'Moonlight Sonata'},
+  {cat:'World History',     clue:'Construction of this massive northern Chinese defensive wall began in the 7th century BC',ans:'The Great Wall of China'},
+  {cat:'Technology',        clue:'This company, founded by Steve Jobs and Steve Wozniak in 1976, launched the Macintosh in 1984',ans:'Apple'},
+  {cat:'Sports',            clue:'This annual cycling race, first held in 1903, covers roughly 3,500 km through France',ans:'Tour de France'},
+  {cat:'Art',               clue:'Leonardo da Vinci painted this portrait of a woman with a famously enigmatic smile',ans:'The Mona Lisa'},
+  {cat:'Animals',           clue:'This is the only mammal capable of true sustained flight',ans:'Bat'},
+  {cat:'Movies',            clue:'This 1977 George Lucas film introduced Darth Vader and began the Star Wars saga',ans:'A New Hope (Star Wars)'},
+  {cat:'Space',             clue:'This is the largest planet in our solar system, with a Great Red Spot storm',ans:'Jupiter'},
+  {cat:'Language',          clue:'This language has the most native speakers in the world',ans:'Mandarin Chinese'},
+  {cat:'Math',              clue:'This Greek letter represents the ratio of a circle\'s circumference to its diameter, approximately 3.14159',ans:'Pi (\u03c0)'},
+  {cat:'Mythology',         clue:'In Greek mythology, this hero slew the Minotaur with the help of Ariadne\'s thread',ans:'Theseus'},
+  {cat:'Economics',         clue:'This Scottish economist wrote "The Wealth of Nations" in 1776, founding modern economics',ans:'Adam Smith'},
+  {cat:'Medicine',          clue:'Alexander Fleming discovered this first widely used antibiotic by accident in 1928',ans:'Penicillin'},
+  {cat:'Food & Drink',      clue:'This Italian city gave its name to a tomato-based pasta sauce containing meat and vegetables',ans:'Bolognese (Bologna)'}
+];
+
+var fjQuestions      = [];
+var fjCurrentQ       = 0;
+var fjWagers         = [];
 var fjResultsApplied = [];
-var fjCategory = '';
-var fjClue = '';
-var fjAnswer = '';
+var fjCategory = '', fjClue = '', fjAnswer = '';
+
+function fjGenerateQuestions(forceNew) {
+  if (!forceNew && fjQuestions.length >= 5) return;
+  var pool = FJ_QB.slice().sort(function() { return Math.random() - 0.5; });
+  fjQuestions = pool.slice(0, 5);
+  var preview = document.getElementById('fj-q-preview');
+  if (!preview) return;
+  preview.innerHTML = fjQuestions.map(function(q, i) {
+    return '<div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 13px;">' +
+      '<div style="font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:#f5c518;margin-bottom:3px;">Q' + (i+1) + ' \u00b7 ' + escH(q.cat) + '</div>' +
+      '<div style="font-size:.83rem;color:rgba(255,255,255,.75);margin-bottom:4px;">' + escH(q.clue) + '</div>' +
+      '<div style="font-size:.78rem;font-weight:700;color:#a5d6a7;">\u2192 ' + escH(q.ans) + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function fjShowStep(id) {
+  ['fj-step0','fj-step2','fj-step3','fj-step4'].forEach(function(s) {
+    var el = document.getElementById(s);
+    if (el) el.style.display = (s === id) ? 'block' : 'none';
+  });
+}
 
 function triggerFinalJeopardy() {
-  fjResultsApplied = [];
-  // Check for a saved mid-flight FJ session
-  var saved = loadFJSave();
-  if (saved && saved.wagers && saved.wagers.some(function(w){ return w !== null; })) {
-    fjWagers = saved.wagers;
-    fjCategory = saved.category || '';
-    fjClue = saved.clue || '';
-    fjAnswer = saved.answer || '';
-    // Find the first team who still needs to wager
-    var nextIdx = fjWagers.indexOf(null);
-    document.getElementById('fj-step1').style.display = 'none';
-    document.getElementById('fj-step2').style.display = 'block';
-    document.getElementById('fj-step3').style.display = 'none';
-    document.getElementById('fj-step4').style.display = 'none';
-    document.getElementById('fj-cat-display').textContent = fjCategory;
-    document.getElementById('fj-overlay').style.display = 'flex';
-    if (nextIdx >= 0) {
-      fjShowWagerForTeam(nextIdx);
-    } else {
-      // All wagers collected — go straight to clue reveal
-      fjRevealClue();
-    }
-    showToast('Resumed Final Jeopardy — wagers restored');
-    return;
-  }
-  // Fresh start
+  fjCurrentQ = 0;
   fjWagers = [];
-  fjCategory = ''; fjClue = ''; fjAnswer = '';
-  document.getElementById('fj-step1').style.display = 'block';
-  document.getElementById('fj-step2').style.display = 'none';
-  document.getElementById('fj-step3').style.display = 'none';
-  document.getElementById('fj-step4').style.display = 'none';
-  document.getElementById('fj-cat-inp').value = '';
-  document.getElementById('fj-clue-inp').value = '';
-  document.getElementById('fj-ans-inp').value = '';
+  fjResultsApplied = [];
+  fjGenerateQuestions(false);
+  var prog = document.getElementById('fj-progress');
+  if (prog) prog.textContent = '';
+  fjShowStep('fj-step0');
   document.getElementById('fj-overlay').style.display = 'flex';
 }
 
-function fjRevealCategory() {
-  var cat = document.getElementById('fj-cat-inp').value.trim();
-  if (!cat) { document.getElementById('fj-cat-inp').focus(); return; }
-  fjCategory = cat;
-  fjClue = document.getElementById('fj-clue-inp').value.trim();
-  fjAnswer = document.getElementById('fj-ans-inp').value.trim();
-  sndDailyDouble();
-  document.getElementById('fj-cat-display').textContent = cat;
-  document.getElementById('fj-step1').style.display = 'none';
-  document.getElementById('fj-step2').style.display = 'block';
+function fjStartRound() {
+  var q = fjQuestions[fjCurrentQ];
+  if (!q) return;
+  fjCategory = q.cat; fjClue = q.clue; fjAnswer = q.ans;
   fjWagers = new Array(teams.length).fill(null);
-  saveFJ();
+  fjResultsApplied = new Array(teams.length).fill(false);
+  var prog = document.getElementById('fj-progress');
+  if (prog) prog.textContent = 'Question ' + (fjCurrentQ + 1) + ' of ' + fjQuestions.length;
+  sndDailyDouble();
+  document.getElementById('fj-cat-display').textContent = fjCategory;
+  fjShowStep('fj-step2');
   fjShowWagerForTeam(0);
 }
 
 function fjShowWagerForTeam(i) {
   var section = document.getElementById('fj-wager-section');
-  var maxWager = Math.max(0, teams[i].score - 200);
+  var t = teams[i]; if (!t) return;
+  var maxWager = Math.max(0, t.score);
   section.innerHTML =
     '<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:18px 16px;margin-bottom:12px;">' +
-      '<div style="font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);margin-bottom:6px;">Team ' + (i+1) + ' — Private Wager</div>' +
-      '<div style="font-size:1.05rem;font-weight:800;margin-bottom:4px;">' + escH(teams[i].name) + '</div>' +
-      '<div style="font-size:.78rem;color:rgba(255,255,255,.42);margin-bottom:' + (maxWager === 0 ? '8' : '16') + 'px;">Your score: <span style="color:#f5c518;font-weight:700">' + teams[i].score + '</span>&ensp;·&ensp;Max wager: <span style="color:#f5c518;font-weight:700">' + maxWager + '</span></div>' +
-      (maxWager === 0 ? '<div style="background:rgba(255,193,7,.1);border:1px solid rgba(255,193,7,.3);border-radius:6px;padding:8px 12px;font-size:.75rem;color:#ffe082;margin-bottom:14px;">⚠️ Your score is too low to wager — you need more than 200 points to put anything at stake. Your score won\'t change this round.</div>' : '') +
-      '<div style="text-align:left;margin-bottom:14px;">' +
-        '<label style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);display:block;margin-bottom:5px;">Your Wager (0 – ' + maxWager + ')</label>' +
-        '<input id="fj-wager-inp" type="number" min="0" max="' + maxWager + '" placeholder="Enter amount…" style="width:100%;padding:10px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#fff;font-size:1.1rem;outline:none;font-family:inherit;text-align:center;">' +
-      '</div>' +
-      '<button onclick="fjLockWager(' + i + ')" style="background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:12px 0;border-radius:7px;font-weight:800;cursor:pointer;font-size:.95rem;font-family:inherit;width:100%;">🔒 Lock In Wager</button>' +
+      '<div style="font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);margin-bottom:6px;">Private Wager</div>' +
+      '<div style="font-size:1.05rem;font-weight:800;margin-bottom:4px;">' + escH(t.name) + '</div>' +
+      '<div style="font-size:.78rem;color:rgba(255,255,255,.42);margin-bottom:14px;">Score: <span style="color:#f5c518;font-weight:700">' + t.score + '</span>\u2002\u00b7\u2002Max wager: <span style="color:#f5c518;font-weight:700">' + maxWager + '</span></div>' +
+      (maxWager <= 0 ? '<div style="background:rgba(255,193,7,.1);border:1px solid rgba(255,193,7,.3);border-radius:6px;padding:8px 12px;font-size:.75rem;color:#ffe082;margin-bottom:12px;">\u26a0\ufe0f Score is 0 \u2014 no points at stake this round.</div>' : '') +
+      '<input id="fj-wager-inp" type="number" min="0" max="' + maxWager + '" placeholder="0 \u2013 ' + maxWager + '" style="width:100%;padding:10px 12px;border-radius:6px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);color:#fff;font-size:1.1rem;outline:none;font-family:inherit;text-align:center;margin-bottom:12px;box-sizing:border-box;" onkeydown="if(event.key===\'Enter\')fjLockWager(' + i + ')">' +
+      '<button onclick="fjLockWager(' + i + ')" style="background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:12px 0;border-radius:7px;font-weight:800;cursor:pointer;font-size:.95rem;font-family:inherit;width:100%;">\U0001f512 Lock In Wager</button>' +
     '</div>' +
-    '<div style="font-size:.7rem;color:rgba(255,255,255,.25);margin-top:2px;">Other teams: look away! 👀 This wager is private.</div>';
+    '<div style="font-size:.7rem;color:rgba(255,255,255,.25);">Other teams: look away! \U0001f440</div>';
   setTimeout(function(){ var inp = document.getElementById('fj-wager-inp'); if (inp) inp.focus(); }, 60);
 }
 
 function fjLockWager(i) {
   var inp = document.getElementById('fj-wager-inp');
   var val = inp ? parseInt(inp.value) : 0;
-  var maxWager = Math.max(0, teams[i].score - 200);
+  var maxWager = Math.max(0, teams[i] ? teams[i].score : 0);
   if (isNaN(val) || val < 0) val = 0;
   if (val > maxWager) val = maxWager;
   fjWagers[i] = val;
-  saveFJ();
-
   var section = document.getElementById('fj-wager-section');
   var nextTeam = i + 1;
-
   if (nextTeam < teams.length) {
     section.innerHTML =
       '<div style="text-align:center;padding:24px 16px;">' +
-        '<div style="font-size:2rem;margin-bottom:10px;">✅</div>' +
+        '<div style="font-size:2rem;margin-bottom:10px;">\u2705</div>' +
         '<div style="font-size:1rem;font-weight:700;margin-bottom:8px;">' + escH(teams[i].name) + ' locked in!</div>' +
-        '<div style="font-size:.85rem;color:rgba(255,255,255,.42);">Pass the screen to <strong style="color:#fff">' + escH(teams[nextTeam].name) + '</strong></div>' +
+        '<div style="font-size:.85rem;color:rgba(255,255,255,.42);">Pass to <strong style="color:#fff">' + escH(teams[nextTeam].name) + '</strong></div>' +
       '</div>';
-    setTimeout(function(){ fjShowWagerForTeam(nextTeam); }, 2200);
+    setTimeout(function(){ fjShowWagerForTeam(nextTeam); }, 2000);
   } else {
     section.innerHTML =
       '<div style="text-align:center;padding:20px 16px;">' +
-        '<div style="font-size:2rem;margin-bottom:10px;">🔒</div>' +
+        '<div style="font-size:2rem;margin-bottom:10px;">\U0001f512</div>' +
         '<div style="font-size:1rem;font-weight:700;margin-bottom:16px;">All wagers locked!</div>' +
-        '<button onclick="fjRevealClue()" style="background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:12px 28px;border-radius:7px;font-weight:800;cursor:pointer;font-size:.95rem;font-family:inherit;">▶ Reveal the Clue</button>' +
+        '<button onclick="fjRevealClue()" style="background:linear-gradient(135deg,#f5c518,#e6b800);color:#1a1a1a;border:none;padding:12px 28px;border-radius:7px;font-weight:800;cursor:pointer;font-size:.95rem;font-family:inherit;">\u25b6 Reveal the Clue</button>' +
       '</div>';
   }
 }
 
 function fjRevealClue() {
-  document.getElementById('fj-clue-display').textContent = fjClue || '(No clue entered)';
+  document.getElementById('fj-clue-display').textContent = fjClue;
   document.getElementById('fj-ans-display').style.display = 'none';
   document.getElementById('fj-reveal-btn').style.display = 'inline-block';
-  document.getElementById('fj-step2').style.display = 'none';
-  document.getElementById('fj-step3').style.display = 'block';
+  fjShowStep('fj-step3');
   sndReveal();
 }
 
 function fjRevealAnswer() {
-  document.getElementById('fj-ans-display').textContent = fjAnswer || '(No answer entered)';
+  document.getElementById('fj-ans-display').textContent = fjAnswer;
   document.getElementById('fj-ans-display').style.display = 'block';
   document.getElementById('fj-reveal-btn').style.display = 'none';
   sndReveal();
-  // Build results grid
-  fjResultsApplied = new Array(teams.length).fill(false);
   var grid = document.getElementById('fj-results-grid');
   grid.innerHTML = '';
   teams.forEach(function(t, i) {
@@ -1884,16 +1892,17 @@ function fjRevealAnswer() {
     row.innerHTML =
       '<div style="flex:1;text-align:left;">' +
         '<div style="font-weight:700;font-size:.88rem;">' + escH(t.name) + '</div>' +
-        '<div style="font-size:.7rem;color:rgba(255,255,255,.38);">Wagered: <span style="color:#f5c518;font-weight:700">' + (fjWagers[i] || 0) + '</span>&ensp;·&ensp;Score: <span id="fj-score-' + i + '" style="font-weight:700">' + t.score + '</span></div>' +
+        '<div style="font-size:.7rem;color:rgba(255,255,255,.38);">Wagered: <span style="color:#f5c518;font-weight:700">' + (fjWagers[i] || 0) + '</span>\u2002\u00b7\u2002Score: <span id="fj-score-' + i + '" style="font-weight:700">' + t.score + '</span></div>' +
       '</div>' +
-      '<button id="fj-c-' + i + '" onclick="fjMarkResult(' + i + ',true)" style="background:rgba(76,175,80,.2);border:1px solid rgba(76,175,80,.4);color:#a5d6a7;border-radius:5px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:.78rem;font-family:inherit;">✓ Correct</button>' +
-      '<button id="fj-w-' + i + '" onclick="fjMarkResult(' + i + ',false)" style="background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.35);color:#ff8a80;border-radius:5px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:.78rem;font-family:inherit;">✗ Wrong</button>';
+      '<button id="fj-c-' + i + '" onclick="fjMarkResult(' + i + ',true)" style="background:rgba(76,175,80,.2);border:1px solid rgba(76,175,80,.4);color:#a5d6a7;border-radius:5px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:.78rem;font-family:inherit;">\u2713 Correct</button>' +
+      '<button id="fj-w-' + i + '" onclick="fjMarkResult(' + i + ',false)" style="background:rgba(239,83,80,.15);border:1px solid rgba(239,83,80,.35);color:#ff8a80;border-radius:5px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:.78rem;font-family:inherit;">\u2717 Wrong</button>';
     grid.appendChild(row);
   });
   document.getElementById('fj-clue-display2').textContent = fjClue;
   document.getElementById('fj-ans-display2').textContent = fjAnswer;
-  document.getElementById('fj-step3').style.display = 'none';
-  document.getElementById('fj-step4').style.display = 'block';
+  var btn = document.getElementById('fj-next-btn');
+  if (btn) btn.textContent = (fjCurrentQ + 1 < fjQuestions.length) ? 'Next Question \u2192' : '\U0001f3c6 See Final Scores';
+  fjShowStep('fj-step4');
 }
 
 function fjMarkResult(i, correct) {
@@ -1902,10 +1911,7 @@ function fjMarkResult(i, correct) {
   var wager = fjWagers[i] || 0;
   var delta = correct ? wager : -wager;
   teams[i].score += delta;
-  updateScore(i);
-  animateScore(i, delta);
-  save();
-  // Update row UI
+  updateScore(i); animateScore(i, delta); save();
   var row = document.getElementById('fj-result-row-' + i);
   var scoreEl = document.getElementById('fj-score-' + i);
   if (scoreEl) scoreEl.textContent = teams[i].score;
@@ -1919,27 +1925,21 @@ function fjMarkResult(i, correct) {
   if (btnW) { btnW.disabled = true; btnW.style.opacity = correct ? '.28' : '1'; }
 }
 
+function fjNextRound() {
+  fjCurrentQ++;
+  if (fjCurrentQ < fjQuestions.length) {
+    fjStartRound();
+  } else {
+    closeFJ();
+    checkWinner();
+  }
+}
+
 function closeFJ() {
   stopTimer();
   document.getElementById('fj-overlay').style.display = 'none';
-  // Only wipe saved FJ state when we're done (step 4)
-  var s4 = document.getElementById('fj-step4');
-  if (s4 && s4.style.display !== 'none') clearFJSave();
 }
-var _FJ_SAVE_KEY = 'arc4-jeopardy-fj';
-function saveFJ() {
-  try {
-    localStorage.setItem(_FJ_SAVE_KEY, JSON.stringify({
-      wagers: fjWagers, category: fjCategory, clue: fjClue, answer: fjAnswer
-    }));
-  } catch(e) {}
-}
-function loadFJSave() {
-  try { return JSON.parse(localStorage.getItem(_FJ_SAVE_KEY)); } catch(e) { return null; }
-}
-function clearFJSave() {
-  try { localStorage.removeItem(_FJ_SAVE_KEY); } catch(e) {}
-}
+
 
 // ── PWA INSTALL ───────────────────────────────────────────────────────────────
 var deferredInstall = null;
